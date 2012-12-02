@@ -16,11 +16,10 @@ module ArtiMark
       if line =~/^(「|（)/
         classstr = ' class="noindent"'
       end
-      "<p#{classstr}>#{line}</p>\n"
+      "<p#{classstr}>#{line}</p>"
     end
 
     def process_paragraph_group(lines)
-      r = "<div class='pgroup'>\n"
       lines.each {
         |line|
         r << process_paragraph(line)
