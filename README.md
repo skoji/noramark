@@ -1,6 +1,9 @@
 # ArtiMark
 
-TODO: Write a gem description
+ArtiMark is a simple line-oriented text markup language.
+ArtiMark focuses on creating XHTML files for EPUB books.
+
+It is optimized for Japanese Text for the present. 
 
 ## Installation
 
@@ -18,7 +21,11 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+    require 'arti_mark'
+
+    document = ArtiMark::Document.new
+    document.read(string_or_io)
+    put document.result # outputs converted XHTML file
 
 ## Contributing
 
