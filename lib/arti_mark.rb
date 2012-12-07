@@ -35,7 +35,7 @@ module ArtiMark
 
     def convert(text)
       # split text to lines
-      lines = text.rstrip.split(/\r?\n/).map { |line| line.chomp }
+      lines = text.rstrip.split(/\r?\n/).map { |line| line.strip }
       r = []
       start_html r
       process_lines(lines, r)
@@ -51,8 +51,8 @@ module ArtiMark
     end
 
     def block_parse(lines, r)
-        lines.shift while lines[0].strip == ''
-        index = lines.find_index { |line| line.strip.size == 0} || lines.size
+        lines.shift while lines[0] == ''
+        index = lines.find_index { |line| line.size == 0} || lines.size
         block = lines.shift(index)
         r[0] << process_paragraph_group(block)
     end    
@@ -62,14 +62,14 @@ module ArtiMark
       if line =~/^(「|（)/
         classstr = " class='noindent'"
       end
-      "<p#{classstr}>#{line.strip}</p>"
+      "<p#{classstr}>#{line}</p>"
     end
 
     def process_paragraph_group(lines)
       r = "<div class='pgroup'>\n"
       lines.each {
         |line|
-        r << process_paragraph(line) + "\n" unless line.strip.size == 0
+        r << process_paragraph(line) + "\n" unless line.size == 0
       }
       r << "</div>\n"
     end
