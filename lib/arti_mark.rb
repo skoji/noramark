@@ -45,35 +45,11 @@ module ArtiMark
 
     def process_lines(lines, r)
       while (lines.size > 0)
-        block_parse(lines, r)
+        ParagraphParser.parse(lines, r)
       end
       r
     end
 
-    def block_parse(lines, r)
-        # slice_beforeが使えるかもしれない
-        lines.shift while lines[0] == ''
-        index = lines.find_index { |line| line.size == 0} || lines.size
-        block = lines.shift(index)
-        r[0] << process_paragraph_group(block)
-    end    
-
-    def process_paragraph(line)
-      classstr = ""
-      if line =~/^(「|（)/
-        classstr = " class='noindent'"
-      end
-      "<p#{classstr}>#{line}</p>"
-    end
-
-    def process_paragraph_group(lines)
-      r = "<div class='pgroup'>\n"
-      lines.each {
-        |line|
-        r << process_paragraph(line) + "\n" unless line.size == 0
-      }
-      r << "</div>\n"
-    end
 
   end
 end
