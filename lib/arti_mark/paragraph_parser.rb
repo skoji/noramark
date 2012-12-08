@@ -22,11 +22,11 @@ module ArtiMark
       r = "<div class='pgroup'>\n"
       lines.each {
         |line|
-        line =~ /^(\w+?)(?:\.(\w*?))?:(.*?)$/
+        line =~ /^(\w+?)((?:\.\w*?)*):(.*?)$/
         cmd, cls, text = $1, $2, $3
         classstr = ''
-        if !cls.nil?
-          classstr = " class='#{cls}'"
+        if !cls.nil? && cls.size > 0
+          classstr = " class='#{cls[1..-1].gsub('.', ' ')}'"
         end
         if cmd =~ /h([1-6])/
           r << "<h#{$1}#{classstr}>#{text.strip}</h#{$1}>\n"
