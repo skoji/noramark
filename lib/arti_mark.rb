@@ -45,11 +45,13 @@ module ArtiMark
 
     def process_lines(lines, r)
       while (lines.size > 0)
-        ParagraphParser.parse(lines, r)
+        determine_parser(lines).parse(lines, r)
       end
       r
     end
 
-
+    def determine_parser(lines)
+      ParagraphParser.instance
+    end
   end
 end
