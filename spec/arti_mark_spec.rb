@@ -27,7 +27,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</html>") 
     end
     it 'should convert paragraph with header' do
-      text = "h1: タイトルです。\nここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\nh2:ふたつめの見出しです。\n ここから、次のパラグラフです。"
+      text = "h1: タイトルです。\nここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
@@ -44,7 +44,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("<p>三行目です。</p>") 
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<h2>ふたつめの見出しです。</h2>") 
+      expect(r.shift.strip).to eq("<h2 class='column'>ふたつめの見出しです。</h2>") 
       expect(r.shift.strip).to eq("<p>ここから、次のパラグラフです。</p>") 
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 

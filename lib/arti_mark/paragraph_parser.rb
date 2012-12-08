@@ -22,12 +22,16 @@ module ArtiMark
       r = "<div class='pgroup'>\n"
       lines.each {
         |line|
-        line =~ /^(\w*?):(.*?)$/
-        cmd, text = $1, $2
+        line =~ /^(\w+?)(?:\.(\w*?))?:(.*?)$/
+        cmd, cls, text = $1, $2, $3
+        classstr = ''
+        if !cls.nil?
+          classstr = " class='#{cls}'"
+        end
         if cmd =~ /h([1-6])/
-          r << "<h#{$1}>#{text.strip}</h#{$1}>\n"
+          r << "<h#{$1}#{classstr}>#{text.strip}</h#{$1}>\n"
         elsif !cmd.nil? && respond_to?(cmd.to_sym)
-          send(cmd, "#{text}")
+          send(cmd, cls, "#{text}")
         else
           r << process_paragraph(line) + "\n" unless line.size == 0
         end
