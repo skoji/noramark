@@ -30,7 +30,7 @@ describe ArtiMark do
   end
   describe 'convert' do
     it 'should convert simple paragraph' do
-      text = "ここから、パラグラフがはじまります。\n二行目です。\n三行目です。\n\n ここから、次のパラグラフです。"
+      text = "ここから、パラグラフがはじまります。\n二行目です。\n三行目です。\n\n\n ここから、次のパラグラフです。"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }

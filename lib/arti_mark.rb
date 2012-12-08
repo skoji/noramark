@@ -35,7 +35,7 @@ module ArtiMark
 
     def convert(text)
       # split text to lines
-      lines = text.rstrip.split(/\r?\n/).map { |line| line.strip }
+      lines = text.strip.gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).map { |line| line.strip }
       r = []
       start_html r
       process_lines(lines, r)
@@ -51,6 +51,7 @@ module ArtiMark
     end
 
     def block_parse(lines, r)
+        # slice_beforeが使えるかもしれない
         lines.shift while lines[0] == ''
         index = lines.find_index { |line| line.size == 0} || lines.size
         block = lines.shift(index)
