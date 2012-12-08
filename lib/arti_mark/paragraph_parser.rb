@@ -22,7 +22,15 @@ module ArtiMark
       r = "<div class='pgroup'>\n"
       lines.each {
         |line|
-        r << self.process_paragraph(line) + "\n" unless line.size == 0
+        line =~ /^(\w*?):(.*?)$/
+        cmd, text = $1, $2
+        if cmd =~ /h([1-6])/
+          r << "<h#{$1}>#{text.strip}</h#{$1}>\n"
+        elsif !cmd.nil? && respond_to?(cmd.to_sym)
+          send(cmd, "#{text}")
+        else
+          r << process_paragraph(line) + "\n" unless line.size == 0
+        end
       }
       r << "</div>\n"
     end
