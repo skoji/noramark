@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require "arti_mark/version"
+require "arti_mark/base_parser"
 require "arti_mark/paragraph_parser"
 
 module ArtiMark
