@@ -4,19 +4,16 @@ require 'singleton'
 module ArtiMark
   class ParagraphParser
     include BaseParser, Singleton
-    def parse(lines, r)
+    def parse(lines, r, syntax_handler)
         lines.shift while lines[0] == ''
-        index = lines.find_index { |line| line.size == 0} || lines.size
-        block = lines.shift(index)
-        r[0] << process_paragraph_group(block)
+        r[0] << process_paragraph_group(lines, syntax_handler)
     end
 
-    def process_paragraph_group(lines)
+    def process_paragraph_group(lines, syntax_handler)
       r = "<div class='pgroup'>\n"
-      lines.each {
-        |line|
-        r << process_line(line) unless line.size == 0
-      }
+      while lines.size > 0 && syntax_handler.determine_parser(lines[0]).nil? && lines[0].size > 0
+        r << process_line(lines.shift, syntax_handler)
+      end
       r << "</div>\n"
     end
 

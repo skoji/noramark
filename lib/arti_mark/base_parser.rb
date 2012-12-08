@@ -16,7 +16,7 @@ module ArtiMark
       "<p#{class_string(cls_array)}>#{line}</p>\n"
     end
 
-    def process_line(line)
+    def process_line(line, syntax_handler)
       line =~ /^(\w+?)((?:\.\w*?)*):(.*?)$/
       cmd, cls, text = $1, $2, $3
       class_array = []
@@ -25,8 +25,8 @@ module ArtiMark
       end
       if cmd =~ /h([1-6])/
         "<h#{$1}#{class_string(class_array)}>#{text.strip}</h#{$1}>\n"
-      elsif !cmd.nil? && respond_to?(cmd.to_sym)
-        send(cmd, class_array, "#{text}")
+      elsif !cmd.nil? && syntax_handler.respond_to?(cmd.to_sym)
+        syntax_handler.send(cmd, class_array, "#{text}")
       else
         paragraph(line, class_array)
       end
