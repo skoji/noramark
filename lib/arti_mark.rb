@@ -2,6 +2,7 @@
 require "arti_mark/version"
 require "arti_mark/base_parser"
 require "arti_mark/paragraph_parser"
+require 'arti_mark/syntax_handler'
 
 module ArtiMark
   class Document
@@ -9,6 +10,7 @@ module ArtiMark
       @lang = param[:lang] || 'en'
       @title = param[:title] || 'ArtiMark generated document'
       @output = ""
+      @syntax_handler = SyntaxHandler.new
     end 
 
     def result
@@ -46,13 +48,10 @@ module ArtiMark
 
     def process_lines(lines, r)
       while (lines.size > 0)
-        determine_parser(lines).parse(lines, r)
+        @syntax_handler.determine_parser(lines).parse(lines, r)
       end
       r
     end
 
-    def determine_parser(lines)
-      ParagraphParser.instance
-    end
   end
 end

@@ -10,7 +10,7 @@ module ArtiMark
     end
 
     def paragraph(line, cls_array)
-      if line =~/^(「|（)/
+      if line =~/^(「|（)/ # TODO: should be plaggable
         cls_array << 'noindent'
       end
       "<p#{class_string(cls_array)}>#{line}</p>\n"
@@ -26,11 +26,10 @@ module ArtiMark
       if cmd =~ /h([1-6])/
         "<h#{$1}#{class_string(class_array)}>#{text.strip}</h#{$1}>\n"
       elsif !cmd.nil? && respond_to?(cmd.to_sym)
-        send(cmd, cls, "#{text}")
+        send(cmd, class_array, "#{text}")
       else
         paragraph(line, class_array)
       end
     end
-
   end
 end
