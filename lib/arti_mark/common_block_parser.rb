@@ -4,6 +4,10 @@ require 'singleton'
 module ArtiMark
   module CommonBlockParser
     include BaseParser
+    def accept?(lines)
+      lines[0] =~ /^#{@command}(\.\w+?)*\s*{\s*$/
+    end
+
     def parse(lines, r, syntax_handler)
       lines.shift =~ /^#{@command}(\.\w+?)*\s*{\s*$/
       cls_array = class_array($1)
