@@ -1,9 +1,22 @@
 module ArtiMark
   class SyntaxHandler
     def force_blocker?(lines)
+      lines[0] =~ /^newpage(,[\w ]+?)*:$/
     end
+
     def determine_parser(lines, opt = {})
-      if DivParser.instance.accept?(lines)
+      if lines[0] =~ /^newpage(,[\w ]+?)*:$/
+        Proc.new { 
+          |the_lines, r, syntax_handler|
+          the_lines.shift
+          if !$1.nil? && $1.size > 0
+            title = $1[1..-1]
+          else 
+            title = nil
+          end
+          r.start_html(title)
+        }
+      elsif DivParser.instance.accept?(lines)
         DivParser.instance.method(:parse)
       elsif ArticleParser.instance.accept?(lines)
         ArticleParser.instance.method(:parse)
