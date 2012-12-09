@@ -4,12 +4,11 @@ module ArtiMark
   class HeadParser
     include BaseParser, Singleton
     def initialize
-      @matcher = /^(\w+?)((?:\.\w*?)*):(.*?)$/
+      @matcher = /^(h[1-6])((?:\.\w*?)*):(.*?)$/
     end
 
     def accept?(lines)
       lines[0] =~ @matcher
-      $1 =~ /h([1-6])/
     end
 
     def parse(lines, r, syntax_handler)
