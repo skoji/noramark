@@ -27,6 +27,20 @@ Or install it yourself as:
     document.read(string_or_io)
     put document.result # outputs converted XHTML file
 
+Source text looks like this. 
+
+    art {
+        h1: header 1
+        article comes here. linebreak will produce paragraph.
+
+        blank line will procude div.pgroup.
+
+        d.column {
+            this block will produce div.column.
+        }
+    }
+
+
 ## Contributing
 
 1. Fork it
