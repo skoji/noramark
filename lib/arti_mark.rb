@@ -5,6 +5,7 @@ require 'arti_mark/common_block_parser'
 require "arti_mark/paragraph_parser"
 require "arti_mark/div_parser"
 require "arti_mark/article_parser"
+require "arti_mark/section_parser"
 require "arti_mark/head_parser"
 require 'arti_mark/syntax_handler'
 require 'arti_mark/result_holder'

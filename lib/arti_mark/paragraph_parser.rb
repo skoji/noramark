@@ -5,6 +5,9 @@ module ArtiMark
   class ParagraphParser
     include BaseParser, Singleton
 
+    def accept?(lines)
+      lines[0].size == 0
+    end
     def parse(lines, r, syntax_handler)
         lines.shift while lines[0].size == 0
         return unless syntax_handler.determine_parser(lines).nil? 
