@@ -21,7 +21,7 @@ module ArtiMark
           lines.shift
           break
         end
-        syntax_handler.determine_parser(lines, :get_default => true).parse(lines, r, syntax_handler)
+        syntax_handler.determine_parser(lines, :get_default => true).call(lines, r, syntax_handler)
       end
       r << "</#{@markup}>\n"
     end

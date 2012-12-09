@@ -1,14 +1,16 @@
 module ArtiMark
   class SyntaxHandler
+    def force_blocker?(lines)
+    end
     def determine_parser(lines, opt = {})
       if DivParser.instance.accept?(lines)
-        DivParser.instance
+        DivParser.instance.method(:parse)
       elsif ArticleParser.instance.accept?(lines)
-        ArticleParser.instance
+        ArticleParser.instance.method(:parse)
       elsif lines[0].size == 0
-        ParagraphParser.instance
+        ParagraphParser.instance.method(:parse)
       elsif HeadParser.instance.accept?(lines)
-        HeadParser.instance
+        HeadParser.instance.method(:parse)
       else
         if opt[:get_default]
           default_parser
@@ -19,14 +21,14 @@ module ArtiMark
     end
 
     def default_parser
-      ParagraphParser.instance
+      ParagraphParser.instance.method(:parse)
     end
 
     def parse(lines, r)
       if parser = determine_parser(lines)
-        parser.parse(lines, r, self)
+        parser.call(lines, r, self)
       else
-        ParagraphParser.instance.parse(lines, r, self)
+        default_parser.call(lines, r, self)
       end
     end
 
