@@ -38,6 +38,7 @@ module ArtiMark
     end
 
     def parse(lines, r)
+      throw "something wrong: #{lines}" if lines[0] == '}'  # TODO: should do something here with paragraph_parser
       if parser = determine_parser(lines)
         parser.call(lines, r, self)
       else

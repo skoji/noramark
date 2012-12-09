@@ -13,9 +13,9 @@ module ArtiMark
 
     def process_paragraph_group(lines, paragraph, syntax_handler)
       paragraph << "<div class='pgroup'>\n"
-      while lines.size > 0 && 
+      while (lines.size > 0 && 
             lines[0] != '}' && # TODO: is this correct...?
-            syntax_handler.determine_parser(lines).nil? 
+            syntax_handler.determine_parser(lines).nil?)
           paragraph << process_line(lines.shift, syntax_handler) 
       end
       paragraph << "</div>\n"
