@@ -17,7 +17,7 @@ module ArtiMark
       cmd, cls, text = $1, class_array($2), $3
       raise 'HeadParser called for #{lines[0]}' unless cmd =~ /h([1-6])/
       lines.shift
-      r[0] << "<h#{$1}#{class_string(cls)}>#{text.strip}</h#{$1}>\n"
+      r << "<h#{$1}#{class_string(cls)}>#{text.strip}</h#{$1}>\n"
     end
   end
 end
