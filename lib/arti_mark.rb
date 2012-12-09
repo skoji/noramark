@@ -3,6 +3,7 @@ require "arti_mark/version"
 require "arti_mark/base_parser"
 require "arti_mark/paragraph_parser"
 require "arti_mark/div_parser"
+require "arti_mark/head_parser"
 require 'arti_mark/syntax_handler'
 
 module ArtiMark
