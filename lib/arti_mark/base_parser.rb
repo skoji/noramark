@@ -9,6 +9,23 @@ module ArtiMark
       end
     end
 
+    def process_if_pgroup_splitter(lines, r, syntax_handler)
+      lines[0] =~ /^(\w+?)((?:\.\w*?)*):(.*?)$/
+      cmd, cls, text = $1, $2, $3
+      if cmd =~ /h([1-6])/
+        lines.shift
+        class_array = []
+        if !cls.nil? && cls.size > 0
+          class_array = cls[1..-1].split('.')
+        end
+        r << "</div>\n"
+        r << "<h#{$1}#{class_string(class_array)}>#{text.strip}</h#{$1}>\n"
+        r << "<div class='pgroup'>\n"
+        p r
+        true
+      end
+    end
+
     def paragraph(line, cls_array)
       if line =~/^(「|（)/ # TODO: should be plaggable
         cls_array << 'noindent'
@@ -23,9 +40,7 @@ module ArtiMark
       if !cls.nil? && cls.size > 0
         class_array = cls[1..-1].split('.')
       end
-      if cmd =~ /h([1-6])/
-        "<h#{$1}#{class_string(class_array)}>#{text.strip}</h#{$1}>\n"
-      elsif !cmd.nil? && syntax_handler.respond_to?(cmd.to_sym)
+      if !cmd.nil? && syntax_handler.respond_to?(cmd.to_sym)
         syntax_handler.send(cmd, class_array, "#{text}")
       else
         paragraph(line, class_array)
