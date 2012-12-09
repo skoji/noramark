@@ -13,12 +13,7 @@ module ArtiMark
     def initialize(param = {})
       @lang = param[:lang] || 'en'
       @title = param[:title] || 'ArtiMark generated document'
-      @output = ""
       @syntax_handler = SyntaxHandler.new
-    end 
-
-    def result
-      @output
     end 
 
     def start_html(pages)
