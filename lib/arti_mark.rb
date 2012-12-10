@@ -20,7 +20,7 @@ module ArtiMark
 
     def convert(text)
       # split text to lines
-      lines = text.strip.gsub(/　/, ' ').gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).map { |line| line.strip } # should be plaggable
+      lines = text.strip.gsub(/　/, ' ').gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).map { |line| line.strip } # text preprocess should be plaggable
       process_lines(lines, @resultHolder)
       @resultHolder.result
     end
