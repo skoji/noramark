@@ -8,15 +8,14 @@ module ArtiMark
     end
 
     def accept?(lines)
-      lines[0] =~ @matcher
+      lex_line_command(lines[0])[:cmd] =~ /h[1-6]/
     end
 
     def parse(lines, r, syntax_handler)
-      lines[0] =~ @matcher
-      cmd, cls, text = $1, class_array($2), $3
-      raise 'HeadParser called for #{lines[0]}' unless cmd =~ /h([1-6])/
+      lexed = lex_line_command(lines[0])
+      raise 'HeadParser called for #{lines[0]}' unless lexed[:cmd] =~ /h([1-6])/
       lines.shift
-      r << "<h#{$1}#{class_string(cls)}>#{text.strip}</h#{$1}>\n"
+      r << "<#{lexed[:cmd]}#{class_string(lexed[:cls])}>#{lexed[:text].strip}</#{lexed[:cmd]}>\n"
     end
   end
 end
