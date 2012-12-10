@@ -1,15 +1,16 @@
 module ArtiMark
   class SyntaxHandler
+    include CommandLexer
     def initialize
       @block_parsers = []
       @block_parsers <<
         [
-          Proc.new { |lines| lines[0] =~ /^newpage(,[\w ]+?)*:$/ },
+          Proc.new { |lines| lex_line_command(lines[0])[:cmd] == 'newpage' },
           Proc.new { 
             |lines, r, syntax_handler|
-            lines.shift
-            if !$1.nil? && $1.size > 0
-              title = $1[1..-1]
+            lexed = lex_line_command(lines.shift)
+            if lexed[:params].size > 0
+              title = lexed[:params].first
             else 
               title = nil
             end

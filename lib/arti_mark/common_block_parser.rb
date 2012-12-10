@@ -5,13 +5,13 @@ module ArtiMark
   module CommonBlockParser
     include BaseParser
     def accept?(lines)
-      lines[0] =~ /^#{@command}(\.\w+?)*\s*{\s*$/
+      lex_block_command(lines[0])[:cmd] == @command
     end
 
     def parse(lines, r, syntax_handler)
-      lines.shift =~ /^#{@command}(\.\w+?)*\s*{\s*$/
-      cls_array = class_array($1)
-      process_block(lines, r, syntax_handler, cls_array)
+      lexed = lex_block_command(lines.shift)
+      throw 'something wrong here #{lines}' if lexed[:cmd] != @command
+      process_block(lines, r, syntax_handler, lexed[:cls])
     end
 
     def process_block(lines, r, syntax_handler, cls_array)

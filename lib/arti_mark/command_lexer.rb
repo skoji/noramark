@@ -16,10 +16,22 @@ module ArtiMark
       cls_array
     end
 
-    def lex_line_command(line)
-        line =~ /^(\w+?)((?:\.\w*?)*):(.*?)$/
-        return $1, class_array($2), $3
+    def param_array(param_part)
+      r = []
+      if !param_part.nil? && param_part.size > 0
+        r = param_part[1..-1].split(',')
+      end
+      r
     end
 
+    def lex_line_command(line)
+        line =~ /^(\w+?)((?:\.\w+?)*)((?:,[\w ]+?)*):(.*?)$/
+        return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
+    end
+
+    def lex_block_command(line)
+        line =~ /^(\w+?)((?:\.\w+?)*)((?:,[\w ]+?)*)\s*{\s*$/
+        return { :cmd => $1, :cls => class_array($2), :params => param_array($3)}
+    end
   end
 end
