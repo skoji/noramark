@@ -1,5 +1,5 @@
 module ArtiMark
-  module CommandParser
+  module CommandLexer
     def class_string(cls_array)
       if cls_array.size == 0
         ''
@@ -14,6 +14,11 @@ module ArtiMark
         cls_array = cls_part[1..-1].split('.')
       end
       cls_array
+    end
+
+    def lex_line_command(line)
+        line =~ /^(\w+?)((?:\.\w*?)*):(.*?)$/
+        return $1, class_array($2), $3
     end
 
   end

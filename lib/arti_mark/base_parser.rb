@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 module ArtiMark
   module BaseParser
-    include CommandParser
+    include CommandLexer
     def paragraph(line, cls_array)
       if line =~/^(「|（)/ # TODO: should be plaggable
         cls_array << 'noindent'
@@ -10,8 +10,7 @@ module ArtiMark
     end
 
     def process_line(line, syntax_handler)
-      line =~ /^(\w+?)((?:\.\w*?)*):(.*?)$/
-      cmd, cls, text = $1, class_array($2), $3
+      cmd, cls, text = lex_line_command(line)
       if !cmd.nil? && syntax_handler.respond_to?(cmd.to_sym)
         syntax_handler.send(cmd, cls, "#{text}")
       else
