@@ -3,10 +3,6 @@
 module ArtiMark
   class HeadParser
     include BaseParser, Singleton
-    def initialize
-      @matcher = /^(h[1-6])((?:\.\w*?)*):(.*?)$/
-    end
-
     def accept?(lines)
       lex_line_command(lines[0])[:cmd] =~ /h[1-6]/
     end
