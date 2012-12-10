@@ -17,7 +17,7 @@ module ArtiMark
           }
         ]
 
-        [DivParser.instance, ArticleParser.instance, ParagraphParser.instance, HeadParser.instance].each {
+      [DivParser.instance, ArticleParser.instance, ParagraphParser.instance, HeadParser.instance].each {
           |parser|
           @block_parsers << [
             parser.method(:accept?),
