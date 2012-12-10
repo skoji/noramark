@@ -178,7 +178,7 @@ describe ArtiMark do
       text = "this is start.\nnewpage,page changed:\nthis is second page.\nnewpage:\nand the third."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-        expect(converted.size).to eq 3
+      expect(converted.size).to eq 3
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
       expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
