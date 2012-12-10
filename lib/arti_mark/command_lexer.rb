@@ -19,18 +19,18 @@ module ArtiMark
     def param_array(param_part)
       r = []
       if !param_part.nil? && param_part.size > 0
-        r = param_part[1..-1].split(',')
+        r = param_part.split(',')
       end
       r
     end
 
     def lex_line_command(line)
-        line =~ /^(\w+?)((?:\.\w+?)*)((?:,[\w ]+?)*):(.*?)$/
+        line =~ /^(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*:(.*?)$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
     end
 
     def lex_block_command(line)
-        line =~ /^(\w+?)((?:\.\w+?)*)((?:,[\w ]+?)*)\s*{\s*$/
+        line =~ /^(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{\s*$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3)}
     end
   end
