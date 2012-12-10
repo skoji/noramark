@@ -8,18 +8,18 @@ module ArtiMark
     def accept?(lines)
       lines[0].size == 0
     end
-    def parse(lines, r, syntax_handler)
+    def parse(lines, r, syntax)
         lines.shift while lines[0].size == 0
-        return unless syntax_handler.determine_parser(lines).nil? 
-        r << process_paragraph_group(lines, '', syntax_handler)
+        return unless syntax.determine_parser(lines).nil? 
+        r << process_paragraph_group(lines, '', syntax)
     end
 
-    def process_paragraph_group(lines, paragraph, syntax_handler)
+    def process_paragraph_group(lines, paragraph, syntax)
       paragraph << "<div class='pgroup'>\n"
       while (lines.size > 0 && 
             lines[0] != '}' && # TODO: is this correct...?
-            syntax_handler.determine_parser(lines).nil?)
-          paragraph << process_line(lines.shift, syntax_handler) 
+            syntax.determine_parser(lines).nil?)
+          paragraph << process_line(lines.shift, syntax) 
       end
       paragraph << "</div>\n"
     end

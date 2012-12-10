@@ -8,14 +8,14 @@ require "arti_mark/div_parser"
 require "arti_mark/article_parser"
 require "arti_mark/section_parser"
 require "arti_mark/head_parser"
-require 'arti_mark/syntax_handler'
+require 'arti_mark/syntax'
 require 'arti_mark/result_holder'
 
 module ArtiMark
   class Document
     def initialize(param = {})
       @resultHolder = ResultHolder.new(param)
-      @syntax_handler = SyntaxHandler.new
+      @syntax = Syntax.new
     end 
 
     def convert(text)
@@ -27,7 +27,7 @@ module ArtiMark
 
     def process_lines(lines, r)
       while (lines.size > 0)
-        @syntax_handler.parse(lines, r)
+        @syntax.parse(lines, r)
       end
       r
     end

@@ -1,17 +1,18 @@
 module ArtiMark
-  class SyntaxHandler
+  class Syntax
     include CommandLexer
 
-    attr_accessor :inline_handler
+    attr_accessor :inline_handler, :linecommand_handler
 
     def initialize
       @inline_handler = Class.new do extend CommandLexer end
+      @linecommand_handler = Class.new do extend CommandLexer end
       @block_parsers = []
       @block_parsers <<
         [
           Proc.new { |lines| lex_line_command(lines[0])[:cmd] == 'newpage' },
           Proc.new { 
-            |lines, r, syntax_handler|
+            |lines, r, syntax|
             lexed = lex_line_command(lines.shift)
             if lexed[:params].size > 0
               title = lexed[:params].first
