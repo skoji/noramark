@@ -35,6 +35,13 @@ module ArtiMark
         "<a#{class_string(cls)} href='#{param[0]}'>#{text}</a>"
       end
 
+      def @inline_handler.s(cls, param, text)
+        "<span#{class_string(cls)}>#{text.strip}</a>"
+      end
+
+      def @linecommand_handler.p(cls, param, text)
+        "<p#{class_string(cls)}>#{text.strip}</p>\n"
+      end
     end
 
     def determine_parser(lines, opt = {})
