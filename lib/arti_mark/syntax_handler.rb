@@ -1,7 +1,11 @@
 module ArtiMark
   class SyntaxHandler
     include CommandLexer
+
+    attr_accessor :inline_handler
+
     def initialize
+      @inline_handler = Class.new do extend CommandLexer end
       @block_parsers = []
       @block_parsers <<
         [
@@ -25,6 +29,11 @@ module ArtiMark
             parser.method(:parse)
           ]
         }
+
+      def @inline_handler.l(cls, param, text)
+        "<a#{class_string(cls)} href='#{param[0]}'>#{text}</a>"
+      end
+
     end
 
     def determine_parser(lines, opt = {})
