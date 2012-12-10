@@ -5,7 +5,7 @@ module ArtiMark
   class ArticleParser
     include CommonBlockParser, Singleton
     def initialize
-      @command = 'art'
+      @command = /(art|article)/
       @markup = 'article'
     end
   end

@@ -7,7 +7,7 @@ module ArtiMark
       lex_line_command(lines[0])[:cmd] =~ /h[1-6]/
     end
 
-    def parse(lines, r, syntax_handler)
+    def parse(lines, r, syntax)
       lexed = lex_line_command(lines[0])
       raise 'HeadParser called for #{lines[0]}' unless lexed[:cmd] =~ /h([1-6])/
       lines.shift

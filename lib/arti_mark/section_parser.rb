@@ -5,7 +5,7 @@ module ArtiMark
   class SectionParser
     include CommonBlockParser, Singleton
     def initialize
-      @command = 'sec'
+      @command = /(sec|section)/
       @markup = 'section'
     end
   end

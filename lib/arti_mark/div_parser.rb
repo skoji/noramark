@@ -5,7 +5,7 @@ module ArtiMark
   class DivParser
     include CommonBlockParser, Singleton
     def initialize
-      @command = 'd'
+      @command = /(d|div)/
       @markup = 'div'
     end
   end
