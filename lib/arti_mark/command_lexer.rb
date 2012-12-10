@@ -33,5 +33,18 @@ module ArtiMark
         line =~ /^(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{\s*$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3)}
     end
+
+    def replace_inline_commands(line, syntax_handler)
+      line.gsub(/:(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{(.*?)}:/) {
+        |matched|
+        cmd, cls, param, text = $1, class_array($2), param_array($3), $4
+        if syntax_handler.inline_handler.respond_to?(cmd)
+          syntax_handler.inline_handler.send(cmd, cls, param, text)
+        else
+          matched
+        end
+      }
+    end
+
   end
 end
