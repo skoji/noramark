@@ -8,6 +8,7 @@ require "arti_mark/div_parser"
 require "arti_mark/article_parser"
 require "arti_mark/section_parser"
 require "arti_mark/head_parser"
+require "arti_mark/block_image_parser"
 require "arti_mark/universal_block_parser"
 require 'arti_mark/syntax'
 require 'arti_mark/result_holder'

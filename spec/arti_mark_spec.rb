@@ -173,6 +173,24 @@ describe ArtiMark do
      expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>") 
     end
+     it 'should handle block image' do
+      text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
+     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
+      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
+      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
+      expect(r.shift.strip).to eq('<head>')   
+      expect(r.shift.strip).to eq('<title>the document title</title>')
+      expect(r.shift.strip).to eq('</head>')   
+      expect(r.shift.strip).to eq('<body>') 
+      expect(r.shift.strip).to eq("<div class='pgroup'>") 
+      expect(r.shift.strip).to eq("<p>this is normal line.</p>") 
+      expect(r.shift.strip).to eq("</div>") 
+      expect(r.shift.strip).to eq("<div class='img-wrap'><img src='./image1.jpg' alt='alt text' /><p>caption text</p></div>")
+      expect(r.shift.strip).to eq("</body>") 
+      expect(r.shift.strip).to eq("</html>")
+     end
 
     it 'should handle page change article' do
       text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
