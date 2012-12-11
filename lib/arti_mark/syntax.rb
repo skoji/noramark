@@ -39,9 +39,25 @@ module ArtiMark
         "<span#{class_string(cls)}>#{text.strip}</a>"
       end
 
+      # universal inline command handler
+      def @inline_handler.method_missing(cmd, *args)
+        "<#{cmd}#{class_string(args[0])}>#{args[2]}</#{cmd}>"
+      end
+
       def @linecommand_handler.p(cls, param, text)
         "<p#{class_string(cls)}>#{text.strip}</p>\n"
       end
+
+      def @linecommand_handler.q(cls, param, text)
+        "<blockquote#{class_string(cls)}>#{text.strip}</blockquote>\n"
+      end
+      
+      #univarsal line command handler
+      def @linecommand_handler.method_missing(cmd, *args)
+        "<#{cmd}#{class_string(args[0])}>#{args[2].strip}</#{cmd}>\n"
+      end
+
+
     end
 
     def determine_parser(lines, opt = {})

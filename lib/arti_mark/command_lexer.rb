@@ -38,7 +38,7 @@ module ArtiMark
       line.gsub(/:(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{(.*?)}:/) {
         |matched|
         cmd, cls, param, text = $1, class_array($2), param_array($3), $4
-        if syntax.inline_handler.respond_to?(cmd)
+        if !cmd.nil? 
           syntax.inline_handler.send(cmd, cls, param, text)
         else
           matched
