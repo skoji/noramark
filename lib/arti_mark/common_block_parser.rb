@@ -11,6 +11,7 @@ module ArtiMark
     def parse(lines, r, syntax)
       lexed = lex_block_command(lines.shift)
       throw 'something wrong here #{lines}' unless lexed[:cmd] =~ @command
+      @markup = lexed[:cmd] if @markup.nil?
       process_block(lines, r, syntax, lexed[:cls])
     end
 

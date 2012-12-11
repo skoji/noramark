@@ -49,7 +49,10 @@ module ArtiMark
         |accept, parser|
         return parser if accept.call(lines)
       }
-      if opt[:get_default]
+
+      if UniversalBlockParser.instance.accept?(lines)
+        UniversalBlockParser.instance.method(:parse)
+      elsif opt[:get_default]
           default_parser
       else
           nil

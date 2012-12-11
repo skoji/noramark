@@ -293,5 +293,27 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
      end
+    it 'should handle any block' do
+      text = "this is normal line.\ncite {\n this block should be in cite. \n}"
+     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
+      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
+      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
+      expect(r.shift.strip).to eq('<head>')   
+      expect(r.shift.strip).to eq('<title>the document title</title>')
+      expect(r.shift.strip).to eq('</head>')   
+      expect(r.shift.strip).to eq('<body>') 
+      expect(r.shift.strip).to eq("<div class='pgroup'>") 
+      expect(r.shift.strip).to eq("<p>this is normal line.</p>") 
+      expect(r.shift.strip).to eq("</div>")
+      expect(r.shift.strip).to eq("<cite>")
+      expect(r.shift.strip).to eq("<div class='pgroup'>") 
+      expect(r.shift.strip).to eq("<p>this block should be in cite.</p>")
+      expect(r.shift.strip).to eq("</div>") 
+      expect(r.shift.strip).to eq("</cite>") 
+      expect(r.shift.strip).to eq("</body>") 
+      expect(r.shift.strip).to eq("</html>")
+     end
   end
 end
