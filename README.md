@@ -1,11 +1,10 @@
 # ArtiMark
 
-ArtiMark is a simple line-oriented text markup language.
-ArtiMark focuses on creating XHTML files for EPUB books.
-It is optimized for Japanese Text for the present. 
+ArtiMark is a simple line-oriented text markup language. It focuses on creating XHTML files for EPUB books.
+It is optimized for Japanese text for the present. 
 
-This version is in very early alpha status, and not usable at all.
-Will be partly usable in the end of 2012.
+This very early alpha version, so it's not usable at all.
+It will be partly usable by the end of 2012.
 
 ## Installation
 
@@ -25,9 +24,9 @@ Or install it yourself as:
 
     require 'arti_mark'
 
-    document = ArtiMark::Document.new
+    document = ArtiMark::Document.new(:lang => 'ja')
     document.read(string_or_io)
-    put document.result # outputs converted XHTML file
+    put document.result[0] # outputs 1st page of converted XHTML file
 
 Source text looks like this. 
 
