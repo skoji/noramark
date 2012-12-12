@@ -27,6 +27,10 @@ module ArtiMark
       @resultHolder.result
     end
 
+    def toc
+      @resultHolder.toc
+    end
+    
     def process_lines(lines, r)
       while (lines.size > 0)
         @syntax.parse(lines, r)

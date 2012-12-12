@@ -1,8 +1,9 @@
 module ArtiMark
   class ResultHolder
-    attr_accessor :title, :head_inserters
+    attr_accessor :title, :head_inserters, :toc
     def initialize(param = {})
       @head_inserters = []
+      @toc = []
       @lang = param[:lang] || 'en'
       @title = param[:title] || 'ArtiMark generated document'
       @stylesheets = param[:stylesheets] || []
@@ -40,6 +41,7 @@ module ArtiMark
       page << "</head>\n"
       page << "<body>\n"
       @pages << page
+      @toc << title
     end
 
     def end_html
