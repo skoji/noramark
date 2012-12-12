@@ -53,6 +53,10 @@ module ArtiMark
       end
     end
 
+    def toc=(label)
+      @toc[-1] = label if @toc.size > 0
+    end
+
     def <<(text)
       if @pages.size == 0 || @pages.last.frozen?
         start_html

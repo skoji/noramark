@@ -370,8 +370,18 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
      end
-     it 'should generate toc' do
+     it 'should generate toc: with newpage parameter' do
        text = "newpage(1st chapter):\n1st chapter.\nnewpage(2nd chapter):\n2nd chapger.\nnewpage: 2nd chapter continued.\nnewpage(3rd chapter):\n3rd chapter."
+       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+       artimark.convert(text)
+       toc = artimark.toc
+       expect(toc[0]).to eq('1st chapter')
+       expect(toc[1]).to eq('2nd chapter')
+       expect(toc[2]).to be_nil
+       expect(toc[3]).to eq('3rd chapter')
+     end
+     it 'should generate toc: with h parameter' do
+       text = "newpage:\nh1(toc): 1st chapter\n content.\nnewpage:\nh1(toc): 2nd chapter\ncontent.\nnewpage: 2nd chapter continued.\nnewpage:\nh1(toc): 3rd chapter\n content."
        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
        artimark.convert(text)
        toc = artimark.toc

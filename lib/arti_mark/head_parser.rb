@@ -12,6 +12,7 @@ module ArtiMark
       raise 'HeadParser called for #{lines[0]}' unless lexed[:cmd] =~ /h([1-6])/
       lines.shift
       r << "<#{lexed[:cmd]}#{class_string(lexed[:cls])}>#{lexed[:text].strip}</#{lexed[:cmd]}>\n"
+      r.toc = lexed[:text].strip if lexed[:params].member? 'toc'
     end
   end
 end
