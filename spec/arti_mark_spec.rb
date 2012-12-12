@@ -381,7 +381,7 @@ describe ArtiMark do
        expect(toc[3]).to eq('3rd chapter')
      end
      it 'should generate toc: with h parameter' do
-       text = "newpage:\nh1(toc): 1st chapter\n content.\nnewpage:\nh1(toc): 2nd chapter\ncontent.\nnewpage: 2nd chapter continued.\nnewpage:\nh1(toc): 3rd chapter\n content."
+       text = "newpage:\nh1(in-toc): 1st chapter\n content.\nnewpage:\nh1(in-toc): 2nd chapter\ncontent.\nnewpage: 2nd chapter continued.\nnewpage:\nh1(in-toc): 3rd chapter\n content."
        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
        artimark.convert(text)
        toc = artimark.toc
