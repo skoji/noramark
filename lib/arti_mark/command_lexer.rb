@@ -25,7 +25,7 @@ module ArtiMark
     end
 
     def lex_line_command(line)
-        line =~ /^(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*:(.*?)$/
+        line =~ /^([\w\*]+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*:(.*?)$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
     end
 
