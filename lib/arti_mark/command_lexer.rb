@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 module ArtiMark
   module CommandLexer
     def class_string(cls_array)
@@ -22,10 +23,10 @@ module ArtiMark
         r = param_part.split(',')
       end
       r
-    end
+    end 
 
     def lex_line_command(line)
-        line =~ /^([\w\*]+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*:(.*?)$/
+        line =~ /^([\w\*;]+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*:(.*?)$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
     end
 

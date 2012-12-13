@@ -14,7 +14,7 @@ module ArtiMark
       @markup = lexed[:cmd] if @markup.nil?
       process_block(lines, r, syntax, lexed[:cls])
     end
-
+    
     def process_block(lines, r, syntax, cls_array)
       r << "<#{@markup}#{class_string(cls_array)}>\n"
       while lines.size > 0  
