@@ -31,21 +31,25 @@ module ArtiMark
           ]
         }
 
-      def @inline_handler.l(cls, param, text)
-        "<a#{class_string(cls)} href='#{param[0]}'>#{text}</a>"
+      def @inline_handler.l(lexed)
+        ref = lexed[:params][0].strip
+        "<a#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text]}</a>"
       end
 
-      def @inline_handler.s(cls, param, text)
+      def @inline_handler.s(lexed)
+        cls, text = lexed[:cls], lexed[:text]
         "<span#{class_string(cls)}>#{text.strip}</a>"
       end
 
-      def @inline_handler.img(cls, param, text)
+      def @inline_handler.img(lexed)
+        cls, param, text = lexed[:cls], lexed[:params], lexed[:text]
         "<img#{class_string(cls)} src='#{text}' alt='#{param.join(' ')}' />"
       end
 
       # universal inline command handler
       def @inline_handler.method_missing(cmd, *args)
-        "<#{cmd}#{class_string(args[0])}>#{args[2]}</#{cmd}>"
+        cls, param, text = args[0][:cls], args[0][:params], args[0][:text]
+        "<#{cmd}#{class_string(cls)}>#{text}</#{cmd}>"
       end
 
       def @linecommand_handler.p(cls, param, text)

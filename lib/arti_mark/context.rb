@@ -1,5 +1,5 @@
 module ArtiMark
-  class ResultHolder
+  class Context
     attr_accessor :title, :head_inserters, :toc
     def initialize(param = {})
       @head_inserters = []

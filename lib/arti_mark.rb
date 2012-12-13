@@ -11,24 +11,24 @@ require "arti_mark/head_parser"
 require "arti_mark/block_image_parser"
 require "arti_mark/universal_block_parser"
 require 'arti_mark/syntax'
-require 'arti_mark/result_holder'
+require 'arti_mark/context'
 
 module ArtiMark
   class Document
     def initialize(param = {})
-      @resultHolder = ResultHolder.new(param)
+      @context = Context.new(param)
       @syntax = Syntax.new
     end 
 
     def convert(text)
       # split text to lines
       lines = text.strip.gsub(/　/, ' ').gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).map { |line| line.strip } # text preprocess should be plaggable
-      process_lines(lines, @resultHolder)
-      @resultHolder.result
+      process_lines(lines, @context)
+      @context.result
     end
 
     def toc
-      @resultHolder.toc
+      @context.toc
     end
     
     def process_lines(lines, r)
