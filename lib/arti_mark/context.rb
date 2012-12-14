@@ -1,6 +1,6 @@
 module ArtiMark
   class Context
-    attr_accessor :title, :head_inserters, :toc
+    attr_accessor :title, :head_inserters, :toc, :stylesheets
     def initialize(param = {})
       @head_inserters = []
       @toc = []
@@ -12,10 +12,13 @@ module ArtiMark
       head_inserter do
         ret = ""
         @stylesheets.each { |s|
-          ret << "<link rel=\"stylesheet\" type=\"text/css\" href=\"#{s}\" />\n"
-        }
-        @stylesheets_alt.each { |s,m|
-          ret << "<link rel=\"stylesheet\" type=\"text/css\" media = \"#{m}\" href=\"#{s}\" />\n"  
+          if s.is_a? String
+            ret << "<link rel=\"stylesheet\" type=\"text/css\" href=\"#{s}\" />\n"
+          elsif s.is_a? Array
+          ret << "<link rel=\"stylesheet\" type=\"text/css\" media=\"#{s[1]}\" href=\"#{s[0]}\" />\n"  
+          else
+            raise "Can't use #{s} as a stylesheet"
+          end
         }
         ret
       end

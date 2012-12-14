@@ -170,12 +170,12 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("<p>here comes new paragraph.</p>") 
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq('</article>')   
-     expect(r.shift.strip).to eq("</body>") 
+      expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>") 
     end
-     it 'should handle block image' do
+    it 'should handle block image' do
       text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -190,7 +190,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("<div class='img-wrap'><img src='./image1.jpg' alt='alt text' /><p>caption text</p></div>")
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
 
     it 'should handle page change article' do
       text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
@@ -235,7 +235,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
     it 'should handle stylesheets' do
       text = "d.styled {\n this is styled document.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title', :stylesheets => ['reset.css', 'mystyle.css'])
@@ -259,7 +259,7 @@ describe ArtiMark do
     end
     it 'should handle link' do
       text = "link to :l(http://github.com/skoji/artimark){artimark repository}:. \ncan you see this?"
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -274,10 +274,10 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
     it 'should handle custom paragraph' do
       text = "this is normal line.\np.custom: this text is in custom class."
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -292,10 +292,10 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
     it 'should handle span' do
       text = "this is normal line.\np.custom: this text is in :s.keyword{custom}: class."
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -310,10 +310,10 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
     it 'should handle any block' do
       text = "this is normal line.\ncite {\n this block should be in cite. \n}"
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -332,10 +332,10 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</cite>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
-     it 'should handle inline image' do
+    end
+    it 'should handle inline image' do
       text = "this is normal line.\nsimple image :img(caption){./image1.jpg}:"
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -350,11 +350,11 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
 
     it 'should handle any inline' do
       text = "this is normal line.\nin this line, this should be :strong{marked as strong}:."
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -369,32 +369,32 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
-     it 'should generate toc: with newpage parameter' do
-       text = "newpage(1st chapter):\n1st chapter.\nnewpage(2nd chapter):\n2nd chapger.\nnewpage: 2nd chapter continued.\nnewpage(3rd chapter):\n3rd chapter."
-       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-       artimark.convert(text)
-       toc = artimark.toc
-       expect(toc[0]).to eq('1st chapter')
-       expect(toc[1]).to eq('2nd chapter')
-       expect(toc[2]).to be_nil
-       expect(toc[3]).to eq('3rd chapter')
-     end
+    end
+    it 'should generate toc: with newpage parameter' do
+      text = "newpage(1st chapter):\n1st chapter.\nnewpage(2nd chapter):\n2nd chapger.\nnewpage: 2nd chapter continued.\nnewpage(3rd chapter):\n3rd chapter."
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark.convert(text)
+      toc = artimark.toc
+      expect(toc[0]).to eq('1st chapter')
+      expect(toc[1]).to eq('2nd chapter')
+      expect(toc[2]).to be_nil
+      expect(toc[3]).to eq('3rd chapter')
+    end
 
-     it 'should generate toc with h parameter' do
-       text = "newpage:\nh1(in-toc): 1st chapter\n content.\nnewpage:\nh1(in-toc): 2nd chapter\ncontent.\nnewpage: 2nd chapter continued.\nnewpage:\nh1(in-toc): 3rd chapter\n content."
-       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-       artimark.convert(text)
-       toc = artimark.toc
-       expect(toc[0]).to eq('1st chapter')
-       expect(toc[1]).to eq('2nd chapter')
-       expect(toc[2]).to be_nil
-       expect(toc[3]).to eq('3rd chapter')
-     end
+    it 'should generate toc with h parameter' do
+      text = "newpage:\nh1(in-toc): 1st chapter\n content.\nnewpage:\nh1(in-toc): 2nd chapter\ncontent.\nnewpage: 2nd chapter continued.\nnewpage:\nh1(in-toc): 3rd chapter\n content."
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark.convert(text)
+      toc = artimark.toc
+      expect(toc[0]).to eq('1st chapter')
+      expect(toc[1]).to eq('2nd chapter')
+      expect(toc[2]).to be_nil
+      expect(toc[3]).to eq('3rd chapter')
+    end
 
-     it 'should handle ordered list ' do
+    it 'should handle ordered list ' do
       text = "this is normal line.\n1: for the 1st.\n2: secondly, blah.\n3: and last...\nthe ordered list ends."
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -416,10 +416,10 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
-     it 'should handle unordered list ' do
+    end
+    it 'should handle unordered list ' do
       text = "this is normal line.\n*: for the 1st.\n*: secondly, blah.\n*: and last...\nthe ordered list ends."
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -441,10 +441,10 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
-     it 'should handle definition list ' do
+    end
+    it 'should handle definition list ' do
       text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah :blah.\n;: 3rd: this term is the last.\nthe list ends."
-     artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
@@ -466,9 +466,9 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
-     end
+    end
 
-     it 'should escape html' do
+    it 'should escape html' do
       text = ";:definition<>:<>&"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
@@ -481,6 +481,22 @@ describe ArtiMark do
       expect(r.shift.strip).to eq('<body>') 
       expect(r.shift.strip).to eq('<dl>')        
       expect(r.shift.strip).to eq('<dt>definition&lt;&gt;</dt><dd>&lt;&gt;&amp;</dd>')        
-      end
+    end
+    it 'should specify stylesheets' do
+      text = "stylesheets:css/default.css, css/specific.css\nstylesheets(only screen and (min-device-width : 320px) and (max-device-width : 480px)):css/iphone.css\ntext."
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
+      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
+      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
+      expect(r.shift.strip).to eq('<head>')   
+      expect(r.shift.strip).to eq('<title>the document title</title>')
+      expect(r.shift.strip).to eq('<link rel="stylesheet" type="text/css" href="css/default.css" />')
+      expect(r.shift.strip).to eq('<link rel="stylesheet" type="text/css" href="css/specific.css" />')
+      expect(r.shift.strip).to eq('<link rel="stylesheet" type="text/css" media="only screen and (min-device-width : 320px) and (max-device-width : 480px)" href="css/iphone.css" />')
+      expect(r.shift.strip).to eq('</head>')   
+      expect(r.shift.strip).to eq('<body>') 
+    end
+
   end
 end

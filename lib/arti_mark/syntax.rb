@@ -58,6 +58,17 @@ module ArtiMark
         "<p#{class_string(cls)}>#{text.strip}</p>\n"
       end
 
+      def @linecommand_handler.stylesheets(lexed, context)
+        if lexed[:params].empty?
+          context.stylesheets.concat lexed[:text].split(',').map(&:strip)
+        else
+          context.stylesheets.concat lexed[:text].split(',').map {|s|
+            [s.strip, lexed[:params].join]
+          }
+        end
+        ''
+      end
+
       #univarsal line command handler
       def @linecommand_handler.method_missing(cmd, *args)
         "<#{cmd}#{class_string(args[0][:cls])}>#{args[0][:text].strip}</#{cmd}>\n"
