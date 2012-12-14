@@ -468,5 +468,6 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</html>")
      end
 
+
   end
 end
