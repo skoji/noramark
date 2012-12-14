@@ -47,6 +47,11 @@ module ArtiMark
         "<img#{class_string(cls)} src='#{text.strip}' alt='#{param.join(' ')}' />"
       end
 
+      def @inline_handler.ruby(lexed, context)
+        cls, param, text = lexed[:cls], lexed[:params], lexed[:text]
+        "<ruby#{class_string(cls)}>#{text.strip}<rp>(</rp><rt>#{param.join}</rt><rp>)</rp></ruby>"
+      end
+
       # universal inline command handler
       def @inline_handler.method_missing(cmd, *args)
         cls, text = args[0][:cls], args[0][:text]
@@ -67,6 +72,11 @@ module ArtiMark
               s
             end
           }
+        ''
+      end
+
+      def @linecommand_handler.title(lexed, context)
+        context.title = lexed[:text].strip
         ''
       end
 
