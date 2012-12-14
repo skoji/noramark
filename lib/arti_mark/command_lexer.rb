@@ -42,12 +42,12 @@ module ArtiMark
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3)}
     end
 
-    def replace_inline_commands(line, syntax)
+    def replace_inline_commands(line, syntax, context)
       line.gsub(/:(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{(.*?)}:/) {
         |matched|
         lexed = {:cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
         if !lexed[:cmd].nil? 
-          syntax.inline_handler.send(lexed[:cmd], lexed)
+          syntax.inline_handler.send(lexed[:cmd], lexed, context)
         else
           matched
         end

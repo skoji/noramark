@@ -35,11 +35,10 @@ module ArtiMark
       @context.toc
     end
     
-    def process_lines(lines, r)
+    def process_lines(lines, context)
       while (lines.size > 0)
-        @syntax.parse(lines, r)
+        @syntax.parse(lines, context)
       end
-      r
     end
 
   end

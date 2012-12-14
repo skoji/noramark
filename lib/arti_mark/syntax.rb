@@ -13,14 +13,14 @@ module ArtiMark
         [
           Proc.new { |lines| lex_line_command(lines[0])[:cmd] == 'newpage' },
           Proc.new { 
-            |lines, r, syntax|
+            |lines, context, syntax|
             lexed = lex_line_command(lines.shift)
             if lexed[:params].size > 0
               title = escape_html lexed[:params].first
             else 
               title = nil
             end
-            r.start_html(title)
+            context.start_html(title)
           }
         ]
 
@@ -32,17 +32,17 @@ module ArtiMark
           ]
         }
 
-      def @inline_handler.l(lexed)
+      def @inline_handler.l(lexed, context)
         ref = lexed[:params][0].strip
         "<a#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text].strip}</a>"
       end
 
-      def @inline_handler.s(lexed)
+      def @inline_handler.s(lexed, context)
         cls, text = lexed[:cls], lexed[:text]
         "<span#{class_string(cls)}>#{text.strip}</a>"
       end
 
-      def @inline_handler.img(lexed)
+      def @inline_handler.img(lexed, context)
         cls, param, text = lexed[:cls], lexed[:params], lexed[:text]
         "<img#{class_string(cls)} src='#{text.strip}' alt='#{param.join(' ')}' />"
       end
@@ -53,13 +53,14 @@ module ArtiMark
         "<#{cmd}#{class_string(cls)}>#{text.strip}</#{cmd}>"
       end
 
-      def @linecommand_handler.p(cls, param, text)
+      def @linecommand_handler.p(lexed, context)
+        cls, text = lexed[:cls], lexed[:text]
         "<p#{class_string(cls)}>#{text.strip}</p>\n"
       end
 
       #univarsal line command handler
       def @linecommand_handler.method_missing(cmd, *args)
-        "<#{cmd}#{class_string(args[0])}>#{args[2].strip}</#{cmd}>\n"
+        "<#{cmd}#{class_string(args[0][:cls])}>#{args[0][:text].strip}</#{cmd}>\n"
       end
 
 
@@ -84,12 +85,12 @@ module ArtiMark
       ParagraphParser.instance.method(:parse)
     end
 
-    def parse(lines, r)
+    def parse(lines, context)
       throw "something wrong: #{lines}" if lines[0] == '}'  # TODO: should do something here with paragraph_parser
       if parser = determine_parser(lines)
-        parser.call(lines, r, self)
+        parser.call(lines, context, self)
       else
-        default_parser.call(lines, r, self)
+        default_parser.call(lines, context, self)
       end
     end
 
