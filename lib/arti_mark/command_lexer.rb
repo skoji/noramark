@@ -2,10 +2,9 @@
 module ArtiMark
   module CommandLexer
     def escape_html(string)
-      string.to_s.gsub("&", "&").
+      string.to_s.gsub("&", "&amp;").
         gsub("<", "&lt;").
         gsub(">", "&gt;").
-        gsub("&", "&amp;").
         gsub('"', "&quot;")
     end
 

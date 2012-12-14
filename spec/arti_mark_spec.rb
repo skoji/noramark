@@ -468,6 +468,19 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</html>")
      end
 
-
+     it 'should escape html' do
+      text = ";:definition<>:<>&"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
+      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
+      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
+      expect(r.shift.strip).to eq('<head>')   
+      expect(r.shift.strip).to eq('<title>the document title</title>')
+      expect(r.shift.strip).to eq('</head>')   
+      expect(r.shift.strip).to eq('<body>') 
+      expect(r.shift.strip).to eq('<dl>')        
+      expect(r.shift.strip).to eq('<dt>definition&lt;&gt;</dt><dd>&lt;&gt;&amp;</dd>')        
+      end
   end
 end
