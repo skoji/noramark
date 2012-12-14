@@ -443,7 +443,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</html>")
      end
      it 'should handle definition list ' do
-      text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah blah.\n;: 3rd: this term is the last.\nthe list ends."
+      text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah :blah.\n;: 3rd: this term is the last.\nthe list ends."
      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
@@ -458,7 +458,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</div>") 
       expect(r.shift.strip).to eq("<dl>")
       expect(r.shift.strip).to eq("<dt>1st</dt><dd>this is the first definition</dd>")
-      expect(r.shift.strip).to eq("<dt>2nd</dt><dd>blah blah.</dd>")
+      expect(r.shift.strip).to eq("<dt>2nd</dt><dd>blah :blah.</dd>")
       expect(r.shift.strip).to eq("<dt>3rd</dt><dd>this term is the last.</dd>")
       expect(r.shift.strip).to eq("</dl>")
       expect(r.shift.strip).to eq("<div class='pgroup'>") 
