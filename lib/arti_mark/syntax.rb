@@ -1,3 +1,4 @@
+require 'cgi'
 module ArtiMark
   class Syntax
     include CommandLexer
@@ -15,7 +16,7 @@ module ArtiMark
             |lines, r, syntax|
             lexed = lex_line_command(lines.shift)
             if lexed[:params].size > 0
-              title = lexed[:params].first
+              title = escape_html lexed[:params].first
             else 
               title = nil
             end
@@ -33,7 +34,7 @@ module ArtiMark
 
       def @inline_handler.l(lexed)
         ref = lexed[:params][0].strip
-        "<a#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text]}</a>"
+        "<a#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text].strip}</a>"
       end
 
       def @inline_handler.s(lexed)
@@ -43,13 +44,13 @@ module ArtiMark
 
       def @inline_handler.img(lexed)
         cls, param, text = lexed[:cls], lexed[:params], lexed[:text]
-        "<img#{class_string(cls)} src='#{text}' alt='#{param.join(' ')}' />"
+        "<img#{class_string(cls)} src='#{text.strip}' alt='#{param.join(' ')}' />"
       end
 
       # universal inline command handler
       def @inline_handler.method_missing(cmd, *args)
-        cls, param, text = args[0][:cls], args[0][:params], args[0][:text]
-        "<#{cmd}#{class_string(cls)}>#{text}</#{cmd}>"
+        cls, text = args[0][:cls], args[0][:text]
+        "<#{cmd}#{class_string(cls)}>#{text.strip}</#{cmd}>"
       end
 
       def @linecommand_handler.p(cls, param, text)

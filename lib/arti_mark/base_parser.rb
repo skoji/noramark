@@ -3,6 +3,7 @@ module ArtiMark
   module BaseParser
     include CommandLexer
 
+
     def paragraph(line, syntax, cls_array = [])
       if line =~/^(「|（)/ # TODO: should be plaggable
         cls_array << 'noindent'
@@ -11,6 +12,7 @@ module ArtiMark
     end
 
     def process_line(line, syntax)
+      line = escape_html line
       line = replace_inline_commands(line, syntax)
       lexed = lex_line_command(line)
       if !lexed[:cmd].nil? && syntax.linecommand_handler.respond_to?(lexed[:cmd].to_sym)

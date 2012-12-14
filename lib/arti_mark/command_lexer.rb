@@ -1,6 +1,14 @@
 # -*- encoding: utf-8 -*-
 module ArtiMark
   module CommandLexer
+    def escape_html(string)
+      string.to_s.gsub("&", "&").
+        gsub("<", "&lt;").
+        gsub(">", "&gt;").
+        gsub("&", "&amp;").
+        gsub('"', "&quot;")
+    end
+
     def class_string(cls_array)
       if cls_array.size == 0
         ''

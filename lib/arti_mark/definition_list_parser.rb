@@ -15,7 +15,7 @@ module ArtiMark
         lexed = lex_line_command(lines[0])
         return unless lexed[:cmd] =~ @cmd
         dt, dd = lexed[:text].split(':').map(&:strip)
-        r << "<dt>#{dt}</dt><dd>#{dd}</dd>\n"
+        r << "<dt>#{escape_html dt}</dt><dd>#{escape_html dd}</dd>\n"
         lines.shift
       end
     end

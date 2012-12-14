@@ -19,7 +19,7 @@ module ArtiMark
       while lines.size > 0  
         lexed = lex_line_command(lines[0])
         return unless lexed[:cmd] =~ @cmd
-        r << "<li>#{lexed[:text].strip}</li>\n"
+        r << "<li>#{escape_html lexed[:text].strip}</li>\n"
         lines.shift
       end
     end
