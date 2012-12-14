@@ -59,13 +59,14 @@ module ArtiMark
       end
 
       def @linecommand_handler.stylesheets(lexed, context)
-        if lexed[:params].empty?
-          context.stylesheets.concat lexed[:text].split(',').map(&:strip)
-        else
-          context.stylesheets.concat lexed[:text].split(',').map {|s|
-            [s.strip, lexed[:params].join]
+          context.stylesheets =  lexed[:text].split(',').map {|s|
+            s.strip!
+            if s =~ /^(.+?\.css):\((.+?)\)$/
+              [$1, $2]
+            else
+              s
+            end
           }
-        end
         ''
       end
 

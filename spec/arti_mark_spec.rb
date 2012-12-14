@@ -483,7 +483,7 @@ describe ArtiMark do
       expect(r.shift.strip).to eq('<dt>definition&lt;&gt;</dt><dd>&lt;&gt;&amp;</dd>')        
     end
     it 'should specify stylesheets' do
-      text = "stylesheets:css/default.css, css/specific.css\nstylesheets(only screen and (min-device-width : 320px) and (max-device-width : 480px)):css/iphone.css\ntext."
+      text = "stylesheets:css/default.css, css/specific.css, css/iphone.css:(only screen and (min-device-width : 320px) and (max-device-width : 480px))\ntext."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
