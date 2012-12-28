@@ -1,4 +1,3 @@
-require 'cgi'
 module ArtiMark
   class Syntax
     include CommandLexer
