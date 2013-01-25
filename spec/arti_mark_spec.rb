@@ -1,32 +1,41 @@
 # -*- encoding: utf-8 -*-
 require File.dirname(__FILE__) + '/spec_helper.rb'
 require File.dirname(__FILE__) + '/../lib/arti_mark'
+require 'nokogiri'
+require File.dirname(__FILE__) + '/nokogiri_test_helper.rb'
 
-describe ArtiMark do
+describe ArtiMark do 
   describe 'convert' do
-    it 'should convert simple paragraph' do
-      text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
-      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-      converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>ここから、パラグラフがはじまります。</p>") 
-      expect(r.shift.strip).to eq("<p class='noindent'>「二行目です。」</p>") 
-      expect(r.shift.strip).to eq("<p>三行目です。</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>ここから、次のパラグラフです。</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>") 
-    end
-    it 'should convert paragraph with header' do
+      it 'should generate valid xhtml' do
+            text = 'some text'
+            artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the title')
+            xhtml = Nokogiri::XML::Document.parse(artimark.convert(text)[0])
+            expect(xhtml.root.name).to eq('html')
+            expect(xhtml.root.namespaces['xmlns']).to eq('http://www.w3.org/1999/xhtml')
+            expect(xhtml.root['xml:lang']).to eq('ja')
+            expect(xhtml.root.element_children[0].name).to eq 'head'
+            expect(xhtml.root.at_xpath('xmlns:head/xmlns:title').text).to eq('the title')
+            expect(xhtml.root.element_children[1].name).to eq 'body'
+      end
+      it 'should convert simple paragraph' do
+            text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
+            artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+            body = Nokogiri::XML::Document.parse(artimark.convert(text)[0]).root.at_xpath('xmlns:body')
+            expect(body.element_children.size).to eq 2
+
+            first_paragraph = body.element_children[0]
+            expect(first_paragraph.selector_str).to eq 'div.pgroup'
+            expect(first_paragraph.element_children.size).to eq 3
+            expect(first_paragraph.element_children[0].selector_and_text).to eq ['p', 'ここから、パラグラフがはじまります。']
+            expect(first_paragraph.element_children[1].selector_and_text).to eq ['p.noindent', '「二行目です。」']
+            expect(first_paragraph.element_children[2].selector_and_text).to eq ['p', '三行目です。']
+            second_paragraph = body.element_children[1]
+            expect(second_paragraph.selector_str).to eq 'div.pgroup'
+            expect(second_paragraph.element_children.size).to eq 1
+            expect(second_paragraph.element_children[0].selector_and_text).to eq ['p', 'ここから、次のパラグラフです。'] 
+
+      end
+      it 'should convert paragraph with header' do
       text = "h1: タイトルです。\nここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
@@ -516,6 +525,6 @@ describe ArtiMark do
       expect(r.shift.strip).to eq('</head>')   
       expect(r.shift.strip).to eq('<body>') 
     end
-
   end
 end
+
