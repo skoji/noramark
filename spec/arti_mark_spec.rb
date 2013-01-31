@@ -6,199 +6,135 @@ require File.dirname(__FILE__) + '/nokogiri_test_helper.rb'
 
 describe ArtiMark do 
   describe 'convert' do
-      it 'should generate valid xhtml' do
-            text = 'some text'
-            artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the title')
-            xhtml = Nokogiri::XML::Document.parse(artimark.convert(text)[0])
-            expect(xhtml.root.name).to eq('html')
-            expect(xhtml.root.namespaces['xmlns']).to eq('http://www.w3.org/1999/xhtml')
-            expect(xhtml.root['xml:lang']).to eq('ja')
-            expect(xhtml.root.element_children[0].name).to eq 'head'
-            expect(xhtml.root.at_xpath('xmlns:head/xmlns:title').text).to eq('the title')
-            expect(xhtml.root.element_children[1].name).to eq 'body'
-      end
-      it 'should convert simple paragraph' do
-            text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
-            artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-            body = Nokogiri::XML::Document.parse(artimark.convert(text)[0]).root.at_xpath('xmlns:body')
-            expect(body.element_children.size).to eq 2
-
-            first_paragraph = body.element_children[0]
-            expect(first_paragraph.selector_str).to eq 'div.pgroup'
-            expect(first_paragraph.element_children.size).to eq 3
-            expect(first_paragraph.element_children[0].selector_and_text).to eq ['p', 'ここから、パラグラフがはじまります。']
-            expect(first_paragraph.element_children[1].selector_and_text).to eq ['p.noindent', '「二行目です。」']
-            expect(first_paragraph.element_children[2].selector_and_text).to eq ['p', '三行目です。']
-            second_paragraph = body.element_children[1]
-            expect(second_paragraph.selector_str).to eq 'div.pgroup'
-            expect(second_paragraph.element_children.size).to eq 1
-            expect(second_paragraph.element_children[0].selector_and_text).to eq ['p', 'ここから、次のパラグラフです。'] 
-
-      end
-      it 'should convert paragraph with header' do
-      text = "h1: タイトルです。\nここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
+    it 'should generate valid xhtml' do
+      text = 'some text'
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the title')
+      xhtml = Nokogiri::XML::Document.parse(artimark.convert(text)[0])
+      expect(xhtml.root.name).to eq('html')
+      expect(xhtml.root.namespaces['xmlns']).to eq('http://www.w3.org/1999/xhtml')
+      expect(xhtml.root['xml:lang']).to eq('ja')
+      expect(xhtml.root.element_children[0].name).to eq 'head'
+      expect(xhtml.root.at_xpath('xmlns:head/xmlns:title').text).to eq('the title')
+      expect(xhtml.root.element_children[1].name).to eq 'body'
+    end
+    it 'should convert simple paragraph' do
+      text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<h1>タイトルです。</h1>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>ここから、パラグラフがはじまります。</p>") 
-      expect(r.shift.strip).to eq("<p class='noindent'>「二行目です。」</p>") 
-      expect(r.shift.strip).to eq("<p>三行目です。</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<h2 class='column'>ふたつめの見出しです。</h2>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>ここから、次のパラグラフです。</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<h3 class='third foo'>クラスが複数ある見出しです</h3>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>") 
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div.pgroup', 
+         ['p', 'ここから、パラグラフがはじまります。'],
+         ['p.noindent', '「二行目です。」'],
+         ['p', '三行目です。']
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_childs).to eq(
+        ['div.pgroup',
+          ['p', 'ここから、次のパラグラフです。']]
+      )
+    end
+    it 'should convert paragraph with header' do
+      text = "h1: タイトルです。\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 5
+      expect(body.element_children[0].a).to eq ['h1', 'タイトルです。']
+      expect(body.element_children[1].selector_and_childs).to eq(
+        ['div.pgroup',
+          ['p', 'ここから、パラグラフがはじまります。']
+        ]
+      )
+      expect(body.element_children[2].a).to eq ['h2.column', 'ふたつめの見出しです。']
+      expect(body.element_children[3].selector_and_childs).to eq(
+        ['div.pgroup',
+         ['p', 'ここから、次のパラグラフです。']
+        ]
+      )
+      expect(body.element_children[4].a).to eq ['h3.third.foo', 'クラスが複数ある見出しです']
     end
 
     it 'should convert div and paragraph' do
-      text = "d {\n h1: title. \n 1st line. \n「二行目」\n\n new paragraph in div.\n}\n here comes new paragraph."
+      text = "d {\n1st line. \n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq('<div>')   
-      expect(r.shift.strip).to eq("<h1>title.</h1>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>1st line.</p>") 
-      expect(r.shift.strip).to eq("<p class='noindent'>「二行目」</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>new paragraph in div.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>here comes new paragraph.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>") 
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div',
+          ['div.pgroup',
+           ['p', '1st line.']
+          ]
+        ]
+      )
     end
 
     it 'should convert div with class' do
-      text = "d.preface {\n h1: title. \n 1st line. \n「二行目」\n\n new paragraph in div.\n}\n here comes new paragraph."
+      text = "d.preface {\n h1: title.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq('<div class=\'preface\'>')   
-      expect(r.shift.strip).to eq("<h1>title.</h1>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>1st line.</p>") 
-      expect(r.shift.strip).to eq("<p class='noindent'>「二行目」</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>new paragraph in div.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>here comes new paragraph.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>") 
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div.preface',
+         ['h1', 'title.']
+        ]
+      )
     end
     it 'should convert nested div' do
-      text = "d.preface {\n h1: title. \n 1st line. \n「二行目」\n\n new paragraph in div.\n d.nested {\n nested!\n}\n}\n here comes new paragraph."
+      text = "d.preface {\n outer div. \n d.nested {\n nested!\n}\nouter div again.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq('<div class=\'preface\'>')   
-      expect(r.shift.strip).to eq("<h1>title.</h1>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>1st line.</p>") 
-      expect(r.shift.strip).to eq("<p class='noindent'>「二行目」</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>new paragraph in div.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='nested'>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>nested!</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>here comes new paragraph.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>") 
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div.preface',
+         ['div.pgroup',
+          ['p', 'outer div.']
+         ],
+         ['div.nested',
+          ['div.pgroup',
+           ['p', 'nested!']
+          ]
+         ],
+         ['div.pgroup',
+          ['p', 'outer div again.']
+         ],
+        ]
+      )
     end
+    
     it 'should convert article' do
-      text = "art {\nd.preface {\n h1: title. \n 1st line. \n「二行目」\n\n new paragraph in div.\n d.nested {\n nested!\n}\n}\n here comes new paragraph.\n}"
+      text = "art {\n in the article.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq('<article>')   
-      expect(r.shift.strip).to eq('<div class=\'preface\'>')   
-      expect(r.shift.strip).to eq("<h1>title.</h1>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>1st line.</p>") 
-      expect(r.shift.strip).to eq("<p class='noindent'>「二行目」</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>new paragraph in div.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='nested'>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>nested!</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>here comes new paragraph.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq('</article>')   
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>") 
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+     expect(body.element_children[0].selector_and_childs).to eq(
+      ['article',
+       ['div.pgroup',
+        ['p', 'in the article.']
+       ]
+      ]
+     ) 
     end
+
     it 'should handle block image' do
       text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>') 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this is normal line.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<div class='img-wrap'><img src='./image1.jpg' alt='alt text' /><p>caption text</p></div>")
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+       ['div.pgroup',
+        ['p', 'this is normal line.']
+       ]
+      )      
+      expect(body.element_children[1].selector_and_childs).to eq(
+       ['div.img-wrap',
+        ["img[src='./image1.jpg'][alt='alt text']", ''],
+        ['p', 'caption text']
+       ]
+      )      
     end
 
     it 'should handle page change article' do
@@ -206,101 +142,69 @@ describe ArtiMark do
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       expect(converted.size).to eq 3
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq('<p>this is start.</p>')   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body1 = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body1.element_children[0].selector_and_childs).to eq(
+       ['div.pgroup',
+        ['p', 'this is start.']
+       ]
+      )
 
-      r = converted[1].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>page changed</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq('<p>this is second page.</p>')   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      head2 = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
+      expect(head2.element_children[0].a).to eq ['title', 'page changed']
+      body2 = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:body')
+      expect(body2.element_children[0].selector_and_childs).to eq(
+       ['div.pgroup',
+        ['p', 'this is second page.']
+       ]
+      )
 
-      r = converted[2].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>page changed</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq('<p>and the third.</p>')   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      head3 = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:head')
+      expect(head3.element_children[0].a).to eq ['title', 'page changed']
+      body3 = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:body')
+      expect(body3.element_children[0].selector_and_childs).to eq(
+       ['div.pgroup',
+        ['p', 'and the third.']
+       ]
+      )
     end
+
     it 'should handle stylesheets' do
       text = "d.styled {\n this is styled document.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title', :stylesheets => ['reset.css', 'mystyle.css'])
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq("<link rel=\"stylesheet\" type=\"text/css\" href=\"reset.css\" />")
-      expect(r.shift.strip).to eq("<link rel=\"stylesheet\" type=\"text/css\" href=\"mystyle.css\" />")
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='styled'>") 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq('<p>this is styled document.</p>')   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+      expect(head.element_children[0].a).to eq ['title', 'the document title']
+      expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='reset.css']", '']
+      expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='mystyle.css']", '']
     end
+
     it 'should handle link' do
       text = "link to :l(http://github.com/skoji/artimark){artimark repository}:. \ncan you see this?"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>link to <a href='http://github.com/skoji/artimark'>artimark repository</a>.</p>")   
-      expect(r.shift.strip).to eq("<p>can you see this?</p>")   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+      ['div.pgroup',
+       ['p',
+        'link to ',
+         ["a[href='http://github.com/skoji/artimark']", 'artimark repository'],
+         '.'
+       ],
+       ['p', 'can you see this?']
+      ]
+     )       
     end
     it 'should handle custom paragraph' do
       text = "this is normal line.\np.custom: this text is in custom class."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this is normal line.</p>")   
-      expect(r.shift.strip).to eq("<p class='custom'>this text is in custom class.</p>")   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+      ['div.pgroup',
+       ['p', 'this is normal line.'],
+       ['p.custom', 'this text is in custom class.']
+      ]
+     )        
     end
     it 'should handle span' do
       text = "this is normal line.\np.custom: this text is in :s.keyword{custom}: class."
