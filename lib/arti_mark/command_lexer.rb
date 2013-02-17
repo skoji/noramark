@@ -33,17 +33,17 @@ module ArtiMark
     end 
 
     def lex_line_command(line)
-        line =~ /^([\w\*;]+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*:(.*?)$/
+        line =~ /^([\w\*;]+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*:(.*?)$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
     end
 
     def lex_block_command(line)
-        line =~ /^(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{\s*$/
+        line =~ /^(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{\s*$/
         return { :cmd => $1, :cls => class_array($2), :params => param_array($3)}
     end
 
     def replace_inline_commands(line, syntax, context)
-      line.gsub(/:(\w+?)((?:\.\w+?)*)(?:\((.+?)\))?\s*{(.*?)}:/) {
+      line.gsub(/:(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{(.*?)}:/) {
         |matched|
         lexed = {:cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
         if !lexed[:cmd].nil? 

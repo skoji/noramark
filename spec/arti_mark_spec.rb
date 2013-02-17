@@ -73,12 +73,12 @@ describe ArtiMark do
     end
 
     it 'should convert div with class' do
-      text = "d.preface {\n h1: title.\n}"
+      text = "d.preface-one {\n h1: title.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children[0].selector_and_childs).to eq(
-        ['div.preface',
+        ['div.preface-one',
          ['h1', 'title.']
         ]
       )
@@ -207,62 +207,44 @@ describe ArtiMark do
      )        
     end
     it 'should handle span' do
-      text = "this is normal line.\np.custom: this text is in :s.keyword{custom}: class."
+      text = "p.custom: this text is in :s.keyword{custom}: class."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>')   
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this is normal line.</p>")   
-      expect(r.shift.strip).to eq("<p class='custom'>this text is in <span class='keyword'>custom</a> class.</p>")   
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div.pgroup',
+         ['p.custom', 'this text is in ', ['span.keyword', 'custom'], ' class.'
+        ]]
+      )
     end
     it 'should handle any block' do
       text = "this is normal line.\ncite {\n this block should be in cite. \n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>') 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this is normal line.</p>") 
-      expect(r.shift.strip).to eq("</div>")
-      expect(r.shift.strip).to eq("<cite>")
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this block should be in cite.</p>")
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</cite>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div.pgroup',
+          ['p', 'this is normal line.']
+        ]
+      )
+      expect(body.element_children[1].selector_and_childs).to eq(
+        ['cite',
+         ['div.pgroup',
+            ['p', 'this block should be in cite.']
+          ]
+        ]
+      )
     end
     it 'should handle inline image' do
-      text = "this is normal line.\nsimple image :img(caption){./image1.jpg}:"
+      text = "simple image :img(caption){./image1.jpg}:."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>') 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this is normal line.</p>") 
-      expect(r.shift.strip).to eq("<p>simple image <img src='./image1.jpg' alt='caption' /></p>")
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div.pgroup',
+          ['p',
+            'simple image ', ["img[src='./image1.jpg'][alt='caption']", ''], '.']]
+      )
     end
 
     it 'should handle any inline' do
