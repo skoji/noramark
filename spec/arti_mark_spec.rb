@@ -38,7 +38,7 @@ describe ArtiMark do
       )
     end
     it 'should convert paragraph with header' do
-      text = "h1: タイトルです。\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
+      text = "h1: タイトルです。\r\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -179,7 +179,7 @@ describe ArtiMark do
     end
 
     it 'should handle link' do
-      text = "link to :l(http://github.com/skoji/artimark){artimark repository}:. \ncan you see this?"
+      text = "link to [l(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -207,7 +207,7 @@ describe ArtiMark do
      )        
     end
     it 'should handle span' do
-      text = "p.custom: this text is in :s.keyword{custom}: class."
+      text = "p.custom: this text is in [s.keyword{custom}] class."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -236,7 +236,7 @@ describe ArtiMark do
       )
     end
     it 'should handle inline image' do
-      text = "simple image :img(caption){./image1.jpg}:."
+      text = "simple image [img(caption){./image1.jpg}]."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -248,7 +248,7 @@ describe ArtiMark do
     end
 
     it 'should handle any inline' do
-      text = "this is normal line.\nin this line, this should be :strong{marked as strong}:."
+      text = "this is normal line.\nin this line, this should be [strong{marked as strong}]."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
@@ -288,7 +288,7 @@ describe ArtiMark do
     end
 
     it 'should handle ruby' do
-      text = ":ruby(とんぼ){蜻蛉}:の:ruby(めがね){眼鏡}:はみずいろめがね"
+      text = "[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }

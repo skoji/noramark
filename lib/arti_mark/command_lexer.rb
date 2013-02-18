@@ -43,7 +43,7 @@ module ArtiMark
     end
 
     def replace_inline_commands(line, syntax, context)
-      line.gsub(/:(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{(.*?)}:/) {
+      line.gsub(/\[(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{(.*?)}\]/) {
         |matched|
         lexed = {:cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
         if !lexed[:cmd].nil? 

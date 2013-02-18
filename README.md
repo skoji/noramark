@@ -2,9 +2,9 @@
 
 ArtiMark is a simple text markup language. It focuses on creating XHTML files for EPUB books. It is optimized for Japanese text for the present. 
 
-**CAUTION This is very early alpha version, so it's not stable at all including the markup syntax. **
+**CAUTION This is very early alpha version, so it's not stable at all. Even the markup syntax will change. **
 
-I hope it will be partly stable by the end of January, 2013
+I hope it will be partly stable by the end of Feburary, 2013
 
 ## Installation
 
@@ -41,7 +41,7 @@ Source text looks like this.
 
         d.column {
             This block will produce div.column.
-            Inline commands like :l(http://github.com/skoji/arti_mark/){this}: and :s.strong{this}: is available.
+            Inline commands like [l(http://github.com/skoji/arti_mark/){this}] and [s.strong{this}] is available.
         }
     }
     
