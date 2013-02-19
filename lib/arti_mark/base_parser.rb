@@ -5,7 +5,7 @@ module ArtiMark
 
 
     def paragraph(line, syntax, cls_array = [])
-      if line =~/^(「|（)/ # TODO: should be plaggable
+      if line =~/^(「|『|（)/ # TODO: should be plaggable
         cls_array << 'noindent'
       end
       "<p#{class_string(cls_array)}>#{line}</p>\n"
