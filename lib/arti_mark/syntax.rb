@@ -36,6 +36,10 @@ module ArtiMark
         "<a#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text].strip}</a>"
       end
 
+      def @inline_handler.link(lexed, context)
+        l(lexed, context)
+      end
+
       def @inline_handler.s(lexed, context)
         cls, text = lexed[:cls], lexed[:text]
         "<span#{class_string(cls)}>#{text.strip}</a>"

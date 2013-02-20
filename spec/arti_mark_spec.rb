@@ -179,6 +179,22 @@ describe ArtiMark do
     end
 
     it 'should handle link' do
+      text = "link to [link(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+      ['div.pgroup',
+       ['p',
+        'link to ',
+         ["a[href='http://github.com/skoji/artimark']", 'artimark repository'],
+         '.'
+       ],
+       ['p', 'can you see this?']
+      ]
+     )       
+    end
+    it 'should handle link with l' do
       text = "link to [l(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
