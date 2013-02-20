@@ -71,6 +71,17 @@ describe ArtiMark do
         ]
       )
     end
+    it 'should convert div without paragraph' do
+      text = "d(flat-text) {\n1st line. \n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_childs).to eq(
+        ['div',
+           ['p', '1st line.']
+        ]
+      )
+    end
 
     it 'should convert div with class' do
       text = "d.preface-one {\n h1: title.\n}"
