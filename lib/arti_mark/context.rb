@@ -1,6 +1,6 @@
 module ArtiMark
   class Context
-    attr_accessor :title, :head_inserters, :toc, :stylesheets
+    attr_accessor :title, :head_inserters, :toc, :stylesheets, :enable_pgroup
     def initialize(param = {})
       @head_inserters = []
       @toc = []
@@ -8,6 +8,7 @@ module ArtiMark
       @title = param[:title] || 'ArtiMark generated document'
       @stylesheets = param[:stylesheets] || []
       @stylesheets_alt = param[:stylesheets_alt] || []
+      @enable_pgroup = param[:enable_pgroup] || true
       @pages = []
       head_inserter do
         ret = ""

@@ -16,25 +16,18 @@ module ArtiMark
     end
     
     def process_block(lines, r, syntax, cls_array, params)
-      flat_text = params.member? 'flat-text'
+      previous_pgroup , r.enable_pgroup = r.enable_pgroup , false if params.member? 'wo-pgroup'
       r << "<#{@markup}#{class_string(cls_array)}>\n"
-      while lines.size > 0  
-        if lines[0] == '}'
+      while lines.size > 0
+        if lines[0] == '}' 
           lines.shift
           break
-        end
-        if flat_text 
-          #TODO : common with paragraph_parser. should go anywhere else
-          while (lines.size > 0 && 
-            lines[0] != '}' && 
-            syntax.determine_parser(lines).nil?)
-            r << process_line(lines.shift, syntax, r) 
-          end
-        else 
+        else
           syntax.determine_parser(lines, :get_default => true).call(lines, r, syntax)
         end
       end
       r << "</#{@markup}>\n"
+      r.enable_pgroup = previous_pgroup if !previous_pgroup.nil?
     end
 
   end

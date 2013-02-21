@@ -15,14 +15,14 @@ module ArtiMark
     end
 
     def process_paragraph_group(lines, paragraph, syntax, context)
-      paragraph << "<div class='pgroup'>\n"
+      paragraph << "<div class='pgroup'>\n" if context.enable_pgroup
       while (lines.size > 0 && 
             lines[0] != '}' && # TODO: is this correct...?
             syntax.determine_parser(lines).nil?)
           paragraph << process_line(lines.shift, syntax, context) 
       end
-      paragraph << "</div>\n"
+      paragraph << "</div>\n" if context.enable_pgroup
+      paragraph
     end
-
   end
 end
