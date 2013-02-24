@@ -15,6 +15,7 @@ require "arti_mark/unordered_list_parser"
 require "arti_mark/definition_list_parser"
 require "arti_mark/universal_block_parser"
 require 'arti_mark/syntax'
+require 'arti_mark/result'
 require 'arti_mark/context'
 
 module ArtiMark

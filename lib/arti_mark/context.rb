@@ -9,7 +9,7 @@ module ArtiMark
       @stylesheets = param[:stylesheets] || []
       @stylesheets_alt = param[:stylesheets_alt] || []
       @enable_pgroup = param[:enable_pgroup] || true
-      @pages = []
+      @pages = Result.new
       head_inserter do
         ret = ""
         @stylesheets.each { |s|
@@ -72,6 +72,7 @@ module ArtiMark
       if !@pages.last.frozen?
         end_html
       end
+
       @pages
     end
   end
