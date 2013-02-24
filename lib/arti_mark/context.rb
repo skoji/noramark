@@ -1,6 +1,6 @@
 module ArtiMark
   class Context
-    attr_accessor :title, :head_inserters, :toc, :stylesheets, :enable_pgroup
+    attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup
     def initialize(param = {})
       @head_inserters = []
       @toc = []

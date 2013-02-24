@@ -448,11 +448,26 @@ describe ArtiMark do
       expect(head.element_children[3].a).to eq ["link[rel='stylesheet'][type='text/css'][media='only screen and (min-device-width : 320px) and (max-device-width : 480px)'][href='css/iphone.css']", '']
 
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      p body.to_s
       expect(body.element_children[0].selector_and_childs).to eq(
         ['div.pgroup',
           ['p',
             'text.']])
+    end
+
+    it 'should specify title' do
+      text = "title:the title of the book in the text.\n\ntext."
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+      expect(head.element_children[0].a).to eq ['title', 'the title of the book in the text.']
+    end
+
+    it 'should specify lang' do
+      text = "lang:ja\n\n日本語 text."
+      artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title')
+      converted = artimark.convert(text)
+      root = Nokogiri::XML::Document.parse(converted[0]).root
+      expect(root['lang']).to eq 'ja'
     end
   end
 end

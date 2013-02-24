@@ -83,6 +83,11 @@ module ArtiMark
         ''
       end
 
+      def @linecommand_handler.lang(lexed, context)
+        context.lang = lexed[:text].strip
+        ''
+      end
+
       #univarsal line command handler
       def @linecommand_handler.method_missing(cmd, *args)
         "<#{cmd}#{class_string(args[0][:cls])}>#{args[0][:text].strip}</#{cmd}>\n"
