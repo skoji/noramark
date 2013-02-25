@@ -1,6 +1,6 @@
 # ArtiMark
 
-ArtiMark is a simple text markup language. It focuses on creating XHTML files for EPUB books. It is optimized for Japanese text for the present. 
+ArtiMark is a simple text markup language. It is designed to create XHTML files for EPUB books. It is optimized for Japanese text for the present. 
 
 **CAUTION This is very early alpha version, so it's not stable at all. Even the markup syntax will change. **
 
