@@ -25,7 +25,7 @@ Or install it yourself as:
     require 'arti_mark'
 
     document = ArtiMark::Document.new()
-    document.read(string_or_io)
+    document.convert(string_or_io)
     put document.result[0] # outputs 1st page of converted XHTML file
 
 Source text looks like this. 
