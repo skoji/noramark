@@ -28,8 +28,8 @@ Or install it yourself as:
     document.convert(string_or_io)
     put document.result[0] # outputs 1st page of converted XHTML file
 
-Source text looks like this. 
-    
+an example of markup text
+
     lang: en
     title: test title
     stylesheets: css/normalize.css, css/main.css
@@ -46,8 +46,8 @@ Source text looks like this.
             Inline commands like [link(http://github.com/skoji/arti_mark/){this}] and [s.strong{this}] is available.
         }
     }
-    
-It is converted to a XHTML file like this.
+
+The converted XHTML file
 
     <?xml version="1.0" encoding="UTF-8"?>
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
