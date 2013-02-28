@@ -12,6 +12,7 @@ module ArtiMark
     end
 
     def process_line(line, syntax, context)
+      return '' if line =~ /^#.*$/
       line = escape_html line
       line = replace_inline_commands(line, syntax, context)
       lexed = lex_line_command(line)
