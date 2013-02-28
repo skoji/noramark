@@ -1,14 +1,12 @@
 # ArtiMark
 
-ArtiMark is a simple text markup language. It focuses on creating XHTML files for EPUB books. It is optimized for Japanese text for the present. 
+ArtiMark is a simple text markup language. It is designed to create XHTML files for EPUB books. It is optimized for Japanese text for the present. 
 
 **CAUTION This is very early alpha version, so it's not stable at all. Even the markup syntax will change. **
 
 I hope it will be partly stable by the end of Feburary, 2013
 
 ## Installation
-
-Note: This gem is not yet released to rubygems.org.
 
 Add this line to your application's Gemfile:
 
@@ -26,14 +24,19 @@ Or install it yourself as:
 
     require 'arti_mark'
 
-    document = ArtiMark::Document.new(:lang => 'ja')
-    document.read(string_or_io)
+    document = ArtiMark::Document.new()
+    document.convert(string_or_io)
     put document.result[0] # outputs 1st page of converted XHTML file
 
-Source text looks like this. 
+an example of markup text
 
     # line begins with # is a comment.
     # you don't need to indent artimark text.
+
+    lang: en
+    title: test title
+    stylesheets: css/normalize.css, css/main.css
+
     art {
         h1: header 1
         article comes here.
@@ -43,12 +46,20 @@ Source text looks like this.
 
         d.column {
             This block will produce div.column.
-            Inline commands like [l(http://github.com/skoji/arti_mark/){this}] and [s.strong{this}] is available.
+            Inline commands like [link(http://github.com/skoji/arti_mark/){this}] and [s.strong{this}] is available.
         }
     }
-    
-It is converted to XHTML like this, sorrounded with appropriate html,head and  body tags.
 
+The converted XHTML file
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+    <title> test title</title>
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    </head>
+    <body>
     <article>
     <h1>header 1</h1>
     <div class='pgroup'>
