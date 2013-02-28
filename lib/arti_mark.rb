@@ -27,7 +27,7 @@ module ArtiMark
 
     def convert(text)
       # split text to lines
-      lines = text.strip.gsub(/　/, ' ').gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).map { |line| line.strip } # text preprocess should be plaggable
+      lines = text.strip.gsub(/　/, ' ').gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).reject{|line| line.strip =~ /^#.*$/ }.map { |line| line.strip } # text preprocess should be plaggable
       process_lines(lines, @context)
       @context.result
     end

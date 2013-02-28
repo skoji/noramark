@@ -32,6 +32,8 @@ Or install it yourself as:
 
 Source text looks like this. 
 
+    # line begins with # is a comment.
+    # you don't need to indent artimark text.
     art {
         h1: header 1
         article comes here.

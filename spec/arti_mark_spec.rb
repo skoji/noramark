@@ -298,6 +298,7 @@ describe ArtiMark do
         ['p', 'should be ', ['strong', 'marked as strong'],'.']]
       )
     end
+
     it 'should generate toc: with newpage parameter' do
       text = "newpage(1st chapter):\n1st chapter.\nnewpage(2nd chapter):\n2nd chapger.\nnewpage: 2nd chapter continued.\nnewpage(3rd chapter):\n3rd chapter."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -460,6 +461,27 @@ describe ArtiMark do
       converted = artimark.convert(text)
       root = Nokogiri::XML::Document.parse(converted[0]).root
       expect(root['lang']).to eq 'ja'
+    end
+
+    it 'should ignore comments' do
+      text = "#この行はコメントです\nここから、パラグラフがはじまります。\n#これもコメント\n「二行目です。」\n三行目です。\n\n#これもコメント\n\n ここから、次のパラグラフです。"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'ここから、パラグラフがはじまります。'],
+         ['p.noindent', '「二行目です。」'],
+         ['p', '三行目です。']
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['div.pgroup',
+          ['p', 'ここから、次のパラグラフです。']]
+      )
     end
   end
 end
