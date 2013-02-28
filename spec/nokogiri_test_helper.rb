@@ -25,14 +25,14 @@ module Nokogiri
       def child_a(index)
         element_children[index].selector_and_text
       end 
-      def selector_and_childs
+      def selector_and_children
         [selector] + children.select{|c| c.elem? || c.text.strip.size > 0}.map{|c| 
           if !c.elem? 
             c.text
           elsif c.element_children.size == 0
             c.selector_and_text
           else
-            c.selector_and_childs
+            c.selector_and_children
           end 
         }
       end
