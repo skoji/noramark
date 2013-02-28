@@ -67,8 +67,8 @@ module ArtiMark
       nil
     end
 
-    def block_delimiter
-      @block_delimiter_stack.last || ''
+    def block_close?(line)
+      line == (@block_delimiter_stack.last || '') + '}'
     end
 
     def toc=(label)

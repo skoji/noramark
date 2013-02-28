@@ -122,6 +122,7 @@ describe ArtiMark do
         ]
       )
     end
+
     it 'should convert nested div' do
       text = "d.preface {\n outer div. \n d.nested {\n nested!\n}\nouter div again.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -144,6 +145,51 @@ describe ArtiMark do
       )
     end
     
+    it 'should convert nested div with alternate style inside' do
+      text = "d.preface {\n outer div. \n d.nested {---\n nested!\n---}\nouter div again.\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.preface',
+         ['div.pgroup',
+          ['p', 'outer div.']
+         ],
+         ['div.nested',
+          ['div.pgroup',
+           ['p', 'nested!']
+          ]
+         ],
+         ['div.pgroup',
+          ['p', 'outer div again.']
+         ],
+        ]
+      )
+    end
+
+   it 'should convert nested div with alternate style outside' do
+      text = "d.preface {---\n outer div. \n}\nyou can write curly brace as above.\nd.nested {\n nested!\n}\nouter div again.\n---}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.preface',
+         ['div.pgroup',
+          ['p', 'outer div.'],
+          ['p', '}'],
+          ['p', 'you can write curly brace as above.']
+         ],
+         ['div.nested',
+          ['div.pgroup',
+           ['p', 'nested!']
+          ]
+         ],
+         ['div.pgroup',
+          ['p', 'outer div again.']
+         ],
+        ]
+      )
+    end    
     it 'should convert article' do
       text = "art {\n in the article.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')

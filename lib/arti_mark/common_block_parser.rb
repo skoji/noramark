@@ -21,7 +21,7 @@ module ArtiMark
       previous_pgroup , r.enable_pgroup = r.enable_pgroup , false if params.member? 'wo-pgroup'
       r << "<#{@markup}#{class_string(cls_array)}>\n"
       while lines.size > 0
-        if lines[0] == r.block_delimiter + '}' 
+        if r.block_close? lines[0] 
           lines.shift
           break
         else
