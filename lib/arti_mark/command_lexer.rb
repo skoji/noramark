@@ -38,8 +38,8 @@ module ArtiMark
     end
 
     def lex_block_command(line)
-        line =~ /^(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{\s*$/
-        return { :cmd => $1, :cls => class_array($2), :params => param_array($3)}
+        line =~ /^(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*(?:{(---)?)\s*$/
+        return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :delimiter => $4||''}
     end
 
     def replace_inline_commands(line, syntax, context)

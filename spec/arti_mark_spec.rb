@@ -71,6 +71,20 @@ describe ArtiMark do
         ]
       )
     end
+
+    it 'should convert div and paragraph with alternate style' do
+      text = "d {---\n1st line. \n---}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div',
+          ['div.pgroup',
+           ['p', '1st line.']
+          ]
+        ]
+      )
+    end
     it 'should convert div without pgroup' do
       text = "d(wo-pgroup) {\n1st line. \n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')

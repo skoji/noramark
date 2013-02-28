@@ -17,11 +17,11 @@ module ArtiMark
     def process_paragraph_group(lines, syntax, context)
       paragraph = ''
       while (lines.size > 0 && 
-            lines[0] != '}' && # TODO: is this correct...?
+            lines[0] != context.block_delimiter + '}' && # TODO: is this correct...?
             syntax.determine_parser(lines).nil?)
           paragraph << process_line(lines.shift, syntax, context) 
       end
-      if paragraph.size > 0 
+      if paragraph.size > 0   
         paragraph = "<div class='pgroup'>\n#{paragraph}</div>\n" if context.enable_pgroup
       end
       paragraph

@@ -10,6 +10,7 @@ module ArtiMark
       @stylesheets_alt = param[:stylesheets_alt] || []
       @enable_pgroup = param[:enable_pgroup] || true
       @pages = Result.new
+      @block_delimiter_stack = []
       head_inserter do
         ret = ""
         @stylesheets.each { |s|
@@ -55,6 +56,19 @@ module ArtiMark
         page << "</html>\n"
         page.freeze 
       end
+    end
+
+    def enter_block(lexed)
+      @block_delimiter_stack.push(lexed[:delimiter])
+    end
+
+    def exit_block(lexed)
+      @block_delimiter_stack.pop
+      nil
+    end
+
+    def block_delimiter
+      @block_delimiter_stack.last || ''
     end
 
     def toc=(label)
