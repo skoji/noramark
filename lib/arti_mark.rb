@@ -23,11 +23,23 @@ module ArtiMark
     def initialize(param = {})
       @context = Context.new(param)
       @syntax = Syntax.new
+      @preprocessors = [
+                        Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
+                        Proc.new { |text| text.strip.gsub(/　/, ' ') } # Japanese full-width spece to half space width
+                       ]
     end 
 
+    def preprocessor(&block)
+      @preprocessors << block
+    end
+    
     def convert(text)
+      @preprocessors.each {
+        |pr|
+        text = pr.call(text)
+      }
       # split text to lines
-      lines = text.strip.gsub(/　/, ' ').gsub(/\r?\n(\r?\n)+/, "\n\n").split(/\r?\n/).map { |line| line.strip } # text preprocess should be plaggable
+      lines = text.split(/\r?\n/).map { |line| line.strip } 
       process_lines(lines, @context)
       @context.result
     end

@@ -543,6 +543,22 @@ describe ArtiMark do
           ['p', 'ここから、次のパラグラフです。']]
       )
     end
+
+    it 'should handle preprocessor' do
+      text = "pre-preprocess text"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      artimark.preprocessor do
+        |text|
+        text.gsub('pre-preprocess', 'post-process')
+      end
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'post-process text'],
+        ]
+      )
+    end
   end
 end
 
