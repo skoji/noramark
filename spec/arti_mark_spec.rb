@@ -398,7 +398,16 @@ describe ArtiMark do
       expect(r.shift.strip).to eq("</body>") 
       expect(r.shift.strip).to eq("</html>")
     end
-
+    it 'should handle tatechuyoko' do
+      text = "[tcy{10}]年前のことだった"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', ['span.tcy', '10'], '年前のことだった']
+        ])
+    end
 
     it 'should handle ordered list ' do
       text = "this is normal line.\n1: for the 1st.\n2: secondly, blah.\n3: and last...\nthe ordered list ends."

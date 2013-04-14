@@ -55,6 +55,12 @@ module ArtiMark
         "<ruby#{class_string(cls)}>#{text.strip}<rp>(</rp><rt>#{param.join}</rt><rp>)</rp></ruby>"
       end
 
+      def @inline_handler.tcy(lexed, context)
+        cls, text = lexed[:cls],  lexed[:text]
+        cls << 'tcy'
+        "<span#{class_string(cls)}>#{text.strip}</span>"
+      end
+
       # universal inline command handler
       def @inline_handler.method_missing(cmd, *args)
         cls, text = args[0][:cls], args[0][:text]
