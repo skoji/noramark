@@ -25,7 +25,7 @@ module ArtiMark
       @syntax = Syntax.new
       @preprocessors = [
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
-                        Proc.new { |text| text.strip.gsub(/　/, ' ') } # Japanese full-width spece to half space width
+                        Proc.new { |text| text.strip.gsub(/　/, ' ') } # convert Japanese full-width spece to normal space
                        ]
     end 
 
