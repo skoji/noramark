@@ -98,8 +98,6 @@ module ArtiMark
       def @linecommand_handler.method_missing(cmd, *args)
         "<#{cmd}#{class_string(args[0][:cls])}>#{args[0][:text].strip}</#{cmd}>\n"
       end
-
-
     end
 
     def determine_parser(lines, opt = {})
@@ -117,6 +115,14 @@ module ArtiMark
       end
     end
 
+    def append_parser(parser)
+      raise 'parser should define accept? and parse' if !(parser.respond_to?(:accept?) && parser.respond_to?(:parse))
+      @block_parsers << [
+                         parser.method(:accept?),
+                         parser.method(:parse)
+                        ]
+    end
+    
     def default_parser
       ParagraphParser.instance.method(:parse)
     end
