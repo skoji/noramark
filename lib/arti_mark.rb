@@ -23,11 +23,6 @@ module ArtiMark
     def initialize(param = {})
       @context = Context.new(param)
       @syntax = Syntax.new
-      (param[:parsers] || {}).each {
-        |perser|
-        @syntax.append_parser(parser)
-      } 
-      
       @preprocessors = [
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                         Proc.new { |text| text.strip.gsub(/　/, ' ') } # convert Japanese full-width spece to normal space
@@ -36,6 +31,10 @@ module ArtiMark
 
     def preprocessor(&block)
       @preprocessors << block
+    end
+
+    def parser(parser)
+        @syntax.append_parser(parser)
     end
     
     def convert(text)

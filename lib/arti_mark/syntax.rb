@@ -116,11 +116,19 @@ module ArtiMark
     end
 
     def append_parser(parser)
-      raise 'parser should define accept? and parse' if !(parser.respond_to?(:accept?) && parser.respond_to?(:parse))
-      @block_parsers << [
-                         parser.method(:accept?),
-                         parser.method(:parse)
-                        ]
+      if parser.respond_to?(:accept?) && parser.respond_to?(:parse)
+        @block_parsers << [
+                           parser.method(:accept?),
+                           parser.method(:parse)
+                          ]
+      elsif parser[:accept?] && parser[:parse]
+        @block_parsers << [
+                           parser[:accept?],
+                           parser[:parse]
+                          ]
+      else
+        raise 'parser should define accept? and parse' if !(parser.respond_to?(:accept?) && parser.respond_to?(:parse))
+      end
     end
     
     def default_parser

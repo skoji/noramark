@@ -24,28 +24,39 @@ module ArtiMark
       cls_array
     end
 
-    def param_array(param_part)
+    def param_parse(param_part)
       r = []
+      named = {}
       if !param_part.nil? && param_part.size > 0
         r = param_part.split(',')
       end
-      r
-    end 
+      r.each {
+        |param|
+        splitted = param.split(':', 2)
+        if (splitted.size == 2)
+          named[splitted[0].strip.to_sym] = splitted[1]
+        end
+      }
+      return r, named
+    end
 
     def lex_line_command(line)
-        line =~ /^([\w\*;]+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*:(.*?)$/
-        return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
+      line =~ /^([\w\*;]+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*:(.*?)$/
+      all_params, named_params = param_parse($3)
+      return { :cmd => $1, :cls => class_array($2), :params => all_params, :named_params => named_params, :text => $4 }
     end
 
     def lex_block_command(line)
-        line =~ /^(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*(?:{(---)?)\s*$/
-        return { :cmd => $1, :cls => class_array($2), :params => param_array($3), :delimiter => $4||''}
+      line =~ /^(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*(?:{(---)?)\s*$/
+      not_named, named = param_parse($3)
+      return { :cmd => $1, :cls => class_array($2), :params => not_named, :named_params => named, :delimiter => $4||''}
     end
 
     def replace_inline_commands(line, syntax, context)
       line.gsub(/\[(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{(.*?)}\]/) {
         |matched|
-        lexed = {:cmd => $1, :cls => class_array($2), :params => param_array($3), :text => $4 }
+        not_named, named = param_parse($3)        
+        lexed = {:cmd => $1, :cls => class_array($2), :params => not_named, :named_params => named, :text => $4 }
         if !lexed[:cmd].nil? 
           syntax.inline_handler.send(lexed[:cmd], lexed, context)
         else
