@@ -8,10 +8,12 @@ module ArtiMark
     end
 
     def parse(lines, r, syntax)
-      lexed = lex_line_command(lines[0])
+      line = escape_html lines[0]
+      line = replace_inline_commands(line, syntax, r)      
+      lexed = lex_line_command(line)
       raise 'HeadParser called for #{lines[0]}' unless lexed[:cmd] =~ /h([1-6])/
       lines.shift
-      r << "<#{lexed[:cmd]}#{class_string(lexed[:cls])}>#{escape_html lexed[:text].strip}</#{lexed[:cmd]}>\n"
+      r << "<#{lexed[:cmd]}#{class_string(lexed[:cls])}>#{lexed[:text].strip}</#{lexed[:cmd]}>\n"
       r.toc = lexed[:text].strip if lexed[:params].member? 'in-toc'
     end
   end

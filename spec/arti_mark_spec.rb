@@ -381,6 +381,14 @@ describe ArtiMark do
       expect(toc[3]).to eq('3rd chapter')
     end
 
+    it 'should convert inline command within line block' do
+      text = "h1: [tcy{20}]縦中横タイトル"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq ['h1', ['span.tcy', '20'], '縦中横タイトル']
+    end
+
     it 'should handle ruby' do
       text = "[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
