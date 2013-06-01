@@ -222,6 +222,25 @@ describe ArtiMark do
       )      
     end
 
+    it 'should handle block image with before caption' do
+      text = "this is normal line.\nimage(./image1.jpg, alt text, caption_before: true): caption text"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+       ['div.pgroup',
+        ['p', 'this is normal line.']
+       ]
+      )      
+      expect(body.element_children[1].selector_and_children).to eq(
+       ['div.img-wrap',
+        ['p', 'caption text'],
+        ["img[src='./image1.jpg'][alt='alt text']", '']
+       ]
+      )      
+    end
+
+    
     it 'should handle page change article' do
       text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
