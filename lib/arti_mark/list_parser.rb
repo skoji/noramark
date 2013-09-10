@@ -10,7 +10,7 @@ module ArtiMark
 
     def parse(lines, r, syntax)
       lexed = lex_line_command(lines[0])
-      r << "<#{@blockname}#{class_string(lexed[:cls])}>\n"
+      r << "<#{@blockname}#{ids_string(lexed[:ids])}#{class_string(lexed[:cls])}>\n"
       process_block(lines, r, syntax)
       r << "</#{@blockname}>\n"
     end

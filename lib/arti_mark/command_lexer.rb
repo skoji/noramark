@@ -8,20 +8,34 @@ module ArtiMark
         gsub('"', "&quot;")
     end
 
-    def class_string(cls_array)
-      if cls_array.size == 0
+    def attr_string(the_array, attr_name) 
+      if the_array.size == 0
         ''
       else
-        " class='#{cls_array.join(' ')}'"
+        " #{attr_name}='#{the_array.join(' ')}'"
       end
     end
 
-    def class_array(cls_part)
-      cls_array = []
-      if !cls_part.nil? && cls_part.size > 0
-        cls_array = cls_part[1..-1].split('.')
+    def class_string(cls_array)
+      attr_string(cls_array, 'class')
+    end
+
+    def ids_string(ids_array)
+      attr_string(ids_array, 'id')
+    end
+    def attr_array(part, separator=".") 
+      the_array = []
+      if !part.nil? && part.size > 0
+        the_array = part[1..-1].split(separator)
       end
-      cls_array
+      the_array
+    end
+    def id_array(id_part)
+      attr_array(id_part, '#')
+    end
+
+    def class_array(cls_part)
+      attr_array(cls_part, '.')
     end
 
     def param_parse(param_part)
@@ -41,23 +55,23 @@ module ArtiMark
     end
 
     def lex_line_command(line)
-      line =~ /^([\w\*;]+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*:(.*?)$/
-      all_params, named_params = param_parse($3)
-      return { :cmd => $1, :cls => class_array($2), :params => all_params, :named_params => named_params, :text => $4 }
+      line =~ /^([\w\*;]+?)((?:\#[A-Za-z0-9_\-]+?)*)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*:(.*?)$/
+      all_params, named_params = param_parse($4)
+      return { :cmd => $1, :ids => id_array($2), :cls => class_array($3), :params => all_params, :named_params => named_params, :text => $5 }
     end
 
     def lex_block_command(line)
-      line =~ /^(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*(?:{(---)?)\s*$/
-      not_named, named = param_parse($3)
-      return { :cmd => $1, :cls => class_array($2), :params => not_named, :named_params => named, :delimiter => $4||''}
+      line =~ /^(\w+?)((?:\#[A-Za-z0-9_\-]+?)*)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*(?:{(---)?)\s*$/
+      not_named, named = param_parse($4)
+      return { :cmd => $1, :ids => id_array($2), :cls => class_array($3), :params => not_named, :named_params => named, :delimiter => $5||''}
     end
 
     def replace_inline_commands(line, syntax, context)
-      line.gsub(/\[(\w+?)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{(.*?)}\]/) {
+      line.gsub(/\[(\w+?)((?:\#[A-Za-z0-9_\-]+?)*)((?:\.[A-Za-z0-9_\-]+?)*)(?:\((.+?)\))?\s*{(.*?)}\]/) {
         |matched|
-        not_named, named = param_parse($3)        
-        lexed = {:cmd => $1, :cls => class_array($2), :params => not_named, :named_params => named, :text => $4 }
-        if !lexed[:cmd].nil? 
+        not_named, named = param_parse($4)        
+        lexed = {:cmd => $1, :ids => id_array($2), :cls => class_array($3), :params => not_named, :named_params => named, :text => $5 }
+        if !lexed[:cmd].nil?
           syntax.inline_handler.send(lexed[:cmd], lexed, context)
         else
           matched

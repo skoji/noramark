@@ -123,6 +123,18 @@ describe ArtiMark do
       )
     end
 
+    it 'should convert div with id and class' do
+      text = "d#thecontents.preface-one {\n h1: title.\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div#thecontents.preface-one',
+         ['h1', 'title.']
+        ]
+      )
+    end
+
     it 'should convert nested div' do
       text = "d.preface {\n outer div. \n d.nested {\n nested!\n}\nouter div again.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -630,7 +642,6 @@ describe ArtiMark do
           lexed = lex_line_command(lines[0])
           lines.shift
           src = lexed[:params][0].strip
-          p lexed
           width = lexed[:named_params][:width]
           height = lexed[:named_params][:height]
           caption = lexed[:text].strip

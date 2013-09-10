@@ -17,7 +17,7 @@ module ArtiMark
       caption = lexed[:text].strip
       caption_before = lexed[:named_params][:caption_before]
       
-      r << "<div#{class_string(lexed[:cls])}>"
+      r << "<div#{ids_string(lexed[:ids])}#{class_string(lexed[:cls])}>"
       r << "<p>#{caption}</p>" if !caption.nil?  && caption.size > 0 && caption_before
       r << "<img src='#{src}' alt='#{alt}' />"
       r << "<p>#{caption}</p>" if !caption.nil?  && caption.size > 0 && !caption_before

@@ -30,10 +30,9 @@ module ArtiMark
             parser.method(:parse)
           ]
         }
-
       def @inline_handler.l(lexed, context)
         ref = lexed[:params][0].strip
-        "<a#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text].strip}</a>"
+        "<a#{ids_string(lexed[:ids])}#{class_string(lexed[:cls])} href='#{ref}'>#{lexed[:text].strip}</a>"
       end
 
       def @inline_handler.link(lexed, context)
@@ -42,34 +41,34 @@ module ArtiMark
 
       def @inline_handler.s(lexed, context)
         cls, text = lexed[:cls], lexed[:text]
-        "<span#{class_string(cls)}>#{text.strip}</span>"
+        "<span#{ids_string(lexed[:ids])}#{class_string(cls)}>#{text.strip}</span>"
       end
 
       def @inline_handler.img(lexed, context)
         cls, param, text = lexed[:cls], lexed[:params], lexed[:text]
-        "<img#{class_string(cls)} src='#{text.strip}' alt='#{param.join(' ')}' />"
+        "<img#{ids_string(lexed[:ids])}#{class_string(cls)} src='#{text.strip}' alt='#{param.join(' ')}' />"
       end
 
       def @inline_handler.ruby(lexed, context)
         cls, param, text = lexed[:cls], lexed[:params], lexed[:text]
-        "<ruby#{class_string(cls)}>#{text.strip}<rp>(</rp><rt>#{param.join}</rt><rp>)</rp></ruby>"
+        "<ruby#{ids_string(lexed[:ids])}#{class_string(cls)}>#{text.strip}<rp>(</rp><rt>#{param.join}</rt><rp>)</rp></ruby>"
       end
 
       def @inline_handler.tcy(lexed, context)
         cls, text = lexed[:cls],  lexed[:text]
         cls << 'tcy'
-        "<span#{class_string(cls)}>#{text.strip}</span>"
+        "<span#{ids_string(lexed[:ids])}#{class_string(cls)}>#{text.strip}</span>"
       end
 
       # universal inline command handler
       def @inline_handler.method_missing(cmd, *args)
-        cls, text = args[0][:cls], args[0][:text]
-        "<#{cmd}#{class_string(cls)}>#{text.strip}</#{cmd}>"
+        ids, cls, text = args[0][:ids], args[0][:cls], args[0][:text]
+        "<#{cmd}#{ids_string(ids)}#{class_string(cls)}>#{text.strip}</#{cmd}>"
       end
 
       def @linecommand_handler.p(lexed, context)
         cls, text = lexed[:cls], lexed[:text]
-        "<p#{class_string(cls)}>#{text.strip}</p>\n"
+        "<p#{ids_string(lexed[:ids])}#{class_string(cls)}>#{text.strip}</p>\n"
       end
 
       def @linecommand_handler.stylesheets(lexed, context)
@@ -96,7 +95,7 @@ module ArtiMark
 
       #univarsal line command handler
       def @linecommand_handler.method_missing(cmd, *args)
-        "<#{cmd}#{class_string(args[0][:cls])}>#{args[0][:text].strip}</#{cmd}>\n"
+        "<#{cmd}#{ids_string(args[0][:ids])}#{class_string(args[0][:cls])}>#{args[0][:text].strip}</#{cmd}>\n"
       end
     end
 
