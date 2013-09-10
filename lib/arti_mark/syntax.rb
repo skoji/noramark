@@ -42,7 +42,7 @@ module ArtiMark
 
       def @inline_handler.s(lexed, context)
         cls, text = lexed[:cls], lexed[:text]
-        "<span#{class_string(cls)}>#{text.strip}</a>"
+        "<span#{class_string(cls)}>#{text.strip}</span>"
       end
 
       def @inline_handler.img(lexed, context)
