@@ -4,7 +4,7 @@ ArtiMark is a simple text markup language. It is designed to create XHTML files 
 
 **CAUTION This is very early alpha version, so it's not stable at all. Even the markup syntax will change. **
 
-I hope it will be partly stable by the end of Feburary, 2013
+I hope it will be stable by the end of Feburary, 2014
 
 ## Installation
 
