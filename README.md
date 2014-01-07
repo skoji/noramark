@@ -3,7 +3,6 @@
 ArtiMark is a simple text markup language. It is designed to create XHTML files for EPUB books. It is optimized for Japanese text for the present. 
 
 **CAUTION This is very early alpha version, so it's not stable at all. Even the markup syntax will change. **
-** Will change gem name from arti_mark to artimark on 8th January, 2014 **
 
 I hope it will be stable by the end of Feburary, 2014
 
