@@ -16,5 +16,5 @@ Gem::Specification.new do |gem|
   gem.version       = ArtiMark::VERSION
 
   gem.add_development_dependency "rspec", "~> 2.14"
-  gem.add_development_dependency "nokogiri", "~> 1.5.6"
+  gem.add_development_dependency "nokogiri", "~> 1.6.0"
 end
