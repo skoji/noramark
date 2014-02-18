@@ -18,6 +18,7 @@ require 'arti_mark/syntax'
 require 'arti_mark/result'
 require 'arti_mark/context'
 
+require 'arti_mark/html_generator.rb'
 require 'arti_mark/parser.kpeg.rb'
 require 'arti_mark/parser.rb'
 
@@ -29,6 +30,7 @@ module ArtiMark
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                         Proc.new { |text| text.strip.gsub(/　/, ' ') } # convert Japanese full-width spece to normal space
                        ]
+      @generator = HtmlGenerator.new(@context)
     end 
 
     def preprocessor(&block)
@@ -49,19 +51,21 @@ module ArtiMark
         puts @parser.show_error
         exit -1
       end
-      @context.start_html
+      @parser.result.each {
+        |item|
+        process_item(item)
+      }
       @context.result
     end
 
     def toc
       @context.toc
     end
-    
-    def process_lines(lines, context)
-      while (lines.size > 0)
-        @syntax.parse(lines, context)
-      end
-    end
 
+    private
+
+    def process_item(item)
+      @generator.to_html(item)
+    end
   end
 end

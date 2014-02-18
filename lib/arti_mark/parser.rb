@@ -1,8 +1,9 @@
 module ArtiMark
   class Parser
-    def initialize(parameter = {})
-      super
+    def create_item(type, command, children = [])
+      {:type => type, :command => command || {}, :children => children }
     end
+    
     def parse_text(content)
         content.inject([]) do
         |result, item|

@@ -20,41 +20,41 @@ parameters = < parameter (',' parameter)* > { text }
 command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
 
 # paragraph
-paragraph = (!paragraph_delimiter documentline):paragraph { paragraph }
+paragraph = (!paragraph_delimiter documentline):paragraph { create_item(:paragraph, nil, paragraph) }
 
-# block paragraph
-bparagraph = (paragraph nl | paragraph  )+:paragraphs nl* { [:block_paragraph, paragraphs] }
+# paragraph_group
+paragraph_group = (paragraph nl | paragraph  )+:paragraphs nl* { create_item(:paragraph_group, nil, paragraphs) }
 
 # explicit block 
 blockhead = lh command:command - '{' - le { command }
 blockend = lh - '}' - le
-blockbody = (!blockend (bparagraph | block))*:body { body } 
-explicit_block = blockhead:head blockbody:body blockend { [:block, head, body ] }
+blockbody = (!blockend (paragraph_group | block))*:body { body } 
+explicit_block = blockhead:head blockbody:body blockend { create_item(:block, head, body) }
 
 # inline command
-inline = '[' command:command '{' documentcontent_except('}'):content '}' ']' { [:inline, command, content ] } 
+inline = '[' command:command '{' documentcontent_except('}'):content '}' ']' { create_item(:inline, command, content) } 
 
 # special line commands
 
 # newpage
-newpage = lh 'newpage:' documentcontent:content le { [:newpage, content] }
+newpage = lh 'newpage:' documentcontent:content le { create_item(:newpage, nil, content) }
 
 # unordered list
-unordered_list = unordered_item+:items { [:ul, items] }
+unordered_list = unordered_item+:items { create_item(:ul, nil, items) }
 unordered_item = lh '*:' documentcontent:content le { content }
 
 # ordered list
-ordered_list = ordered_item+:items { [:ol, items] }
+ordered_list = ordered_item+:items { create_item(:ol, nil, items) }
 ordered_item = lh num ':' documentcontent:content le { content }
 
 items_list = unordered_list | ordered_list
 
 # generic line command
-line_command = lh command:command ':' documentcontent:content le { [:line_command, command, content ] }
+line_command = lh command:command ':' documentcontent:content le { create_item(:line_command, command, content) }
 
 # blocks
 
-block = bparagraph | explicit_block | newpage | items_list | line_command  
+block = paragraph_group | explicit_block | newpage | items_list | line_command  
 block_delimiter = blockhead | blockend 
 paragraph_delimiter = block_delimiter | block
 
