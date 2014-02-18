@@ -1,0 +1,73 @@
+%% name = ArtiMark::Parser
+
+- = ( ' '  | '\v' | '\t' )*
+nl = ( /\r?\n/ )
+nls = nl+
+lh = /^/
+le = nl | /$/
+word  = < /[\w]/ ( '-' | /[\w]/ )* >  { text }
+num = < [0-9]+ > { text.to_i }
+
+#common syntax
+classname = '.' word:classname { classname }
+classnames = (classname)*:classnames { classnames }
+idname = '#' word:idname { idname }
+idnames = (idname)*:idnames { idnames }
+
+commandname = word:name idnames?:idnames classnames?:classes  { {:name => name, :ids => idnames, :classes => classes} }
+parameter = < ( /[^,)]/* | '"' /[^"]/* '"' | "'" /[^']/* "'" ) > { text }
+parameters = < parameter (',' parameter)* > { text }
+command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
+
+# paragraph
+paragraph = (!paragraph_delimiter documentline):paragraph { paragraph }
+
+# block paragraph
+bparagraph = (paragraph nl | paragraph  )+:paragraphs nl* { [:block_paragraph, paragraphs] }
+
+# explicit block 
+blockhead = lh command:command - '{' - le { command }
+blockend = lh - '}' - le
+blockbody = (!blockend (bparagraph | block))*:body { body } 
+explicit_block = blockhead:head blockbody:body blockend { [:block, head, body ] }
+
+# inline command
+inline = '[' command:command '{' documentcontent_except('}'):content '}' ']' { [:inline, command, content ] } 
+
+# special line commands
+
+# newpage
+newpage = lh 'newpage:' documentcontent:content le { [:newpage, content] }
+
+# unordered list
+unordered_list = unordered_item+:items { [:ul, items] }
+unordered_item = lh '*:' documentcontent:content le { content }
+
+# ordered list
+ordered_list = ordered_item+:items { [:ol, items] }
+ordered_item = lh num ':' documentcontent:content le { content }
+
+items_list = unordered_list | ordered_list
+
+# generic line command
+line_command = lh command:command ':' documentcontent:content le { [:line_command, command, content ] }
+
+# blocks
+
+block = bparagraph | explicit_block | newpage | items_list | line_command  
+block_delimiter = blockhead | blockend 
+paragraph_delimiter = block_delimiter | block
+
+# texts
+char = < /[[:print:]]/ > { text }
+charstring = < char* > { text }
+char_except(e) = char:c &{ c != e }
+charstring_except(e) = < char_except(e)* > { text }
+documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_text(content)
+
+documentcontent = (inline | !inline char)+:content ~parse_text(content)
+
+documentline = lh documentcontent:content /$/ { content }
+
+root = block*:blocks { blocks }
+

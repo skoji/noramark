@@ -18,11 +18,13 @@ require 'arti_mark/syntax'
 require 'arti_mark/result'
 require 'arti_mark/context'
 
+require 'arti_mark/parser.kpeg.rb'
+require 'arti_mark/parser.rb'
+
 module ArtiMark
   class Document
     def initialize(param = {})
       @context = Context.new(param)
-      @syntax = Syntax.new
       @preprocessors = [
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                         Proc.new { |text| text.strip.gsub(/　/, ' ') } # convert Japanese full-width spece to normal space
@@ -42,9 +44,12 @@ module ArtiMark
         |pr|
         text = pr.call(text)
       }
-      # split text to lines
-      lines = text.split(/\r?\n/).map { |line| line.strip } 
-      process_lines(lines, @context)
+      @parser = Parser.new(text)
+      if (!@parser.parse)
+        puts @parser.show_error
+        exit -1
+      end
+      @context.start_html
       @context.result
     end
 
