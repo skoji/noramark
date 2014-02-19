@@ -17,7 +17,6 @@ require "arti_mark/universal_block_parser"
 require 'arti_mark/syntax'
 
 require 'arti_mark/html/generator'
-require 'arti_mark/parser.kpeg'
 require 'arti_mark/parser'
 
 module ArtiMark

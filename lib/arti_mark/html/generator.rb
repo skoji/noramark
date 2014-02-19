@@ -2,6 +2,7 @@
 require 'arti_mark/html/result'
 require 'arti_mark/html/context'
 require 'arti_mark/html/tag_writer'
+require 'arti_mark/html/block_writer'
 module ArtiMark
   module Html
     class Generator
@@ -26,6 +27,7 @@ module ArtiMark
                              item
                            end
                            ),
+          :block => BlockWriter.new(self),
           :line_command => common_tag_writer
           }
       end

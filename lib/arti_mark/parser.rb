@@ -1,3 +1,5 @@
+require 'arti_mark/parser.kpeg'
+
 module ArtiMark
   class Parser
     def create_item(type, command, children = [])
