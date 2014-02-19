@@ -26,7 +26,7 @@ paragraph = (!paragraph_delimiter documentline):paragraph { create_item(:paragra
 paragraph_group = (paragraph nl | paragraph)+:paragraphs nl* { create_item(:paragraph_group, nil, paragraphs) }
 
 # explicit block 
-blockhead = lh command:command - '{' - le { command }
+blockhead = lh - command:command - '{' - le { command }
 blockend = lh - '}' - le
 blockbody = (!blockend block)+:body { body } 
 explicit_block = blockhead:head blockbody:body blockend { create_item(:block, head, body) }

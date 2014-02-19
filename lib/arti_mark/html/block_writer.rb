@@ -4,8 +4,11 @@ module ArtiMark
       def initialize(generator)
         @generator = generator
         @common_tag_writer = TagWriter.create(nil, @generator, trailer: "\n")
+        article_writer = TagWriter.create('article', @generator, trailer: "\n")
         @tag_writers = {
-          'd' => TagWriter.create('div', @generator, trailer: "\n")
+          'd' => TagWriter.create('div', @generator, trailer: "\n"),
+          'art' => article_writer,
+          'article' => article_writer
         }
       end
 

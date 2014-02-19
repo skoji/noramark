@@ -692,12 +692,17 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # blockhead = lh command:command - "{" - le { command }
+  # blockhead = lh - command:command - "{" - le { command }
   def _blockhead
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
@@ -1630,7 +1635,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_command] = rule_info("command", "commandname:commandname (\"(\" - parameters:arg - \")\")? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }")
   Rules[:_paragraph] = rule_info("paragraph", "(!paragraph_delimiter documentline):paragraph { create_item(:paragraph, nil, paragraph) }")
   Rules[:_paragraph_group] = rule_info("paragraph_group", "(paragraph nl | paragraph)+:paragraphs nl* { create_item(:paragraph_group, nil, paragraphs) }")
-  Rules[:_blockhead] = rule_info("blockhead", "lh command:command - \"{\" - le { command }")
+  Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - le { command }")
   Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "blockhead:head blockbody:body blockend { create_item(:block, head, body) }")
