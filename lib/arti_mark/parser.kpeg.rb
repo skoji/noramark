@@ -1146,7 +1146,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # line_command = lh - command:command ":" documentcontent:content le { create_item(:line_command, command, content) }
+  # line_command = lh - command:command ":" documentcontent?:content le { create_item(:line_command, command, content) }
   def _line_command
 
     _save = self.pos
@@ -1172,7 +1172,13 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      _save1 = self.pos
       _tmp = apply(:_documentcontent)
+      @result = nil unless _tmp
+      unless _tmp
+        _tmp = true
+        self.pos = _save1
+      end
       content = @result
       unless _tmp
         self.pos = _save
@@ -1646,7 +1652,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_ordered_list] = rule_info("ordered_list", "ordered_item+:items { create_item(:ol, nil, items) }")
   Rules[:_ordered_item] = rule_info("ordered_item", "lh num \":\" documentcontent:content le { content }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list)")
-  Rules[:_line_command] = rule_info("line_command", "lh - command:command \":\" documentcontent:content le { create_item(:line_command, command, content) }")
+  Rules[:_line_command] = rule_info("line_command", "lh - command:command \":\" documentcontent?:content le { create_item(:line_command, command, content) }")
   Rules[:_block] = rule_info("block", "(line_command | explicit_block | newpage | items_list | paragraph_group)")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
   Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block | block_delimiter)")

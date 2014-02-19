@@ -50,7 +50,7 @@ ordered_item = lh num ':' documentcontent:content le { content }
 items_list = unordered_list | ordered_list
 
 # generic line command
-line_command = lh - command:command ':' documentcontent:content le { create_item(:line_command, command, content) }
+line_command = lh - command:command ':' documentcontent?:content le { create_item(:line_command, command, content) }
 
 # blocks
 
@@ -65,7 +65,7 @@ char_except(e) = char:c &{ c != e }
 charstring_except(e) = < char_except(e)* > { text }
 documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_text(content)
 
-documentcontent = (inline | !inline char)+:content ~parse_text(content)
+documentcontent = (inline | !inline char)+:content  ~parse_text(content)
 
 documentline = lh documentcontent:content /$/ { content }
 

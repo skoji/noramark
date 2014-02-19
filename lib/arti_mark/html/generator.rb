@@ -49,11 +49,11 @@ module ArtiMark
                                                   src = item[:args][0].strip
                                                   alt = (item[:args][1] || '').strip
                                                   caption_before = item[:named_args][:caption_before]
-                                                  if caption_before
+                                                  if caption_before && children_not_empty(item)
                                                     output "<p>"; write_children item; output "</p>"
                                                   end
                                                   output "<img src='#{src}' alt='#{escape_html alt}' />"
-                                                  if !caption_before
+                                                  if !caption_before && children_not_empty(item)
                                                     output "<p>"; write_children item; output "</p>"
                                                   end
                                                   :done

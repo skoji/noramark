@@ -213,6 +213,23 @@ describe ArtiMark do
       )      
     end
 
+    it 'should handle block image without caption' do
+      text = "this is normal line.\nimage(./image1.jpg, alt text):"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+       ['div.pgroup',
+        ['p', 'this is normal line.']
+       ]
+      )      
+      expect(body.element_children[1].selector_and_children).to eq(
+       ['div.img-wrap',
+        ["img[src='./image1.jpg'][alt='alt text']", '']
+       ]
+      )      
+    end
+
 if false    
     
     it 'should handle page change article' do

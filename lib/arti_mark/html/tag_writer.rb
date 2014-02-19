@@ -85,7 +85,11 @@ module ArtiMark
       end
 
       def write_children(item)
-        item[:children].each { |x| @generator.to_html x }
+        (item[:children] || []).each { |x| @generator.to_html x }
+      end
+
+      def children_not_empty(item)
+        !item[:children].nil? && item[:children].size > 0 && item[:children].select { |x| (x.is_a? String) ? x.size >0 : !x.nil? }.size > 0
       end
     end
   end
