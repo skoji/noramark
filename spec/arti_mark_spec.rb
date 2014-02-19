@@ -271,8 +271,6 @@ describe ArtiMark do
       expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='mystyle.css']", '']
     end
 
-if false    
-
     it 'should handle link' do
       text = "link to [link(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -289,6 +287,9 @@ if false
       ]
      )       
     end
+
+if false    
+
     it 'should handle link with l' do
       text = "link to [l(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')

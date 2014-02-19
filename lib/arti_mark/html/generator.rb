@@ -92,7 +92,13 @@ module ArtiMark
         if item.is_a? String
           @context << escape_html(item.strip)
         else
-          @writers[item[:type]].write(item)
+          writer = @writers[item[:type]]
+          if writer.nil?
+            warn "can't find html generator for \"#{item[:raw_text]}\""
+            @context << escape_html(item[:raw_text])
+          else
+            writer.write(item)
+          end
         end
       end
     end

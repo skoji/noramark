@@ -20,19 +20,19 @@ parameters = < parameter (',' parameter)* > { text }
 command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
 
 # paragraph
-paragraph = (!paragraph_delimiter documentline):paragraph { create_item(:paragraph, nil, paragraph) }
+paragraph = < (!paragraph_delimiter documentline):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
 
 # paragraph_group
-paragraph_group = (paragraph nl | paragraph)+:paragraphs nl* { create_item(:paragraph_group, nil, paragraphs) }
+paragraph_group = <(paragraph nl | paragraph)+:paragraphs nl* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
 
 # explicit block 
 blockhead = lh - command:command - '{' - le { command }
 blockend = lh - '}' - le
 blockbody = (!blockend block)+:body { body } 
-explicit_block = blockhead:head blockbody:body blockend { create_item(:block, head, body) }
+explicit_block = < blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }
 
 # inline command
-inline = '[' command:command '{' documentcontent_except('}'):content '}' ']' { create_item(:inline, command, content) } 
+inline = < '[' command:command '{' documentcontent_except('}'):content '}' ']' > { create_item(:inline, command, content, raw: text) } 
 
 # special line commands
 
@@ -40,17 +40,17 @@ inline = '[' command:command '{' documentcontent_except('}'):content '}' ']' { c
 newpage = line_command:item &{ item[:name] == 'newpage' }
 
 # unordered list
-unordered_list = unordered_item+:items { create_item(:ul, nil, items) }
+unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
 unordered_item = lh '*:' documentcontent:content le { content }
 
 # ordered list
-ordered_list = ordered_item+:items { create_item(:ol, nil, items) }
+ordered_list = < ordered_item+:items > { create_item(:ol, nil, items, raw: text) }
 ordered_item = lh num ':' documentcontent:content le { content }
 
 items_list = unordered_list | ordered_list
 
 # generic line command
-line_command = lh - command:command ':' documentcontent?:content le { create_item(:line_command, command, content) }
+line_command = < lh - command:command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
 
 # blocks
 
