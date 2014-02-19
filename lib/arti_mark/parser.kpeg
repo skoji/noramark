@@ -5,7 +5,7 @@ nl = ( /\r?\n/ )
 nls = nl+
 lh = /^/
 le = nl | /$/
-word  = < /[\w]/ ( '-' | /[\w]/ )* >  { text }
+word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
 num = < [0-9]+ > { text.to_i }
 
 #common syntax
@@ -54,7 +54,7 @@ line_command = lh command:command ':' documentcontent:content le { create_item(:
 
 # blocks
 
-block = paragraph_group | explicit_block | newpage | items_list | line_command  
+block = line_command  | explicit_block | newpage | items_list | paragraph_group
 block_delimiter = blockhead | blockend 
 paragraph_delimiter = block_delimiter | block
 

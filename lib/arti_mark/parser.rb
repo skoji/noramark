@@ -1,7 +1,7 @@
 module ArtiMark
   class Parser
     def create_item(type, command, children = [])
-      {:type => type, :command => command || {}, :children => children }
+      {:type => type, :children => children }.merge command || {}
     end
     
     def parse_text(content)

@@ -77,7 +77,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # word = < /[\w]/ ("-" | /[\w]/)* > { text }
+  # word = < /[\w0-9]/ ("-" | /[\w0-9]/)* > { text }
   def _word
 
     _save = self.pos
@@ -86,7 +86,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = scan(/\A(?-mix:[\w])/)
+        _tmp = scan(/\A(?-mix:[\w0-9])/)
         unless _tmp
           self.pos = _save1
           break
@@ -98,7 +98,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
             _tmp = match_string("-")
             break if _tmp
             self.pos = _save3
-            _tmp = scan(/\A(?-mix:[\w])/)
+            _tmp = scan(/\A(?-mix:[\w0-9])/)
             break if _tmp
             self.pos = _save3
             break
@@ -1172,12 +1172,12 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block = (paragraph_group | explicit_block | newpage | items_list | line_command)
+  # block = (line_command | explicit_block | newpage | items_list | paragraph_group)
   def _block
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_paragraph_group)
+      _tmp = apply(:_line_command)
       break if _tmp
       self.pos = _save
       _tmp = apply(:_explicit_block)
@@ -1189,7 +1189,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _tmp = apply(:_items_list)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_line_command)
+      _tmp = apply(:_paragraph_group)
       break if _tmp
       self.pos = _save
       break
@@ -1600,7 +1600,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_nls] = rule_info("nls", "nl+")
   Rules[:_lh] = rule_info("lh", "/^/")
   Rules[:_le] = rule_info("le", "(nl | /$/)")
-  Rules[:_word] = rule_info("word", "< /[\\w]/ (\"-\" | /[\\w]/)* > { text }")
+  Rules[:_word] = rule_info("word", "< /[\\w0-9]/ (\"-\" | /[\\w0-9]/)* > { text }")
   Rules[:_num] = rule_info("num", "< [0-9]+ > { text.to_i }")
   Rules[:_classname] = rule_info("classname", "\".\" word:classname { classname }")
   Rules[:_classnames] = rule_info("classnames", "classname*:classnames { classnames }")
@@ -1624,7 +1624,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_ordered_item] = rule_info("ordered_item", "lh num \":\" documentcontent:content le { content }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list)")
   Rules[:_line_command] = rule_info("line_command", "lh command:command \":\" documentcontent:content le { create_item(:line_command, command, content) }")
-  Rules[:_block] = rule_info("block", "(paragraph_group | explicit_block | newpage | items_list | line_command)")
+  Rules[:_block] = rule_info("block", "(line_command | explicit_block | newpage | items_list | paragraph_group)")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
   Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | block)")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")

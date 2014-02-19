@@ -41,11 +41,13 @@ module ArtiMark
       def tag_start(item, attr = {})
         ids = item[:ids] || []
         classes = item[:classes] || []
-        @context << "<#{@tag_name}#{ids_string(ids)}#{class_string(classes)}#{attr_string(attr)}>"
+        tag_name = @tag_name || item[:name]
+        @context << "<#{tag_name}#{ids_string(ids)}#{class_string(classes)}#{attr_string(attr)}>"
       end
 
       def tag_end(item)
-        @context << "</#{@tag_name}>#{@trailer}"
+        tag_name = @tag_name || item[:name]
+        @context << "</#{tag_name}>#{@trailer}"
       end
 
       def write(item)

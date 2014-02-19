@@ -8,8 +8,11 @@ module ArtiMark
       attr_reader :context
       def initialize(param = {})
         @context = Context.new(param)
-        @writers = {:paragraph =>
+        common_tag_writer = TagWriter.create(nil, self, trailer: "\n")
+        @writers = {
+          :paragraph =>
           TagWriter.create('p', self,
+                           trailer: "\n",
                            item_preprocessor: proc do |item|
                              (item[:classes] ||= [] ) << 'noindent' if item[:children][0] =~/^(「|『|（)/  # TODO: should be plaggable}
                              item
@@ -22,7 +25,8 @@ module ArtiMark
                              (item[:classes] ||= []) << 'pgroup'
                              item
                            end
-                           )
+                           ),
+          :line_command => common_tag_writer
           }
       end
 
