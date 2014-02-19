@@ -48,10 +48,14 @@ module ArtiMark
                                                 write_body_preprocessor: proc do |item|
                                                   src = item[:args][0].strip
                                                   alt = (item[:args][1] || '').strip
+                                                  caption_before = item[:named_args][:caption_before]
+                                                  if caption_before
+                                                    output "<p>"; write_children item; output "</p>"
+                                                  end
                                                   output "<img src='#{src}' alt='#{escape_html alt}' />"
-                                                  output "<p>"
-                                                  write_children item
-                                                  output "</p>"
+                                                  if !caption_before
+                                                    output "<p>"; write_children item; output "</p>"
+                                                  end
                                                   :done
                                                 end
                                                 )
@@ -70,7 +74,7 @@ module ArtiMark
 
       def to_html(item)
         if item.is_a? String
-          @context << item.strip
+          @context << escape_html(item.strip)
         else
           @writers[item[:type]].write(item)
         end

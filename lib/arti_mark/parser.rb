@@ -5,6 +5,7 @@ module ArtiMark
     def create_item(type, command, children = [])
       item = {:type => type, :children => children }.merge command || {}
       item[:args] ||= []
+      item[:named_args] = Hash[*(item[:args].select { |x| x.include?(':') }.map { |x| v = x.split(':', 2); [v[0].strip.to_sym, v[1]]}.flatten)]
       item
     end
     
