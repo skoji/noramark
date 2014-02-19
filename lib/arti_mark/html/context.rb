@@ -26,7 +26,10 @@ module Html
         ret
       end
     end
-  
+    def chop_last_space
+      @pages.last.sub!(/[[:space:]]+$/, '')
+    end
+
     def head_inserter(&block)
       head_inserters << block
     end

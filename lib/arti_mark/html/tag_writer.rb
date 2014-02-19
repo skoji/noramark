@@ -4,8 +4,8 @@ module ArtiMark
       include Util
       attr_accessor :trailer, :item_preprocessors, :write_body_preprocessors
 
-      def self.create(tag_name, generator, item_preprocessor: nil, write_body_preprocessor: nil, trailer: "\n")
-        instance = TagWriter.new(tag_name, generator)
+      def self.create(tag_name, generator, item_preprocessor: nil, write_body_preprocessor: nil, trailer: "\n", chop_last_space: false)
+        instance = TagWriter.new(tag_name, generator, chop_last_space: chop_last_space)
         instance.item_preprocessors << item_preprocessor unless item_preprocessor.nil?
         instance.write_body_preprocessors << write_body_preprocessor unless write_body_preprocessor.nil?
         instance.trailer = trailer
@@ -13,13 +13,14 @@ module ArtiMark
         instance
       end
 
-      def initialize(tag_name, generator)
+      def initialize(tag_name, generator, **param)
         @tag_name = tag_name
         @generator = generator
         @context = generator.context
         @trailer = trailer
         @item_preprocessors = []
         @write_body_preprocessors = []
+        @param = param
       end
 
       def attr_string(attrs)
@@ -49,10 +50,11 @@ module ArtiMark
         add_class(item, cls) if item[:classes].nil? || item[:classes].size == 0 
       end
 
-      def tag_start(item, attr = {})
+      def tag_start(item)
         return if item[:no_tag] 
         ids = item[:ids] || []
         classes = item[:classes] || []
+        attr = item[:attrs] || {}
         tag_name = @tag_name || item[:name]
         @context << "<#{tag_name}#{ids_string(ids)}#{class_string(classes)}#{attr_string(attr)}>"
       end
@@ -86,6 +88,7 @@ module ArtiMark
 
       def write_children(item)
         (item[:children] || []).each { |x| @generator.to_html x }
+        @generator.context.chop_last_space if (@param[:chop_last_space]) 
       end
 
       def children_not_empty(item)

@@ -272,7 +272,7 @@ describe ArtiMark do
     end
 
     it 'should handle link' do
-      text = "link to [link(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
+      text = " link to [link(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')

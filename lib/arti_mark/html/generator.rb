@@ -14,7 +14,7 @@ module ArtiMark
         article_writer = TagWriter.create('article', self)
         @writers = {
           :paragraph =>
-          TagWriter.create('p', self,
+          TagWriter.create('p', self, chop_last_space: true, 
                            item_preprocessor: proc do |item|
                              add_class(item, 'noindent') if item[:children][0] =~/^(「|『|（)/  # TODO: should be plaggable}
                              item
@@ -75,8 +75,17 @@ module ArtiMark
                                                 end
                                                 ),
 
-                               })
-
+                               }),
+          :inline =>
+          WriterSelector.new(self,
+                             {
+                               'link' =>
+                               TagWriter.create('a', self, trailer: '', 
+                                                item_preprocessor: proc do |item|
+                                                  (item[:attrs] ||= {}).merge!({:href => [ item[:args][0] ]})
+                                                  item
+                                                end)
+                               }),
           }
       end
 
@@ -90,7 +99,7 @@ module ArtiMark
 
       def to_html(item)
         if item.is_a? String
-          @context << escape_html(item.strip)
+          @context << escape_html(item.sub(/^[[:space:]]+/, ''))
         else
           writer = @writers[item[:type]]
           if writer.nil?
