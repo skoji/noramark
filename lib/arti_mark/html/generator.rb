@@ -58,7 +58,23 @@ module ArtiMark
                                                   end
                                                   :done
                                                 end
-                                                )
+                                                ),
+                               'newpage' =>
+                               TagWriter.create('div', self,
+                                                item_preprocessor: proc do |item|
+                                                  item[:no_tag] = true
+                                                  item
+                                                end,
+                                                write_body_preprocessor: proc do |item|
+                                                  title = nil
+                                                  if item[:args].size > 0 && item[:args][0].size > 0
+                                                    title = escape_html item[:args].first
+                                                  end
+                                                  @context.start_html(title)
+                                                  :done
+                                                end
+                                                ),
+
                                })
 
           }

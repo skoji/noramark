@@ -37,7 +37,7 @@ inline = '[' command:command '{' documentcontent_except('}'):content '}' ']' { c
 # special line commands
 
 # newpage
-newpage = lh 'newpage:' documentcontent:content le { create_item(:newpage, nil, content) }
+newpage = line_command:item &{ item[:name] == 'newpage' }
 
 # unordered list
 unordered_list = unordered_item+:items { create_item(:ul, nil, items) }
@@ -54,8 +54,8 @@ line_command = lh - command:command ':' documentcontent?:content le { create_ite
 
 # blocks
 
-block = line_command  | explicit_block | newpage | items_list | paragraph_group
-block_delimiter = blockhead | blockend 
+block = line_command  | explicit_block | items_list | paragraph_group
+block_delimiter = blockhead | blockend | newpage
 paragraph_delimiter = block | block_delimiter 
 
 # texts

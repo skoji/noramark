@@ -229,8 +229,6 @@ describe ArtiMark do
        ]
       )      
     end
-
-if false    
     
     it 'should handle page change article' do
       text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
@@ -272,6 +270,8 @@ if false
       expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='reset.css']", '']
       expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='mystyle.css']", '']
     end
+
+if false    
 
     it 'should handle link' do
       text = "link to [link(http://github.com/skoji/artimark){artimark repository}]. \ncan you see this?"

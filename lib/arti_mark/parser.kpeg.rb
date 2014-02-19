@@ -935,34 +935,20 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # newpage = lh "newpage:" documentcontent:content le { create_item(:newpage, nil, content) }
+  # newpage = line_command:item &{ item[:name] == 'newpage' }
   def _newpage
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
+      _tmp = apply(:_line_command)
+      item = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = match_string("newpage:")
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:_documentcontent)
-      content = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:_le)
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:newpage, nil, content) ; end
-      _tmp = true
+      _save1 = self.pos
+      _tmp = begin;  item[:name] == 'newpage' ; end
+      self.pos = _save1
       unless _tmp
         self.pos = _save
       end
@@ -1201,7 +1187,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block = (line_command | explicit_block | newpage | items_list | paragraph_group)
+  # block = (line_command | explicit_block | items_list | paragraph_group)
   def _block
 
     _save = self.pos
@@ -1210,9 +1196,6 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
       _tmp = apply(:_explicit_block)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply(:_newpage)
       break if _tmp
       self.pos = _save
       _tmp = apply(:_items_list)
@@ -1228,7 +1211,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block_delimiter = (blockhead | blockend)
+  # block_delimiter = (blockhead | blockend | newpage)
   def _block_delimiter
 
     _save = self.pos
@@ -1237,6 +1220,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
       _tmp = apply(:_blockend)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_newpage)
       break if _tmp
       self.pos = _save
       break
@@ -1646,15 +1632,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "blockhead:head blockbody:body blockend { create_item(:block, head, body) }")
   Rules[:_inline] = rule_info("inline", "\"[\" command:command \"{\" documentcontent_except('}'):content \"}\" \"]\" { create_item(:inline, command, content) }")
-  Rules[:_newpage] = rule_info("newpage", "lh \"newpage:\" documentcontent:content le { create_item(:newpage, nil, content) }")
+  Rules[:_newpage] = rule_info("newpage", "line_command:item &{ item[:name] == 'newpage' }")
   Rules[:_unordered_list] = rule_info("unordered_list", "unordered_item+:items { create_item(:ul, nil, items) }")
   Rules[:_unordered_item] = rule_info("unordered_item", "lh \"*:\" documentcontent:content le { content }")
   Rules[:_ordered_list] = rule_info("ordered_list", "ordered_item+:items { create_item(:ol, nil, items) }")
   Rules[:_ordered_item] = rule_info("ordered_item", "lh num \":\" documentcontent:content le { content }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list)")
   Rules[:_line_command] = rule_info("line_command", "lh - command:command \":\" documentcontent?:content le { create_item(:line_command, command, content) }")
-  Rules[:_block] = rule_info("block", "(line_command | explicit_block | newpage | items_list | paragraph_group)")
-  Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
+  Rules[:_block] = rule_info("block", "(line_command | explicit_block | items_list | paragraph_group)")
+  Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend | newpage)")
   Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block | block_delimiter)")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
