@@ -176,7 +176,6 @@ describe ArtiMark do
       ]
      ) 
     end
-if false    
 
     it 'should handle block image' do
       text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
@@ -195,6 +194,7 @@ if false
        ]
       )      
     end
+if false    
 
     it 'should handle block image with before caption' do
       text = "this is normal line.\nimage(./image1.jpg, alt text, caption_before: true): caption text"
