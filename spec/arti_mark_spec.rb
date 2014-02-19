@@ -83,7 +83,6 @@ describe ArtiMark do
       )
     end
 
-if false
     it 'should nest div without pgroup' do
       text = "d(wo-pgroup) {\nd {\nnested.\n} \n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -98,6 +97,26 @@ if false
       )
     end
 
+    it 'should nest div without pgroup and with pgroup' do
+      text = "d(wo-pgroup) {\nd {\nnested.\n} \n}\nd {\nin pgroup\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div',
+          ['div',
+           ['p', 'nested.']
+         ]
+        ])                                                                   
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['div',
+          ['div.pgroup',
+           ['p', 'in pgroup']
+         ]
+        ])
+    end
+
+
     it 'should convert div with class' do
       text = "d.preface-one {\n h1: title.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -111,7 +130,7 @@ if false
     end
 
     it 'should convert div with id and class' do
-      text = "d#thecontents.preface-one {\n h1: title.\n}"
+      text = "d#thecontents.preface-one {\nh1: title.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -121,7 +140,7 @@ if false
         ]
       )
     end
-
+if false
     it 'should convert nested div' do
       text = "d.preface {\n outer div. \n d.nested {\n nested!\n}\nouter div again.\n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -143,6 +162,7 @@ if false
         ]
       )
     end
+
     
     it 'should convert nested div with alternate style inside' do
       text = "d.preface {\n outer div. \n d.nested {---\n nested!\n---}\nouter div again.\n}"

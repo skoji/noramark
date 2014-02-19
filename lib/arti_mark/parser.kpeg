@@ -23,12 +23,12 @@ command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; co
 paragraph = (!paragraph_delimiter documentline):paragraph { create_item(:paragraph, nil, paragraph) }
 
 # paragraph_group
-paragraph_group = (paragraph nl | paragraph  )+:paragraphs nl* { create_item(:paragraph_group, nil, paragraphs) }
+paragraph_group = (paragraph nl | paragraph)+:paragraphs nl* { create_item(:paragraph_group, nil, paragraphs) }
 
 # explicit block 
 blockhead = lh command:command - '{' - le { command }
 blockend = lh - '}' - le
-blockbody = (!blockend (paragraph_group | block))*:body { body } 
+blockbody = (!blockend block)+:body { body } 
 explicit_block = blockhead:head blockbody:body blockend { create_item(:block, head, body) }
 
 # inline command
@@ -50,13 +50,13 @@ ordered_item = lh num ':' documentcontent:content le { content }
 items_list = unordered_list | ordered_list
 
 # generic line command
-line_command = lh command:command ':' documentcontent:content le { create_item(:line_command, command, content) }
+line_command = lh - command:command ':' documentcontent:content le { create_item(:line_command, command, content) }
 
 # blocks
 
 block = line_command  | explicit_block | newpage | items_list | paragraph_group
 block_delimiter = blockhead | blockend 
-paragraph_delimiter = block_delimiter | block
+paragraph_delimiter = block | block_delimiter 
 
 # texts
 char = < /[[:print:]]/ > { text }

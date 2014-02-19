@@ -54,7 +54,7 @@ module ArtiMark
 
       def write(item)
         @item_preprocessors.each { |x| item = x.call item }
-        @context.enable_pgroup, saved_ep = !item[:args].include?('wo-pgroup'), @context.enable_pgroup
+        @context.enable_pgroup, saved_ep = !(item[:args].include?('wo-pgroup') || !@context.enable_pgroup), @context.enable_pgroup
         tag_start item
         write_body item
         tag_end item
