@@ -15,32 +15,25 @@ require "arti_mark/unordered_list_parser"
 require "arti_mark/definition_list_parser"
 require "arti_mark/universal_block_parser"
 require 'arti_mark/syntax'
-require 'arti_mark/result'
-require 'arti_mark/context'
 
-require 'arti_mark/html_generator.rb'
-require 'arti_mark/parser.kpeg.rb'
-require 'arti_mark/parser.rb'
+require 'arti_mark/html/generator'
+require 'arti_mark/parser.kpeg'
+require 'arti_mark/parser'
 
 module ArtiMark
   class Document
     def initialize(param = {})
-      @context = Context.new(param)
       @preprocessors = [
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                         Proc.new { |text| text.strip.gsub(/　/, ' ') } # convert Japanese full-width spece to normal space
                        ]
-      @generator = HtmlGenerator.new(@context)
+      @generator = Html::Generator.new(param)
     end 
 
     def preprocessor(&block)
       @preprocessors << block
     end
 
-    def parser(parser)
-        @syntax.append_parser(parser)
-    end
-    
     def convert(text)
       @preprocessors.each {
         |pr|
@@ -51,21 +44,9 @@ module ArtiMark
         puts @parser.show_error
         exit -1
       end
-      @parser.result.each {
-        |item|
-        process_item(item)
-      }
-      @context.result
+      @generator.convert(@parser.result)
+
     end
 
-    def toc
-      @context.toc
-    end
-
-    private
-
-    def process_item(item)
-      @generator.to_html(item)
-    end
   end
 end

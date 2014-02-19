@@ -1,4 +1,5 @@
 module ArtiMark
+module Html
   class Context
     attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup
     def initialize(param = {})
@@ -90,4 +91,5 @@ module ArtiMark
       @pages
     end
   end
+end
 end
