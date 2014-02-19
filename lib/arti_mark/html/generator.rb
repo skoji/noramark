@@ -24,6 +24,7 @@ module ArtiMark
                            trailer: "\n",
                            item_preprocessor: proc do |item|
                              (item[:classes] ||= []) << 'pgroup'
+                             item[:no_tag] = true unless @context.enable_pgroup
                              item
                            end
                            ),

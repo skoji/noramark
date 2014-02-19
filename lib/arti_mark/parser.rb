@@ -3,7 +3,9 @@ require 'arti_mark/parser.kpeg'
 module ArtiMark
   class Parser
     def create_item(type, command, children = [])
-      {:type => type, :children => children }.merge command || {}
+      item = {:type => type, :children => children }.merge command || {}
+      item[:args] ||= []
+      item
     end
     
     def parse_text(content)

@@ -39,6 +39,7 @@ module ArtiMark
       end
 
       def tag_start(item, attr = {})
+        return if item[:no_tag] 
         ids = item[:ids] || []
         classes = item[:classes] || []
         tag_name = @tag_name || item[:name]
@@ -46,15 +47,18 @@ module ArtiMark
       end
 
       def tag_end(item)
+        return if item[:no_tag] 
         tag_name = @tag_name || item[:name]
         @context << "</#{tag_name}>#{@trailer}"
       end
 
       def write(item)
         @item_preprocessors.each { |x| item = x.call item }
+        @context.enable_pgroup, saved_ep = !item[:args].include?('wo-pgroup'), @context.enable_pgroup
         tag_start item
         write_body item
         tag_end item
+        @context.enable_pgroup = saved_ep
       end
       
       def write_body(item)
