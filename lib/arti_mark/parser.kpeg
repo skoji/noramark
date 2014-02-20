@@ -33,7 +33,12 @@ blockbody = (!blockend block)+:body { body }
 explicit_block = < blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }
 
 # inline command
-inline = < '[' command:command '{' documentcontent_except('}'):content '}' ']' > { create_item(:inline, command, content, raw: text) } 
+inline = img_inline | common_inline
+common_inline = < '[' command:command '{' documentcontent_except('}'):content '}' ']' > { create_item(:inline, command, content, raw: text) }
+
+#img inline
+img_command = command:command &{ command[:name] == 'img' && command[:args].size == 2}
+img_inline = < '[' img_command:command  ']' > { create_item(:inline, command, nil, raw: text) } 
 
 # special line commands
 # newpage

@@ -934,8 +934,26 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # inline = < "[" command:command "{" documentcontent_except('}'):content "}" "]" > { create_item(:inline, command, content, raw: text) }
+  # inline = (img_inline | common_inline)
   def _inline
+
+    _save = self.pos
+    while true # choice
+      _tmp = apply(:_img_inline)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_common_inline)
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_inline unless _tmp
+    return _tmp
+  end
+
+  # common_inline = < "[" command:command "{" documentcontent_except('}'):content "}" "]" > { create_item(:inline, command, content, raw: text) }
+  def _common_inline
 
     _save = self.pos
     while true # sequence
@@ -992,7 +1010,77 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_inline unless _tmp
+    set_failed_rule :_common_inline unless _tmp
+    return _tmp
+  end
+
+  # img_command = command:command &{ command[:name] == 'img' && command[:args].size == 2}
+  def _img_command
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_command)
+      command = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  command[:name] == 'img' && command[:args].size == 2; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_img_command unless _tmp
+    return _tmp
+  end
+
+  # img_inline = < "[" img_command:command "]" > { create_item(:inline, command, nil, raw: text) }
+  def _img_inline
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = match_string("[")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_img_command)
+        command = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string("]")
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:inline, command, nil, raw: text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_img_inline unless _tmp
     return _tmp
   end
 
@@ -1823,7 +1911,10 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }")
-  Rules[:_inline] = rule_info("inline", "< \"[\" command:command \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, command, content, raw: text) }")
+  Rules[:_inline] = rule_info("inline", "(img_inline | common_inline)")
+  Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:command \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, command, content, raw: text) }")
+  Rules[:_img_command] = rule_info("img_command", "command:command &{ command[:name] == 'img' && command[:args].size == 2}")
+  Rules[:_img_inline] = rule_info("img_inline", "< \"[\" img_command:command \"]\" > { create_item(:inline, command, nil, raw: text) }")
   Rules[:_newpage] = rule_info("newpage", "line_command:item &{ item[:name] == 'newpage' }")
   Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:command &{ command[:name] == 'p' }")
   Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< lh - explicit_paragraph_command:command \":\" documentcontent?:content le > { create_item(:paragraph, command, content, raw:text) }")

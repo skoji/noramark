@@ -56,7 +56,12 @@ module ArtiMark
         classes = item[:classes] || []
         attr = item[:attrs] || {}
         tag_name = @tag_name || item[:name]
-        @context << "<#{tag_name}#{ids_string(ids)}#{class_string(classes)}#{attr_string(attr)}>"
+        @context << "<#{tag_name}#{ids_string(ids)}#{class_string(classes)}#{attr_string(attr)}"
+        if item[:no_body]
+          @context << " />"
+        else
+          @context << ">"
+        end
       end
 
       def output(string)
@@ -73,8 +78,8 @@ module ArtiMark
         @item_preprocessors.each { |x| item = instance_exec item.dup, &x }
         @context.enable_pgroup, saved_ep = !(item[:args].include?('wo-pgroup') || !@context.enable_pgroup), @context.enable_pgroup
         tag_start item
-        write_body item
-        tag_end item
+        write_body item if !item[:no_body]
+        tag_end item if !item[:no_body]
         @context.enable_pgroup = saved_ep
       end
 

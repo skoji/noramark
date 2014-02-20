@@ -330,8 +330,6 @@ describe ArtiMark do
       )
     end
 
-if false    
-
     it 'should handle any block' do
       text = "this is normal line.\ncite {\n this block should be in cite. \n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -350,17 +348,19 @@ if false
         ]
       )
     end
+
     it 'should handle inline image' do
-      text = "simple image [img(caption){./image1.jpg}]."
+      text = "simple image [img(./image1.jpg, alt)]."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children[0].selector_and_children).to eq(
         ['div.pgroup',
           ['p',
-            'simple image ', ["img[src='./image1.jpg'][alt='caption']", ''], '.']]
+            'simple image ', ["img[src='./image1.jpg'][alt='alt']", ''], '.']]
       )
     end
+if false    
 
     it 'should handle any inline' do
       text = "should be [strong{marked as strong}]."
