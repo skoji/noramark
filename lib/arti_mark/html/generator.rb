@@ -20,7 +20,7 @@ module ArtiMark
 
         @writers = {
           :paragraph =>
-          TagWriter.create('p', self, chop_last_space: true, 
+          TagWriter.create('p', self, chop_last_space: true,
                            item_preprocessor: proc do |item|
                              add_class(item, 'noindent') if item[:children][0] =~/^(「|『|（)/  # TODO: should be plaggable}
                              item
@@ -86,8 +86,10 @@ module ArtiMark
           WriterSelector.new(self,
                              {
                                'link' => link_writer,
-                               'l' => link_writer
+                               'l' => link_writer,
+                               's' => TagWriter.create('span', self, trailer: '')
                                }),
+
           }
       end
 
@@ -98,10 +100,9 @@ module ArtiMark
         }
         @context.result
       end
-
       def to_html(item)
         if item.is_a? String
-          @context << escape_html(item.sub(/^[[:space:]]+/, ''))
+          @context << escape_html(item)
         else
           writer = @writers[item[:type]]
           if writer.nil?

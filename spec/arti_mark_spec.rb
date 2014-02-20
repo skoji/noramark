@@ -317,7 +317,6 @@ describe ArtiMark do
       ]
      )        
     end
-if false    
 
     it 'should handle span' do
       text = "p.custom: this text is in [s.keyword{custom}] class."
@@ -330,6 +329,9 @@ if false
         ]]
       )
     end
+
+if false    
+
     it 'should handle any block' do
       text = "this is normal line.\ncite {\n this block should be in cite. \n}"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
