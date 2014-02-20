@@ -8,7 +8,7 @@ module ArtiMark
         instance = TagWriter.new(tag_name, generator, chop_last_space: chop_last_space)
         instance.item_preprocessors << item_preprocessor unless item_preprocessor.nil?
         instance.write_body_preprocessors << write_body_preprocessor unless write_body_preprocessor.nil?
-        instance.trailer = trailer
+        instance.trailer = trailer 
         yield instance if block_given?
         instance
       end

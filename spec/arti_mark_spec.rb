@@ -360,7 +360,6 @@ describe ArtiMark do
             'simple image ', ["img[src='./image1.jpg'][alt='alt']", ''], '.']]
       )
     end
-if false    
 
     it 'should handle any inline' do
       text = "should be [strong{marked as strong}]."
@@ -372,6 +371,7 @@ if false
         ['p', 'should be ', ['strong', 'marked as strong'],'.']]
       )
     end
+if false    
 
     it 'should generate toc: with newpage parameter' do
       text = "newpage(1st chapter):\n1st chapter.\nnewpage(2nd chapter):\n2nd chapger.\nnewpage: 2nd chapter continued.\nnewpage(3rd chapter):\n3rd chapter."

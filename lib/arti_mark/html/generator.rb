@@ -83,21 +83,22 @@ module ArtiMark
 
                                }),
           :inline =>
-          WriterSelector.new(self,
+          WriterSelector.new(self, 
                              {
                                'link' => link_writer,
                                'l' => link_writer,
-                               's' => TagWriter.create('span', self, trailer: ''),
+                               's' => TagWriter.create('span', self),
                                'img' =>
-                               TagWriter.create('img', self, trailer: '',
+                               TagWriter.create('img', self,
                                                 item_preprocessor: proc do |item|
                                                   item[:no_body] = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
                                                   (item[:attrs] ||= {}).merge!({:src => [item[:args][0] ]})
                                                   item[:attrs].merge!({:alt => [ escape_html(item[:args][1].strip)]}) if (item[:args].size > 1 && item[:args][1].size > 0)
                                                   item
                                                 end)  
-                               }),
-
+                             },
+                             trailer_default:''
+                             )
           }
       end
 
