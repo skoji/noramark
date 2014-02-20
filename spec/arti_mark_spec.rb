@@ -305,9 +305,6 @@ describe ArtiMark do
      )       
     end
 
-if false    
-
-
     it 'should handle custom paragraph' do
       text = "this is normal line.\np.custom: this text is in custom class."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -320,6 +317,8 @@ if false
       ]
      )        
     end
+if false    
+
     it 'should handle span' do
       text = "p.custom: this text is in [s.keyword{custom}] class."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')

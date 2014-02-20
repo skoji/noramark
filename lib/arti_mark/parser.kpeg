@@ -20,7 +20,8 @@ parameters = < parameter (',' parameter)* > { text }
 command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
 
 # paragraph
-paragraph = < (!paragraph_delimiter documentline):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
+implicit_paragraph = < (!paragraph_delimiter documentline):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
+paragraph = explicit_paragraph | implicit_paragraph 
 
 # paragraph_group
 paragraph_group = <(paragraph nl | paragraph)+:paragraphs nl* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
@@ -35,9 +36,11 @@ explicit_block = < blockhead:head blockbody:body blockend > { create_item(:block
 inline = < '[' command:command '{' documentcontent_except('}'):content '}' ']' > { create_item(:inline, command, content, raw: text) } 
 
 # special line commands
-
 # newpage
 newpage = line_command:item &{ item[:name] == 'newpage' }
+# explicit paragraph
+explicit_paragraph_command = command:command &{ command[:name] == 'p' }
+explicit_paragraph = < lh - explicit_paragraph_command:command ':' documentcontent?:content le > { create_item(:paragraph, command, content, raw:text) }
 
 # unordered list
 unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
@@ -50,7 +53,7 @@ ordered_item = lh num ':' documentcontent:content le { content }
 items_list = unordered_list | ordered_list
 
 # generic line command
-line_command = < lh - command:command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
+line_command = < lh - (!explicit_paragraph_command command):command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
 
 # blocks
 
