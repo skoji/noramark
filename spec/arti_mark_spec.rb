@@ -407,7 +407,6 @@ describe ArtiMark do
       text = "this is normal line.\n1: for the 1st.\n2: secondly, blah.\n3: and last...\nthe ordered list ends."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children.size).to eq 3
       expect(body.element_children[0].selector_and_children).to eq(
@@ -424,37 +423,32 @@ describe ArtiMark do
         ['div.pgroup', 
          ['p', 'the ordered list ends.']
         ])
-
     end
-
-if false
-
 
     it 'should handle unordered list ' do
       text = "this is normal line.\n*: for the 1st.\n*: secondly, blah.\n*: and last...\nthe ordered list ends."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>') 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>this is normal line.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("<ul>")
-      expect(r.shift.strip).to eq("<li>for the 1st.</li>")
-      expect(r.shift.strip).to eq("<li>secondly, blah.</li>")
-      expect(r.shift.strip).to eq("<li>and last...</li>")
-      expect(r.shift.strip).to eq("</ul>")
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p>the ordered list ends.</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 3
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'this is normal line.']
+        ])
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['ul', 
+         ['li', 'for the 1st.'],
+         ['li', 'secondly, blah.'],
+         ['li', 'and last...']
+        ])
+      expect(body.element_children[2].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'the ordered list ends.']
+        ])
     end
+
+if false
+
     it 'should handle definition list ' do
       text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah :blah.\n;: 3rd: this term is the last.\nthe list ends."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')

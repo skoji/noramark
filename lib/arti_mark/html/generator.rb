@@ -114,6 +114,7 @@ module ArtiMark
                              trailer_default:''
                              ),
           :ol => TagWriter.create('ol', self),
+          :ul => TagWriter.create('ul', self),
           :li => TagWriter.create('li', self)
 
           }
