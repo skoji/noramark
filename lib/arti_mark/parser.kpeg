@@ -1,8 +1,10 @@
 %% name = ArtiMark::Parser
 
-- = ( ' '  | '\v' | '\t' )*
-nl = ( /\r?\n/ )
-nls = nl+
+# literals
+space = ' ' | '\t' 
+- = space*
+empty_line = lh - nl
+nl = /\r?\n/
 lh = /^/
 le = nl | /$/
 word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
@@ -24,7 +26,7 @@ implicit_paragraph = < (!paragraph_delimiter documentline):paragraph > { create_
 paragraph = explicit_paragraph | implicit_paragraph 
 
 # paragraph_group
-paragraph_group = <(paragraph nl | paragraph)+:paragraphs nl* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
+paragraph_group = < (paragraph nl | paragraph )+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
 
 # explicit block 
 blockhead = lh - command:command - '{' - le { command }
@@ -66,10 +68,9 @@ items_list = unordered_list | ordered_list | definition_list
 line_command = < lh - (!explicit_paragraph_command command):command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
 
 # blocks
-
-block = items_list | line_command  | explicit_block | paragraph_group
-block_delimiter = blockhead | blockend | newpage
-paragraph_delimiter = block | block_delimiter 
+block = items_list | line_command  | explicit_block | paragraph_group | empty_line+
+block_delimiter = blockhead | blockend | newpage 
+paragraph_delimiter = block | block_delimiter  
 
 # texts
 char = < /[[:print:]]/ > { text }
@@ -77,10 +78,15 @@ charstring = < char* > { text }
 char_except(e) = char:c &{ c != e }
 charstring_except(e) = < char_except(e)* > { text }
 documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_text(content)
-
 documentcontent = (inline | !inline char)+:content  ~parse_text(content)
-
 documentline = lh documentcontent:content /$/ { content }
 
-root = block*:blocks { blocks }
+#header
+stylesheets = < lh - 'stylesheets:' (!le charstring):stylesheets le  > { create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) }
+
+header = stylesheets
+
+#root
+root = header*:headers block*:blocks { headers + blocks }
+
 

@@ -3,6 +3,7 @@ require 'arti_mark/html/util'
 require 'arti_mark/html/result'
 require 'arti_mark/html/context'
 require 'arti_mark/html/tag_writer'
+require 'arti_mark/html/header_writer'
 require 'arti_mark/html/writer_selector'
 module ArtiMark
   module Html
@@ -17,6 +18,8 @@ module ArtiMark
                                          (item[:attrs] ||= {}).merge!({:href => [ item[:args][0] ]})
                                          item
                                        end)
+
+        header_writer = HeaderWriter.new self
 
         @writers = {
           :paragraph =>
@@ -123,7 +126,10 @@ module ArtiMark
                              output "<dt>"; write_array item[:args][0]; output "</dt>"
                              output "<dd>"; write_array item[:args][1]; output "</dd>"
                              :done
-                           end)
+                           end),
+          # headers
+          :stylesheets => header_writer
+          
           }
       end
 
