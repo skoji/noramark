@@ -95,7 +95,13 @@ module ArtiMark
                                                   (item[:attrs] ||= {}).merge!({:src => [item[:args][0] ]})
                                                   item[:attrs].merge!({:alt => [ escape_html(item[:args][1].strip)]}) if (item[:args].size > 1 && item[:args][1].size > 0)
                                                   item
-                                                end)  
+                                                end)  ,
+                               'tcy' =>
+                               TagWriter.create('span', self,
+                                                item_preprocessor: proc do |item|
+                                                  add_class item, 'tcy'
+                                                  item
+                                                end)  ,
                              },
                              trailer_default:''
                              )

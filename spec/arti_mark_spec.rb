@@ -371,29 +371,6 @@ describe ArtiMark do
         ['p', 'should be ', ['strong', 'marked as strong'],'.']]
       )
     end
-if false    
-
-    it 'should generate toc: with newpage parameter' do
-      text = "newpage(1st chapter):\n1st chapter.\nnewpage(2nd chapter):\n2nd chapger.\nnewpage: 2nd chapter continued.\nnewpage(3rd chapter):\n3rd chapter."
-      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-      artimark.convert(text)
-      toc = artimark.toc
-      expect(toc[0]).to eq('1st chapter')
-      expect(toc[1]).to eq('2nd chapter')
-      expect(toc[2]).to be_nil
-      expect(toc[3]).to eq('3rd chapter')
-    end
-
-    it 'should generate toc with h parameter' do
-      text = "newpage:\nh1(in-toc): 1st chapter\n content.\nnewpage:\nh1(in-toc): 2nd chapter\ncontent.\nnewpage: 2nd chapter continued.\nnewpage:\nh1(in-toc): 3rd chapter\n content."
-      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-      artimark.convert(text)
-      toc = artimark.toc
-      expect(toc[0]).to eq('1st chapter')
-      expect(toc[1]).to eq('2nd chapter')
-      expect(toc[2]).to be_nil
-      expect(toc[3]).to eq('3rd chapter')
-    end
 
     it 'should convert inline command within line block' do
       text = "h1: [tcy{20}]縦中横タイトル"
@@ -403,6 +380,7 @@ if false
       expect(body.element_children[0].selector_and_children).to eq ['h1', ['span.tcy', '20'], '縦中横タイトル']
     end
 
+if false
     it 'should handle ruby' do
       text = "[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
