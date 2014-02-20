@@ -49,11 +49,11 @@ explicit_paragraph = < lh - explicit_paragraph_command:command ':' documentconte
 
 # unordered list
 unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
-unordered_item = lh '*:' documentcontent:content le { content }
+unordered_item = < lh '*:' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
 
 # ordered list
 ordered_list = < ordered_item+:items > { create_item(:ol, nil, items, raw: text) }
-ordered_item = lh num ':' documentcontent:content le { content }
+ordered_item = < lh num ':' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
 
 items_list = unordered_list | ordered_list
 
@@ -62,7 +62,7 @@ line_command = < lh - (!explicit_paragraph_command command):command ':' document
 
 # blocks
 
-block = line_command  | explicit_block | items_list | paragraph_group
+block = items_list | line_command  | explicit_block | paragraph_group
 block_delimiter = blockhead | blockend | newpage
 paragraph_delimiter = block | block_delimiter 
 

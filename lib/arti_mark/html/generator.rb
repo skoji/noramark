@@ -112,7 +112,10 @@ module ArtiMark
                                
                              },
                              trailer_default:''
-                             )
+                             ),
+          :ol => TagWriter.create('ol', self),
+          :li => TagWriter.create('li', self)
+
           }
       end
 
@@ -129,7 +132,7 @@ module ArtiMark
         else
           writer = @writers[item[:type]]
           if writer.nil?
-            warn "can't find html generator for \"#{item[:raw_text]}\""
+            warn "can't find html generator for \"#{item}\""
             @context << escape_html(item[:raw_text])
           else
             writer.write(item)
