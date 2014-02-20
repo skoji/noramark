@@ -101,7 +101,15 @@ module ArtiMark
                                                 item_preprocessor: proc do |item|
                                                   add_class item, 'tcy'
                                                   item
-                                                end)  ,
+                                                end),
+                               'ruby' =>
+                               TagWriter.create('ruby', self,
+                                                write_body_preprocessor: proc do |item|
+                                                  write_children item
+                                                  output "<rp>(</rp><rt>#{escape_html item[:args][0].strip}</rt><rp>)</rp>"
+                                                  :done
+                                                end),
+                               
                              },
                              trailer_default:''
                              )

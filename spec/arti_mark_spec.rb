@@ -380,24 +380,20 @@ describe ArtiMark do
       expect(body.element_children[0].selector_and_children).to eq ['h1', ['span.tcy', '20'], '縦中横タイトル']
     end
 
-if false
     it 'should handle ruby' do
       text = "[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      r = converted[0].rstrip.split(/\r?\n/).map { |line| line.chomp }
-      expect(r.shift.strip).to eq('<?xml version="1.0" encoding="UTF-8"?>')
-      expect(r.shift.strip).to eq('<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">')
-      expect(r.shift.strip).to eq('<head>')   
-      expect(r.shift.strip).to eq('<title>the document title</title>')
-      expect(r.shift.strip).to eq('</head>')   
-      expect(r.shift.strip).to eq('<body>') 
-      expect(r.shift.strip).to eq("<div class='pgroup'>") 
-      expect(r.shift.strip).to eq("<p><ruby>蜻蛉<rp>(</rp><rt>とんぼ</rt><rp>)</rp></ruby>の<ruby>眼鏡<rp>(</rp><rt>めがね</rt><rp>)</rp></ruby>はみずいろめがね</p>") 
-      expect(r.shift.strip).to eq("</div>") 
-      expect(r.shift.strip).to eq("</body>") 
-      expect(r.shift.strip).to eq("</html>")
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq ['div.pgroup', ['p', 
+         ['ruby', '蜻蛉', ['rp','('],['rt','とんぼ'],['rp', ')']],
+         'の',                                                                                   
+         ['ruby', '眼鏡', ['rp','('],['rt','めがね'],['rp', ')']],
+         'はみずいろめがね']]
     end
+
+
+if false
     it 'should handle tatechuyoko' do
       text = "[tcy{10}]年前のことだった"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
