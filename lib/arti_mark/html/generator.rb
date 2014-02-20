@@ -12,6 +12,12 @@ module ArtiMark
       def initialize(param = {})
         @context = Context.new(param)
         article_writer = TagWriter.create('article', self)
+        link_writer = TagWriter.create('a', self, trailer: '', 
+                                       item_preprocessor: proc do |item|
+                                         (item[:attrs] ||= {}).merge!({:href => [ item[:args][0] ]})
+                                         item
+                                       end)
+
         @writers = {
           :paragraph =>
           TagWriter.create('p', self, chop_last_space: true, 
@@ -79,12 +85,8 @@ module ArtiMark
           :inline =>
           WriterSelector.new(self,
                              {
-                               'link' =>
-                               TagWriter.create('a', self, trailer: '', 
-                                                item_preprocessor: proc do |item|
-                                                  (item[:attrs] ||= {}).merge!({:href => [ item[:args][0] ]})
-                                                  item
-                                                end)
+                               'link' => link_writer,
+                               'l' => link_writer
                                }),
           }
       end
