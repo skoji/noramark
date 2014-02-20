@@ -55,7 +55,12 @@ unordered_item = < lh '*:' documentcontent:content le > { create_item(:li, nil, 
 ordered_list = < ordered_item+:items > { create_item(:ol, nil, items, raw: text) }
 ordered_item = < lh num ':' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
 
-items_list = unordered_list | ordered_list
+# definition list
+definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
+definition_item = < lh ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+
+items_list = unordered_list | ordered_list | definition_list
+
 
 # generic line command
 line_command = < lh - (!explicit_paragraph_command command):command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }

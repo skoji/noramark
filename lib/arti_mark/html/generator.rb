@@ -115,8 +115,15 @@ module ArtiMark
                              ),
           :ol => TagWriter.create('ol', self),
           :ul => TagWriter.create('ul', self),
-          :li => TagWriter.create('li', self)
-
+          :li => TagWriter.create('li', self),
+          :dl => TagWriter.create('dl', self),
+          :dtdd =>
+          TagWriter.create('', self, chop_last_space: true, item_preprocessor: proc do |item| item[:no_tag] = true; item end,
+                           write_body_preprocessor: proc do |item|
+                             output "<dt>"; write_array item[:args][0]; output "</dt>"
+                             output "<dd>"; write_array item[:args][1]; output "</dd>"
+                             :done
+                           end)
           }
       end
 

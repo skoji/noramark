@@ -1389,7 +1389,120 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # items_list = (unordered_list | ordered_list)
+  # definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
+  def _definition_list
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+      _save1 = self.pos
+      _ary = []
+      _tmp = apply(:_definition_item)
+      if _tmp
+        _ary << @result
+        while true
+          _tmp = apply(:_definition_item)
+          _ary << @result if _tmp
+          break unless _tmp
+        end
+        _tmp = true
+        @result = _ary
+      else
+        self.pos = _save1
+      end
+      items = @result
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:dl, nil, items, raw: text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_definition_list unless _tmp
+    return _tmp
+  end
+
+  # definition_item = < lh ";:" - documentcontent_except(':'):term ":" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+  def _definition_item
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string(";:")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply_with_args(:_documentcontent_except, ':')
+        term = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string(":")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_documentcontent)
+        definition = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_le)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_definition_item unless _tmp
+    return _tmp
+  end
+
+  # items_list = (unordered_list | ordered_list | definition_list)
   def _items_list
 
     _save = self.pos
@@ -1398,6 +1511,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
       _tmp = apply(:_ordered_list)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_definition_list)
       break if _tmp
       self.pos = _save
       break
@@ -1948,7 +2064,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_unordered_item] = rule_info("unordered_item", "< lh \"*:\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
   Rules[:_ordered_list] = rule_info("ordered_list", "< ordered_item+:items > { create_item(:ol, nil, items, raw: text) }")
   Rules[:_ordered_item] = rule_info("ordered_item", "< lh num \":\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
-  Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list)")
+  Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
+  Rules[:_definition_item] = rule_info("definition_item", "< lh \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
+  Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
   Rules[:_line_command] = rule_info("line_command", "< lh - (!explicit_paragraph_command command):command \":\" documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }")
   Rules[:_block] = rule_info("block", "(items_list | line_command | explicit_block | paragraph_group)")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend | newpage)")

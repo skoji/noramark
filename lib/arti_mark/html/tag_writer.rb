@@ -92,10 +92,15 @@ module ArtiMark
       end
 
       def write_children(item)
-        (item[:children] || []).each { |x| @generator.to_html x }
-        @generator.context.chop_last_space if (@param[:chop_last_space]) 
+        write_array(item[:children])
       end
 
+      def write_array(array)
+        return if array.nil? || array.size == 0
+        array.each { |x| @generator.to_html x }
+        @generator.context.chop_last_space if (@param[:chop_last_space]) 
+      end
+      
       def children_not_empty(item)
         !item[:children].nil? && item[:children].size > 0 && item[:children].select { |x| (x.is_a? String) ? x.size >0 : !x.nil? }.size > 0
       end
