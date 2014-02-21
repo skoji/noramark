@@ -83,8 +83,9 @@ documentline = lh documentcontent:content /$/ { content }
 
 #header
 stylesheets = < lh - 'stylesheets:' (!le charstring):stylesheets le  > { create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) }
+title = < lh - 'title:' (!le charstring):title le  > { create_item(:title, {:title => title }, nil, raw:text) }
 
-header = stylesheets
+header = stylesheets | title
 
 #root
 root = header*:headers block*:blocks { headers + blocks }

@@ -498,8 +498,6 @@ describe ArtiMark do
             'text.']])
     end
 
-if false
-
     it 'should specify title' do
       text = "title:the title of the book in the text.\n\ntext."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -507,6 +505,8 @@ if false
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
       expect(head.element_children[0].a).to eq ['title', 'the title of the book in the text.']
     end
+
+if false
 
     it 'should specify lang' do
       text = "lang:ja\n\n日本語 text."

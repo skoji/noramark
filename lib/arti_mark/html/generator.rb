@@ -128,8 +128,8 @@ module ArtiMark
                              :done
                            end),
           # headers
-          :stylesheets => header_writer
-          
+          :stylesheets => header_writer,
+          :title => header_writer,
           }
       end
 

@@ -1,6 +1,7 @@
 module ArtiMark
   module Html
     class HeaderWriter
+      include Util
       def initialize(generator)
         @generator = generator
         @context = generator.context
@@ -14,6 +15,9 @@ module ArtiMark
                 s
               end
             end)
+          end,
+          :title => proc do |item|
+            @context.title = escape_html item[:title].strip
           end
         }
       end
