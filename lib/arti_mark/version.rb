@@ -1,3 +1,3 @@
 module ArtiMark
-  VERSION = "0.0.1.beta5"
+  VERSION = "0.1.beta1"
 end
