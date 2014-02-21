@@ -87,7 +87,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # comment = lh space* "#" (!nl .)* nl
+  # comment = lh space* "#" (!nl .)* nl empty_line*
   def _comment
 
     _save = self.pos
@@ -138,6 +138,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break
       end
       _tmp = apply(:_nl)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_empty_line)
+        break unless _tmp
+      end
+      _tmp = true
       unless _tmp
         self.pos = _save
       end
@@ -644,13 +653,13 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # command = commandname:commandname ("(" - parameters:arg - ")")? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
+  # command = commandname:cn ("(" - parameters:arg - ")")? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }
   def _command
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:_commandname)
-      commandname = @result
+      cn = @result
       unless _tmp
         self.pos = _save
         break
@@ -695,7 +704,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  arg ||= ''; commandname.merge({ :args => arg.split(',') }) ; end
+      @result = begin;  arg ||= ''; cn.merge({ :args => arg.split(',') }) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -707,7 +716,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # implicit_paragraph = < (!paragraph_delimiter - documentline -):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
+  # implicit_paragraph = < !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }
   def _implicit_paragraph
 
     _save = self.pos
@@ -730,6 +739,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
           break
         end
         _tmp = apply(:_documentline)
+        p = @result
         unless _tmp
           self.pos = _save1
           break
@@ -741,7 +751,6 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break
       end # end sequence
 
-      paragraph = @result
       if _tmp
         text = get_text(_text_start)
       end
@@ -749,7 +758,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:paragraph, nil, paragraph, raw: text) ; end
+      @result = begin;  create_item(:paragraph, nil, p, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -779,7 +788,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # paragraph_group = < (paragraph nl | paragraph)+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
+  # paragraph_group = < paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }
   def _paragraph_group
 
     _save = self.pos
@@ -790,61 +799,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
       while true # sequence
         _save2 = self.pos
         _ary = []
-
-        _save3 = self.pos
-        while true # choice
-
-          _save4 = self.pos
-          while true # sequence
-            _tmp = apply(:_paragraph)
-            unless _tmp
-              self.pos = _save4
-              break
-            end
-            _tmp = apply(:_nl)
-            unless _tmp
-              self.pos = _save4
-            end
-            break
-          end # end sequence
-
-          break if _tmp
-          self.pos = _save3
-          _tmp = apply(:_paragraph)
-          break if _tmp
-          self.pos = _save3
-          break
-        end # end choice
-
+        _tmp = apply(:_paragraph)
         if _tmp
           _ary << @result
           while true
-
-            _save5 = self.pos
-            while true # choice
-
-              _save6 = self.pos
-              while true # sequence
-                _tmp = apply(:_paragraph)
-                unless _tmp
-                  self.pos = _save6
-                  break
-                end
-                _tmp = apply(:_nl)
-                unless _tmp
-                  self.pos = _save6
-                end
-                break
-              end # end sequence
-
-              break if _tmp
-              self.pos = _save5
-              _tmp = apply(:_paragraph)
-              break if _tmp
-              self.pos = _save5
-              break
-            end # end choice
-
+            _tmp = apply(:_paragraph)
             _ary << @result if _tmp
             break unless _tmp
           end
@@ -853,7 +812,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         else
           self.pos = _save2
         end
-        paragraphs = @result
+        p = @result
         unless _tmp
           self.pos = _save1
           break
@@ -876,7 +835,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:paragraph_group, nil, paragraphs, raw: text) ; end
+      @result = begin;  create_item(:paragraph_group, nil, p, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -888,7 +847,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # blockhead = lh - command:command - "{" - nl { command }
+  # blockhead = lh - command:command - "{" - nl empty_line* { command }
   def _blockhead
 
     _save = self.pos
@@ -929,6 +888,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      while true
+        _tmp = apply(:_empty_line)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
       @result = begin;  command ; end
       _tmp = true
       unless _tmp
@@ -941,7 +909,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # blockend = lh - "}" - le
+  # blockend = lh - "}" - le empty_line*
   def _blockend
 
     _save = self.pos
@@ -967,6 +935,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break
       end
       _tmp = apply(:_le)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_empty_line)
+        break unless _tmp
+      end
+      _tmp = true
       unless _tmp
         self.pos = _save
       end
@@ -1048,7 +1025,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # explicit_block = < blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }
+  # explicit_block = < blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }
   def _explicit_block
 
     _save = self.pos
@@ -1063,8 +1040,18 @@ class ArtiMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
         _tmp = apply(:_blockbody)
         body = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
           break
@@ -1113,7 +1100,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # common_inline = < "[" command:command "{" documentcontent_except('}'):content "}" "]" > { create_item(:inline, command, content, raw: text) }
+  # common_inline = < "[" command:c "{" documentcontent_except('}'):content "}" "]" > { create_item(:inline, c, content, raw: text) }
   def _common_inline
 
     _save = self.pos
@@ -1128,7 +1115,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
           break
         end
         _tmp = apply(:_command)
-        command = @result
+        c = @result
         unless _tmp
           self.pos = _save1
           break
@@ -1163,7 +1150,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:inline, command, content, raw: text) ; end
+      @result = begin;  create_item(:inline, c, content, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1175,19 +1162,19 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # img_command = command:command &{ command[:name] == 'img' && command[:args].size == 2}
+  # img_command = command:c &{ c[:name] == 'img' && c[:args].size == 2}
   def _img_command
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:_command)
-      command = @result
+      c = @result
       unless _tmp
         self.pos = _save
         break
       end
       _save1 = self.pos
-      _tmp = begin;  command[:name] == 'img' && command[:args].size == 2; end
+      _tmp = begin;  c[:name] == 'img' && c[:args].size == 2; end
       self.pos = _save1
       unless _tmp
         self.pos = _save
@@ -1199,7 +1186,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # img_inline = < "[" img_command:command "]" > { create_item(:inline, command, nil, raw: text) }
+  # img_inline = < "[" img_command:c "]" > { create_item(:inline, c, nil, raw: text) }
   def _img_inline
 
     _save = self.pos
@@ -1214,7 +1201,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
           break
         end
         _tmp = apply(:_img_command)
-        command = @result
+        c = @result
         unless _tmp
           self.pos = _save1
           break
@@ -1233,7 +1220,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:inline, command, nil, raw: text) ; end
+      @result = begin;  create_item(:inline, c, nil, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1245,43 +1232,19 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # newpage = line_command:item &{ item[:name] == 'newpage' }
-  def _newpage
-
-    _save = self.pos
-    while true # sequence
-      _tmp = apply(:_line_command)
-      item = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _save1 = self.pos
-      _tmp = begin;  item[:name] == 'newpage' ; end
-      self.pos = _save1
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_newpage unless _tmp
-    return _tmp
-  end
-
-  # explicit_paragraph_command = command:command &{ command[:name] == 'p' }
+  # explicit_paragraph_command = command:c &{ c[:name] == 'p' }
   def _explicit_paragraph_command
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:_command)
-      command = @result
+      c = @result
       unless _tmp
         self.pos = _save
         break
       end
       _save1 = self.pos
-      _tmp = begin;  command[:name] == 'p' ; end
+      _tmp = begin;  c[:name] == 'p' ; end
       self.pos = _save1
       unless _tmp
         self.pos = _save
@@ -1293,7 +1256,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # explicit_paragraph = < lh - explicit_paragraph_command:command ":" documentcontent?:content le > { create_item(:paragraph, command, content, raw:text) }
+  # explicit_paragraph = < lh - explicit_paragraph_command:c ":" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }
   def _explicit_paragraph
 
     _save = self.pos
@@ -1313,7 +1276,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
           break
         end
         _tmp = apply(:_explicit_paragraph_command)
-        command = @result
+        c = @result
         unless _tmp
           self.pos = _save1
           break
@@ -1338,6 +1301,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
         _tmp = apply(:_le)
         unless _tmp
           self.pos = _save1
+          break
+        end
+        while true
+          _tmp = apply(:_empty_line)
+          break unless _tmp
+        end
+        _tmp = true
+        unless _tmp
+          self.pos = _save1
         end
         break
       end # end sequence
@@ -1349,7 +1321,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:paragraph, command, content, raw:text) ; end
+      @result = begin;  create_item(:paragraph, c, content, raw:text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1684,7 +1656,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # line_command = < lh - (!explicit_paragraph_command command):command ":" documentcontent?:content - le > { create_item(:line_command, command, content, raw: text) }
+  # line_command = < lh - !explicit_paragraph_command command:c ":" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
   def _line_command
 
     _save = self.pos
@@ -1703,25 +1675,16 @@ class ArtiMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-
         _save2 = self.pos
-        while true # sequence
-          _save3 = self.pos
-          _tmp = apply(:_explicit_paragraph_command)
-          _tmp = _tmp ? nil : true
-          self.pos = _save3
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = apply(:_command)
-          unless _tmp
-            self.pos = _save2
-          end
+        _tmp = apply(:_explicit_paragraph_command)
+        _tmp = _tmp ? nil : true
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
           break
-        end # end sequence
-
-        command = @result
+        end
+        _tmp = apply(:_command)
+        c = @result
         unless _tmp
           self.pos = _save1
           break
@@ -1731,12 +1694,12 @@ class ArtiMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _save4 = self.pos
+        _save3 = self.pos
         _tmp = apply(:_documentcontent)
         @result = nil unless _tmp
         unless _tmp
           _tmp = true
-          self.pos = _save4
+          self.pos = _save3
         end
         content = @result
         unless _tmp
@@ -1751,6 +1714,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
         _tmp = apply(:_le)
         unless _tmp
           self.pos = _save1
+          break
+        end
+        while true
+          _tmp = apply(:_empty_line)
+          break unless _tmp
+        end
+        _tmp = true
+        unless _tmp
+          self.pos = _save1
         end
         break
       end # end sequence
@@ -1762,7 +1734,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:line_command, command, content, raw: text) ; end
+      @result = begin;  create_item(:line_command, c, content, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1774,8 +1746,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block = (items_list | line_command | explicit_block | paragraph_group | empty_line+)
-  def _block
+  # line_block = (items_list | line_command)
+  def _line_block
 
     _save = self.pos
     while true # choice
@@ -1785,33 +1757,60 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _tmp = apply(:_line_command)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_explicit_block)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply(:_paragraph_group)
-      break if _tmp
-      self.pos = _save
-      _save1 = self.pos
-      _tmp = apply(:_empty_line)
-      if _tmp
-        while true
-          _tmp = apply(:_empty_line)
-          break unless _tmp
-        end
-        _tmp = true
-      else
-        self.pos = _save1
-      end
-      break if _tmp
-      self.pos = _save
       break
     end # end choice
+
+    set_failed_rule :_line_block unless _tmp
+    return _tmp
+  end
+
+  # block = (line_block | explicit_block | paragraph_group):block empty_line* {block}
+  def _block
+
+    _save = self.pos
+    while true # sequence
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_line_block)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_explicit_block)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_paragraph_group)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
+      block = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_empty_line)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; block; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
 
     set_failed_rule :_block unless _tmp
     return _tmp
   end
 
-  # block_delimiter = (blockhead | blockend | newpage)
+  # block_delimiter = (blockhead | blockend)
   def _block_delimiter
 
     _save = self.pos
@@ -1822,9 +1821,6 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _tmp = apply(:_blockend)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_newpage)
-      break if _tmp
-      self.pos = _save
       break
     end # end choice
 
@@ -1832,40 +1828,252 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # paragraph_delimiter = (blockhead | blockend | items_list | line_command | empty_line+)
+  # paragraph_delimiter = (block_delimiter | line_block)
   def _paragraph_delimiter
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_blockhead)
+      _tmp = apply(:_block_delimiter)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_blockend)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply(:_items_list)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply(:_line_command)
-      break if _tmp
-      self.pos = _save
-      _save1 = self.pos
-      _tmp = apply(:_empty_line)
-      if _tmp
-        while true
-          _tmp = apply(:_empty_line)
-          break unless _tmp
-        end
-        _tmp = true
-      else
-        self.pos = _save1
-      end
+      _tmp = apply(:_line_block)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
     set_failed_rule :_paragraph_delimiter unless _tmp
+    return _tmp
+  end
+
+  # stylesheets = < lh - "stylesheets:" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }
+  def _stylesheets
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string("stylesheets:")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply(:_le)
+        _tmp = _tmp ? nil : true
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_charstring)
+        s = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_nl)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_stylesheets unless _tmp
+    return _tmp
+  end
+
+  # title = < lh - "title:" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }
+  def _title
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string("title:")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply(:_le)
+        _tmp = _tmp ? nil : true
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_charstring)
+        t = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_nl)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:title, {:title => t }, nil, raw:text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_title unless _tmp
+    return _tmp
+  end
+
+  # lang = < lh - "lang:" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }
+  def _lang
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string("lang:")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply(:_le)
+        _tmp = _tmp ? nil : true
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_charstring)
+        l = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_nl)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:lang, {:lang => l }, nil, raw:text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_lang unless _tmp
+    return _tmp
+  end
+
+  # header = (stylesheets | title | lang) empty_line*
+  def _header
+
+    _save = self.pos
+    while true # sequence
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_stylesheets)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_title)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_lang)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_empty_line)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_header unless _tmp
     return _tmp
   end
 
@@ -2165,7 +2373,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # documentline = lh documentcontent:content /$/ { content }
+  # documentline = lh documentcontent:content le { content }
   def _documentline
 
     _save = self.pos
@@ -2181,7 +2389,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = scan(/\A(?-mix:$)/)
+      _tmp = apply(:_le)
       unless _tmp
         self.pos = _save
         break
@@ -2198,247 +2406,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # stylesheets = < lh - "stylesheets:" (!le charstring):stylesheets le > { create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) }
-  def _stylesheets
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("stylesheets:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-
-        _save2 = self.pos
-        while true # sequence
-          _save3 = self.pos
-          _tmp = apply(:_le)
-          _tmp = _tmp ? nil : true
-          self.pos = _save3
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = apply(:_charstring)
-          unless _tmp
-            self.pos = _save2
-          end
-          break
-        end # end sequence
-
-        stylesheets = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_le)
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_stylesheets unless _tmp
-    return _tmp
-  end
-
-  # title = < lh - "title:" (!le charstring):title le > { create_item(:title, {:title => title }, nil, raw:text) }
-  def _title
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("title:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-
-        _save2 = self.pos
-        while true # sequence
-          _save3 = self.pos
-          _tmp = apply(:_le)
-          _tmp = _tmp ? nil : true
-          self.pos = _save3
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = apply(:_charstring)
-          unless _tmp
-            self.pos = _save2
-          end
-          break
-        end # end sequence
-
-        title = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_le)
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:title, {:title => title }, nil, raw:text) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_title unless _tmp
-    return _tmp
-  end
-
-  # lang = < lh - "lang:" (!le charstring):lang le > { create_item(:lang, {:lang => lang }, nil, raw:text) }
-  def _lang
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("lang:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-
-        _save2 = self.pos
-        while true # sequence
-          _save3 = self.pos
-          _tmp = apply(:_le)
-          _tmp = _tmp ? nil : true
-          self.pos = _save3
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = apply(:_charstring)
-          unless _tmp
-            self.pos = _save2
-          end
-          break
-        end # end sequence
-
-        lang = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_le)
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:lang, {:lang => lang }, nil, raw:text) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_lang unless _tmp
-    return _tmp
-  end
-
-  # header = (stylesheets | title | lang)
-  def _header
-
-    _save = self.pos
-    while true # choice
-      _tmp = apply(:_stylesheets)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply(:_title)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply(:_lang)
-      break if _tmp
-      self.pos = _save
-      break
-    end # end choice
-
-    set_failed_rule :_header unless _tmp
-    return _tmp
-  end
-
-  # root = header*:headers block*:blocks eof_comment? eof { headers + blocks }
+  # root = header*:headers - block*:blocks - eof_comment? eof { headers.concat blocks.select{ |x| !x.nil?} }
   def _root
 
     _save = self.pos
@@ -2456,6 +2424,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _ary = []
       while true
         _tmp = apply(:_block)
@@ -2465,6 +2438,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _tmp = true
       @result = _ary
       blocks = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
@@ -2484,7 +2462,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  headers + blocks ; end
+      @result = begin;  headers.concat blocks.select{ |x| !x.nil?} ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2500,7 +2478,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_eof] = rule_info("eof", "!.")
   Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
   Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"\#\" (!eof .)*")
-  Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl")
+  Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl empty_line*")
   Rules[:__hyphen_] = rule_info("-", "(space | comment)*")
   Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
@@ -2515,21 +2493,20 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_commandname] = rule_info("commandname", "word:name idnames?:idnames classnames?:classes { {:name => name, :ids => idnames, :classes => classes} }")
   Rules[:_parameter] = rule_info("parameter", "< (/[^,)]/* | \"\\\"\" /[^\"]/* \"\\\"\" | \"'\" /[^']/* \"'\") > { text }")
   Rules[:_parameters] = rule_info("parameters", "< parameter (\",\" parameter)* > { text }")
-  Rules[:_command] = rule_info("command", "commandname:commandname (\"(\" - parameters:arg - \")\")? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }")
-  Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< (!paragraph_delimiter - documentline -):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }")
+  Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:arg - \")\")? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }")
+  Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
-  Rules[:_paragraph_group] = rule_info("paragraph_group", "< (paragraph nl | paragraph)+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }")
-  Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - nl { command }")
-  Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le")
+  Rules[:_paragraph_group] = rule_info("paragraph_group", "< paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }")
+  Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - nl empty_line* { command }")
+  Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le empty_line*")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
-  Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }")
+  Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }")
   Rules[:_inline] = rule_info("inline", "(img_inline | common_inline)")
-  Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:command \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, command, content, raw: text) }")
-  Rules[:_img_command] = rule_info("img_command", "command:command &{ command[:name] == 'img' && command[:args].size == 2}")
-  Rules[:_img_inline] = rule_info("img_inline", "< \"[\" img_command:command \"]\" > { create_item(:inline, command, nil, raw: text) }")
-  Rules[:_newpage] = rule_info("newpage", "line_command:item &{ item[:name] == 'newpage' }")
-  Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:command &{ command[:name] == 'p' }")
-  Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< lh - explicit_paragraph_command:command \":\" documentcontent?:content le > { create_item(:paragraph, command, content, raw:text) }")
+  Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:c \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
+  Rules[:_img_command] = rule_info("img_command", "command:c &{ c[:name] == 'img' && c[:args].size == 2}")
+  Rules[:_img_inline] = rule_info("img_inline", "< \"[\" img_command:c \"]\" > { create_item(:inline, c, nil, raw: text) }")
+  Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:c &{ c[:name] == 'p' }")
+  Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< lh - explicit_paragraph_command:c \":\" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }")
   Rules[:_unordered_list] = rule_info("unordered_list", "< unordered_item+:items > { create_item(:ul, nil, items, raw: text) }")
   Rules[:_unordered_item] = rule_info("unordered_item", "< lh \"*:\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
   Rules[:_ordered_list] = rule_info("ordered_list", "< ordered_item+:items > { create_item(:ol, nil, items, raw: text) }")
@@ -2537,21 +2514,22 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
   Rules[:_definition_item] = rule_info("definition_item", "< lh \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
-  Rules[:_line_command] = rule_info("line_command", "< lh - (!explicit_paragraph_command command):command \":\" documentcontent?:content - le > { create_item(:line_command, command, content, raw: text) }")
-  Rules[:_block] = rule_info("block", "(items_list | line_command | explicit_block | paragraph_group | empty_line+)")
-  Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend | newpage)")
-  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(blockhead | blockend | items_list | line_command | empty_line+)")
+  Rules[:_line_command] = rule_info("line_command", "< lh - !explicit_paragraph_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
+  Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
+  Rules[:_block] = rule_info("block", "(line_block | explicit_block | paragraph_group):block empty_line* {block}")
+  Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
+  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | line_block)")
+  Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
+  Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
+  Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")
+  Rules[:_header] = rule_info("header", "(stylesheets | title | lang) empty_line*")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
   Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")
   Rules[:_charstring_except] = rule_info("charstring_except", "< char_except(e)* > { text }")
   Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
   Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
-  Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content /$/ { content }")
-  Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" (!le charstring):stylesheets le > { create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) }")
-  Rules[:_title] = rule_info("title", "< lh - \"title:\" (!le charstring):title le > { create_item(:title, {:title => title }, nil, raw:text) }")
-  Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" (!le charstring):lang le > { create_item(:lang, {:lang => lang }, nil, raw:text) }")
-  Rules[:_header] = rule_info("header", "(stylesheets | title | lang)")
-  Rules[:_root] = rule_info("root", "header*:headers block*:blocks eof_comment? eof { headers + blocks }")
+  Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content le { content }")
+  Rules[:_root] = rule_info("root", "header*:headers - block*:blocks - eof_comment? eof { headers.concat blocks.select{ |x| !x.nil?} }")
   # :startdoc:
 end
