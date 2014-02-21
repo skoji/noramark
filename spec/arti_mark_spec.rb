@@ -506,8 +506,6 @@ describe ArtiMark do
       expect(head.element_children[0].a).to eq ['title', 'the title of the book in the text.']
     end
 
-if false
-
     it 'should specify lang' do
       text = "lang:ja\n\n日本語 text."
       artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title')
@@ -515,6 +513,9 @@ if false
       root = Nokogiri::XML::Document.parse(converted[0]).root
       expect(root['lang']).to eq 'ja'
     end
+
+if false
+
 
     it 'should ignore comments' do
       text = "#この行はコメントです\nここから、パラグラフがはじまります。\n#これもコメント\n「二行目です。」\n三行目です。\n\n#これもコメント\n\n ここから、次のパラグラフです。"
