@@ -535,8 +535,6 @@ describe ArtiMark do
       )
     end
 
-if false
-
     it 'should handle preprocessor' do
       text = "pre-preprocess text"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -552,59 +550,5 @@ if false
         ]
       )
     end
-    it 'should handle custom block parser' do
-      class TheParser
-        include ArtiMark::BaseParser
-        def accept?(lines)
-          lex_line_command(lines[0])[:cmd] =~ /svg/
-        end
-        def parse(lines, r, syntax)
-          lexed = lex_line_command(lines[0])
-          lines.shift
-          src = lexed[:params][0].strip
-          caption = lexed[:text].strip
-          r << "<div><svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='100%' height='100%' viewBox='0 0 200 200' ><image xlink:href='#{src}' /><p>#{caption}</p></sgv></div>"
-        end
-      end
-      text="svg(img.jpg):caption"
-      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-      artimark.parser(TheParser.new)
-      converted = artimark.convert(text)
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')      
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div', 
-         ["svg[version='1.1'][width='100%'][height='100%'][viewBox='0 0 200 200']", ["image[href='img.jpg']", ''], ['p', 'caption']]
-        ]
-      )
-    end
-    it 'should handle custom block parser with named param' do
-      class TheParser
-        include ArtiMark::BaseParser
-        def accept?(lines)
-          lex_line_command(lines[0])[:cmd] =~ /svg/
-        end
-        def parse(lines, r, syntax)
-          lexed = lex_line_command(lines[0])
-          lines.shift
-          src = lexed[:params][0].strip
-          width = lexed[:named_params][:width]
-          height = lexed[:named_params][:height]
-          caption = lexed[:text].strip
-          r << "<div><svg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='100%' height='100%' viewBox='0 0 200 200' ><image xlink:href='#{src}' width='#{width}' height='#{height}' /><p>#{caption}</p></sgv></div>"
-        end
-      end
-      text="svg(img.jpg, width:200, height:200):caption"
-      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
-      artimark.parser(TheParser.new)
-      converted = artimark.convert(text)
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')      
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div', 
-         ["svg[version='1.1'][width='100%'][height='100%'][viewBox='0 0 200 200']", ["image[href='img.jpg'][width='200'][height='200']", ''], ['p', 'caption']]
-        ]
-      )
-    end
   end
-end
-
 end
