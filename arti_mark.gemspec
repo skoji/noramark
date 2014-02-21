@@ -15,6 +15,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = ArtiMark::VERSION
 
-  gem.add_development_dependency "rspec", "~> 2.11"
-  gem.add_development_dependency "nokogiri", "~> 1.5.6"
+  gem.required_ruby_version = '>= 2.0.0'
+  gem.add_dependency "kpeg"
+  gem.add_development_dependency "rspec", "~> 2.14"
+  gem.add_development_dependency "nokogiri", "~> 1.6.0"
 end

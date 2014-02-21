@@ -19,8 +19,8 @@ module ArtiMark
       
       r << "<div#{ids_string(lexed[:ids])}#{class_string(lexed[:cls])}>"
       r << "<p>#{caption}</p>" if !caption.nil?  && caption.size > 0 && caption_before
-      r << "<img src='#{src}' alt='#{alt}' />"
-      r << "<p>#{caption}</p>" if !caption.nil?  && caption.size > 0 && !caption_before
+      r << "<img src='#{src}' alt='#{escape_html alt}' />"
+      r << "<p>#{escape_html caption}</p>" if !caption.nil?  && caption.size > 0 && !caption_before
       r << "</div>\n"
     end
   end

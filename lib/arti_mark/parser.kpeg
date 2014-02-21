@@ -1,0 +1,97 @@
+%% name = ArtiMark::Parser
+
+# literals
+eof = !.
+space = ' ' | '\t' 
+eof_comment = lh space* "#" (!eof .)*
+comment =   lh space* "#" (!nl .)* nl
+
+- =  ( space | comment )*
+empty_line = lh - nl
+nl = /\r?\n/
+lh = /^/
+le = nl | /$/
+word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
+num = < [0-9]+ > { text.to_i }
+
+#common syntax
+classname = '.' word:classname { classname }
+classnames = (classname)*:classnames { classnames }
+idname = '#' word:idname { idname }
+idnames = (idname)*:idnames { idnames }
+
+commandname = word:name idnames?:idnames classnames?:classes  { {:name => name, :ids => idnames, :classes => classes} }
+parameter = < ( /[^,)]/* | '"' /[^"]/* '"' | "'" /[^']/* "'" ) > { text }
+parameters = < parameter (',' parameter)* > { text }
+command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
+
+# paragraph
+implicit_paragraph = < (!paragraph_delimiter - documentline - ):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
+paragraph = explicit_paragraph | implicit_paragraph 
+
+# paragraph_group
+paragraph_group = < (paragraph nl | paragraph )+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
+
+# explicit block 
+blockhead = lh - command:command - '{' - le { command }
+blockend = lh - '}' - le
+blockbody = (!blockend block)+:body { body } 
+explicit_block = < blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }
+
+# inline command
+inline = img_inline | common_inline
+common_inline = < '[' command:command '{' documentcontent_except('}'):content '}' ']' > { create_item(:inline, command, content, raw: text) }
+
+#img inline
+img_command = command:command &{ command[:name] == 'img' && command[:args].size == 2}
+img_inline = < '[' img_command:command  ']' > { create_item(:inline, command, nil, raw: text) } 
+
+# special line commands
+# newpage
+newpage = line_command:item &{ item[:name] == 'newpage' }
+# explicit paragraph
+explicit_paragraph_command = command:command &{ command[:name] == 'p' }
+explicit_paragraph = < lh - explicit_paragraph_command:command ':' documentcontent?:content le > { create_item(:paragraph, command, content, raw:text) }
+
+# unordered list
+unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
+unordered_item = < lh '*:' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
+
+# ordered list
+ordered_list = < ordered_item+:items > { create_item(:ol, nil, items, raw: text) }
+ordered_item = < lh num ':' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
+
+# definition list
+definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
+definition_item = < lh ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+
+items_list = unordered_list | ordered_list | definition_list
+
+
+# generic line command
+line_command = < lh - (!explicit_paragraph_command command):command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
+
+# blocks
+block = items_list | line_command  | explicit_block | paragraph_group | empty_line+
+block_delimiter = blockhead | blockend | newpage 
+paragraph_delimiter = block | block_delimiter
+
+# texts
+char = < /[[:print:]]/ > { text }
+charstring = < char* > { text }
+char_except(e) = char:c &{ c != e }
+charstring_except(e) = < char_except(e)* > { text }
+documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_text(content)
+documentcontent = (inline | !inline char)+:content  ~parse_text(content)
+documentline = lh documentcontent:content /$/ { content }
+
+#header
+stylesheets = < lh - 'stylesheets:' (!le charstring):stylesheets le  > { create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) }
+title = < lh - 'title:' (!le charstring):title le  > { create_item(:title, {:title => title }, nil, raw:text) }
+lang = < lh - 'lang:' (!le charstring):lang le  > { create_item(:lang, {:lang => lang }, nil, raw:text) }
+header = stylesheets | title | lang
+
+#root
+root = header*:headers block*:blocks eof_comment? eof { headers + blocks }
+
+

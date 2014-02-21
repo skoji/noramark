@@ -1,4 +1,5 @@
 module ArtiMark
+module Html
   class Context
     attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup
     def initialize(param = {})
@@ -25,7 +26,10 @@ module ArtiMark
         ret
       end
     end
-  
+    def chop_last_space
+      @pages.last.sub!(/[[:space:]]+$/, '')
+    end
+
     def head_inserter(&block)
       head_inserters << block
     end
@@ -90,4 +94,5 @@ module ArtiMark
       @pages
     end
   end
+end
 end
