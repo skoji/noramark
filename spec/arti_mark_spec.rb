@@ -21,7 +21,6 @@ describe ArtiMark do
       text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      p converted
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children.size).to eq 2
       expect(body.element_children[0].selector_and_children).to eq(
@@ -514,8 +513,6 @@ describe ArtiMark do
       expect(root['lang']).to eq 'ja'
     end
 
-if false
-
 
     it 'should ignore comments' do
       text = "#この行はコメントです\nここから、パラグラフがはじまります。\n#これもコメント\n「二行目です。」\n三行目です。\n\n#これもコメント\n\n ここから、次のパラグラフです。"
@@ -537,6 +534,8 @@ if false
           ['p', 'ここから、次のパラグラフです。']]
       )
     end
+
+if false
 
     it 'should handle preprocessor' do
       text = "pre-preprocess text"

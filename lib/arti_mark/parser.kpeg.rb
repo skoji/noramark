@@ -3,6 +3,16 @@ require 'kpeg/compiled_parser'
 class ArtiMark::Parser < KPeg::CompiledParser
   # :stopdoc:
 
+  # eof = !.
+  def _eof
+    _save = self.pos
+    _tmp = get_byte
+    _tmp = _tmp ? nil : true
+    self.pos = _save
+    set_failed_rule :_eof unless _tmp
+    return _tmp
+  end
+
   # space = (" " | "\\t")
   def _space
 
@@ -21,10 +31,138 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # - = space*
+  # eof_comment = lh space* "#" (!eof .)*
+  def _eof_comment
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_space)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("#")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+
+        _save3 = self.pos
+        while true # sequence
+          _save4 = self.pos
+          _tmp = apply(:_eof)
+          _tmp = _tmp ? nil : true
+          self.pos = _save4
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = get_byte
+          unless _tmp
+            self.pos = _save3
+          end
+          break
+        end # end sequence
+
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_eof_comment unless _tmp
+    return _tmp
+  end
+
+  # comment = lh space* "#" (!nl .)* nl
+  def _comment
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_space)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("#")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+
+        _save3 = self.pos
+        while true # sequence
+          _save4 = self.pos
+          _tmp = apply(:_nl)
+          _tmp = _tmp ? nil : true
+          self.pos = _save4
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = get_byte
+          unless _tmp
+            self.pos = _save3
+          end
+          break
+        end # end sequence
+
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_nl)
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_comment unless _tmp
+    return _tmp
+  end
+
+  # - = (space | comment)*
   def __hyphen_
     while true
-      _tmp = apply(:_space)
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_space)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_comment)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
       break unless _tmp
     end
     _tmp = true
@@ -569,7 +707,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # implicit_paragraph = < (!paragraph_delimiter documentline):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
+  # implicit_paragraph = < (!paragraph_delimiter - documentline -):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
   def _implicit_paragraph
 
     _save = self.pos
@@ -586,7 +724,17 @@ class ArtiMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
         _tmp = apply(:_documentline)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
         end
@@ -2266,7 +2414,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = header*:headers block*:blocks { headers + blocks }
+  # root = header*:headers block*:blocks eof_comment? eof { headers + blocks }
   def _root
 
     _save = self.pos
@@ -2297,6 +2445,21 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      _save3 = self.pos
+      _tmp = apply(:_eof_comment)
+      unless _tmp
+        _tmp = true
+        self.pos = _save3
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_eof)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       @result = begin;  headers + blocks ; end
       _tmp = true
       unless _tmp
@@ -2310,8 +2473,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
   end
 
   Rules = {}
+  Rules[:_eof] = rule_info("eof", "!.")
   Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
-  Rules[:__hyphen_] = rule_info("-", "space*")
+  Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"\#\" (!eof .)*")
+  Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl")
+  Rules[:__hyphen_] = rule_info("-", "(space | comment)*")
   Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
   Rules[:_lh] = rule_info("lh", "/^/")
@@ -2326,7 +2492,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_parameter] = rule_info("parameter", "< (/[^,)]/* | \"\\\"\" /[^\"]/* \"\\\"\" | \"'\" /[^']/* \"'\") > { text }")
   Rules[:_parameters] = rule_info("parameters", "< parameter (\",\" parameter)* > { text }")
   Rules[:_command] = rule_info("command", "commandname:commandname (\"(\" - parameters:arg - \")\")? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }")
-  Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< (!paragraph_delimiter documentline):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }")
+  Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< (!paragraph_delimiter - documentline -):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
   Rules[:_paragraph_group] = rule_info("paragraph_group", "< (paragraph nl | paragraph)+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }")
   Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - le { command }")
@@ -2362,6 +2528,6 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_title] = rule_info("title", "< lh - \"title:\" (!le charstring):title le > { create_item(:title, {:title => title }, nil, raw:text) }")
   Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" (!le charstring):lang le > { create_item(:lang, {:lang => lang }, nil, raw:text) }")
   Rules[:_header] = rule_info("header", "(stylesheets | title | lang)")
-  Rules[:_root] = rule_info("root", "header*:headers block*:blocks { headers + blocks }")
+  Rules[:_root] = rule_info("root", "header*:headers block*:blocks eof_comment? eof { headers + blocks }")
   # :startdoc:
 end

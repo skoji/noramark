@@ -1,8 +1,12 @@
 %% name = ArtiMark::Parser
 
 # literals
+eof = !.
 space = ' ' | '\t' 
-- = space*
+eof_comment = lh space* "#" (!eof .)*
+comment =   lh space* "#" (!nl .)* nl
+
+- =  ( space | comment )*
 empty_line = lh - nl
 nl = /\r?\n/
 lh = /^/
@@ -22,7 +26,7 @@ parameters = < parameter (',' parameter)* > { text }
 command = commandname:commandname ('(' - parameters:arg - ')')? { arg ||= ''; commandname.merge({ :args => arg.split(',') }) }
 
 # paragraph
-implicit_paragraph = < (!paragraph_delimiter documentline):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
+implicit_paragraph = < (!paragraph_delimiter - documentline - ):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }
 paragraph = explicit_paragraph | implicit_paragraph 
 
 # paragraph_group
@@ -70,7 +74,7 @@ line_command = < lh - (!explicit_paragraph_command command):command ':' document
 # blocks
 block = items_list | line_command  | explicit_block | paragraph_group | empty_line+
 block_delimiter = blockhead | blockend | newpage 
-paragraph_delimiter = block | block_delimiter  
+paragraph_delimiter = block | block_delimiter
 
 # texts
 char = < /[[:print:]]/ > { text }
@@ -88,6 +92,6 @@ lang = < lh - 'lang:' (!le charstring):lang le  > { create_item(:lang, {:lang =>
 header = stylesheets | title | lang
 
 #root
-root = header*:headers block*:blocks { headers + blocks }
+root = header*:headers block*:blocks eof_comment? eof { headers + blocks }
 
 
