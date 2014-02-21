@@ -210,7 +210,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # le = (nl | /$/)
+  # le = (nl | eof)
   def _le
 
     _save = self.pos
@@ -218,7 +218,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _tmp = apply(:_nl)
       break if _tmp
       self.pos = _save
-      _tmp = scan(/\A(?-mix:$)/)
+      _tmp = apply(:_eof)
       break if _tmp
       self.pos = _save
       break
@@ -888,7 +888,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # blockhead = lh - command:command - "{" - le { command }
+  # blockhead = lh - command:command - "{" - nl { command }
   def _blockhead
 
     _save = self.pos
@@ -924,7 +924,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_le)
+      _tmp = apply(:_nl)
       unless _tmp
         self.pos = _save
         break
@@ -1684,7 +1684,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # line_command = < lh - (!explicit_paragraph_command command):command ":" documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
+  # line_command = < lh - (!explicit_paragraph_command command):command ":" documentcontent?:content - le > { create_item(:line_command, command, content, raw: text) }
   def _line_command
 
     _save = self.pos
@@ -1739,6 +1739,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
           self.pos = _save4
         end
         content = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
           break
@@ -1827,15 +1832,34 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # paragraph_delimiter = (block | block_delimiter)
+  # paragraph_delimiter = (blockhead | blockend | items_list | line_command | empty_line+)
   def _paragraph_delimiter
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_block)
+      _tmp = apply(:_blockhead)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_block_delimiter)
+      _tmp = apply(:_blockend)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_items_list)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_line_command)
+      break if _tmp
+      self.pos = _save
+      _save1 = self.pos
+      _tmp = apply(:_empty_line)
+      if _tmp
+        while true
+          _tmp = apply(:_empty_line)
+          break unless _tmp
+        end
+        _tmp = true
+      else
+        self.pos = _save1
+      end
       break if _tmp
       self.pos = _save
       break
@@ -2481,7 +2505,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
   Rules[:_lh] = rule_info("lh", "/^/")
-  Rules[:_le] = rule_info("le", "(nl | /$/)")
+  Rules[:_le] = rule_info("le", "(nl | eof)")
   Rules[:_word] = rule_info("word", "< /[\\w0-9]/ (\"-\" | /[\\w0-9]/)* > { text }")
   Rules[:_num] = rule_info("num", "< [0-9]+ > { text.to_i }")
   Rules[:_classname] = rule_info("classname", "\".\" word:classname { classname }")
@@ -2495,7 +2519,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< (!paragraph_delimiter - documentline -):paragraph > { create_item(:paragraph, nil, paragraph, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
   Rules[:_paragraph_group] = rule_info("paragraph_group", "< (paragraph nl | paragraph)+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }")
-  Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - le { command }")
+  Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - nl { command }")
   Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }")
@@ -2513,10 +2537,10 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
   Rules[:_definition_item] = rule_info("definition_item", "< lh \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
-  Rules[:_line_command] = rule_info("line_command", "< lh - (!explicit_paragraph_command command):command \":\" documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }")
+  Rules[:_line_command] = rule_info("line_command", "< lh - (!explicit_paragraph_command command):command \":\" documentcontent?:content - le > { create_item(:line_command, command, content, raw: text) }")
   Rules[:_block] = rule_info("block", "(items_list | line_command | explicit_block | paragraph_group | empty_line+)")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend | newpage)")
-  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block | block_delimiter)")
+  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(blockhead | blockend | items_list | line_command | empty_line+)")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
   Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")

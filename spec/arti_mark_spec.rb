@@ -565,5 +565,20 @@ describe ArtiMark do
         ]
       )
     end
+
+    it 'should convert h1 in article after title' do
+      text = "arti.atogaki {\nh1: あとがき\n\nabc\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+     expect(body.element_children[0].selector_and_children).to eq(
+["article.atogaki",
+ ["h1", "あとがき"],
+ ["div.pgroup",
+  ["p", "あとがき"]]]
+     ) 
+    end
+
+
   end
 end

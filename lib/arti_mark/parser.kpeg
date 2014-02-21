@@ -10,7 +10,7 @@ comment =   lh space* "#" (!nl .)* nl
 empty_line = lh - nl
 nl = /\r?\n/
 lh = /^/
-le = nl | /$/
+le = nl | eof
 word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
 num = < [0-9]+ > { text.to_i }
 
@@ -33,7 +33,7 @@ paragraph = explicit_paragraph | implicit_paragraph
 paragraph_group = < (paragraph nl | paragraph )+:paragraphs empty_line* > { create_item(:paragraph_group, nil, paragraphs, raw: text) }
 
 # explicit block 
-blockhead = lh - command:command - '{' - le { command }
+blockhead = lh - command:command - '{' - nl { command }
 blockend = lh - '}' - le
 blockbody = (!blockend block)+:body { body } 
 explicit_block = < blockhead:head blockbody:body blockend > { create_item(:block, head, body, raw: text) }
@@ -69,12 +69,12 @@ items_list = unordered_list | ordered_list | definition_list
 
 
 # generic line command
-line_command = < lh - (!explicit_paragraph_command command):command ':' documentcontent?:content le > { create_item(:line_command, command, content, raw: text) }
+line_command = < lh - (!explicit_paragraph_command command):command ':' documentcontent?:content - le > { create_item(:line_command, command, content, raw: text) }
 
 # blocks
 block = items_list | line_command  | explicit_block | paragraph_group | empty_line+
 block_delimiter = blockhead | blockend | newpage 
-paragraph_delimiter = block | block_delimiter
+paragraph_delimiter = blockhead | blockend | items_list | line_command | empty_line+
 
 # texts
 char = < /[[:print:]]/ > { text }
