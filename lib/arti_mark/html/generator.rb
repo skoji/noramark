@@ -130,6 +130,7 @@ module ArtiMark
           # headers
           :stylesheets => header_writer,
           :title => header_writer,
+          :lang => header_writer,
           }
       end
 

@@ -18,6 +18,9 @@ module ArtiMark
           end,
           :title => proc do |item|
             @context.title = escape_html item[:title].strip
+          end,
+          :lang => proc do |item|
+            @context.lang = escape_html item[:lang].strip
           end
         }
       end

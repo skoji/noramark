@@ -2172,7 +2172,80 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # header = (stylesheets | title)
+  # lang = < lh - "lang:" (!le charstring):lang le > { create_item(:lang, {:lang => lang }, nil, raw:text) }
+  def _lang
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string("lang:")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+
+        _save2 = self.pos
+        while true # sequence
+          _save3 = self.pos
+          _tmp = apply(:_le)
+          _tmp = _tmp ? nil : true
+          self.pos = _save3
+          unless _tmp
+            self.pos = _save2
+            break
+          end
+          _tmp = apply(:_charstring)
+          unless _tmp
+            self.pos = _save2
+          end
+          break
+        end # end sequence
+
+        lang = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_le)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:lang, {:lang => lang }, nil, raw:text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_lang unless _tmp
+    return _tmp
+  end
+
+  # header = (stylesheets | title | lang)
   def _header
 
     _save = self.pos
@@ -2181,6 +2254,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
       _tmp = apply(:_title)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_lang)
       break if _tmp
       self.pos = _save
       break
@@ -2284,7 +2360,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content /$/ { content }")
   Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" (!le charstring):stylesheets le > { create_item(:stylesheets, {:stylesheets => stylesheets.split(',').map(&:strip)}, nil, raw:text) }")
   Rules[:_title] = rule_info("title", "< lh - \"title:\" (!le charstring):title le > { create_item(:title, {:title => title }, nil, raw:text) }")
-  Rules[:_header] = rule_info("header", "(stylesheets | title)")
+  Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" (!le charstring):lang le > { create_item(:lang, {:lang => lang }, nil, raw:text) }")
+  Rules[:_header] = rule_info("header", "(stylesheets | title | lang)")
   Rules[:_root] = rule_info("root", "header*:headers block*:blocks { headers + blocks }")
   # :startdoc:
 end
