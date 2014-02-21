@@ -43,6 +43,7 @@ module ArtiMark
                              {
                                'd' => TagWriter.create('div', self),
                                'art' => article_writer,
+                               'arti' => article_writer,
                                'article' => article_writer
                              }),
           :line_command =>

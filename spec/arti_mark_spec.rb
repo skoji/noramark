@@ -177,6 +177,21 @@ describe ArtiMark do
      ) 
     end
 
+    it 'should convert article with other notation' do
+      text = "arti {\n in the article.\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+     expect(body.element_children[0].selector_and_children).to eq(
+      ['article',
+       ['div.pgroup',
+        ['p', 'in the article.']
+       ]
+      ]
+     ) 
+    end
+
+
     it 'should handle block image' do
       text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')

@@ -4,8 +4,6 @@ ArtiMark is a simple text markup language. It is designed to create XHTML files 
 
 **CAUTION This is very early alpha version, so it's not stable at all.**
 
-Reimplemented new version will be released on the end of Feb. 2014. Some syntax will be changed on the new version. The name of the library may change.
-
 ## Installation
 
 Add this line to your application's Gemfile:
