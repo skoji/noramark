@@ -485,7 +485,6 @@ describe ArtiMark do
       text = "stylesheets:css/default.css, css/specific.css, css/iphone.css:(only screen and (min-device-width : 320px) and (max-device-width : 480px))\n\ntext."
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
-      p converted
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
       expect(head.element_children[0].a).to eq ['title', 'the document title']
       expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='css/default.css']", '']
