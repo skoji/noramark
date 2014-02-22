@@ -103,10 +103,10 @@ documentcontent = (inline | !inline char)+:content  ~parse_text(content)
 documentline = lh documentcontent:content le { content }
 
 #page
-page = header*:headers - (!newpage block)*:blocks { headers.concat blocks.select{ |x| !x.nil?} }
-newpaged_page = newpage:newpage page:page { page.unshift newpage }
+page = header*:headers - (!newpage block)*:blocks { create_item(:page, nil, (headers + blocks.select{ |x| !x.nil?})) }
+newpaged_page = newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }
 #root
-root = page:page newpaged_page*:pages - eof_comment? eof { pages.inject(page) { |build_page, next_page| build_page + next_page } }
+root = page:page newpaged_page*:pages - eof_comment? eof { [ page ] + pages }
 
 
 

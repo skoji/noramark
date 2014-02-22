@@ -5,6 +5,7 @@ require 'arti_mark/html/context'
 require 'arti_mark/html/tag_writer'
 require 'arti_mark/html/header_writer'
 require 'arti_mark/html/writer_selector'
+require 'arti_mark/html/abstract_item_writer'
 module ArtiMark
   module Html
     class Generator
@@ -21,8 +22,9 @@ module ArtiMark
                                        end)
 
         header_writer = HeaderWriter.new self
-
+        abstract_item_writer = AbstractItemWriter.new self
         @writers = {
+          :page => abstract_item_writer,
           :paragraph =>
           TagWriter.create('p', self, chop_last_space: true,
                            item_preprocessor: proc do |item|
