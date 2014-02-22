@@ -73,21 +73,6 @@ module ArtiMark
                                                   :done
                                                 end
                                                 ),
-                               'newpage' =>
-                               TagWriter.create('div', self,
-                                                item_preprocessor: proc do |item|
-                                                  item[:no_tag] = true
-                                                  item
-                                                end,
-                                                write_body_preprocessor: proc do |item|
-                                                  title = nil
-                                                  if item[:args].size > 0 && item[:args][0].size > 0
-                                                    title = escape_html item[:args].first
-                                                  end
-                                                  @context.start_html(title)
-                                                  :done
-                                                end
-                                                ),
 
                                }),
           :inline =>
@@ -132,6 +117,23 @@ module ArtiMark
                              output "<dd>"; write_array item[:args][1]; output "</dd>"
                              :done
                            end),
+          :newpage =>
+          TagWriter.create('div', self,
+                           item_preprocessor: proc do |item|
+                             item[:no_tag] = true
+                             item
+                           end,
+                           write_body_preprocessor: proc do |item|
+                             title = nil
+                             if item[:args].size > 0 && item[:args][0].size > 0
+                               title = escape_html item[:args].first
+                             end
+                             @context.title = title unless title.nil?
+                             @context.end_html
+                             :done
+                           end
+                           ),
+
           # headers
           :stylesheets => header_writer,
           :title => header_writer,

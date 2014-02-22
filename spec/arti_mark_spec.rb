@@ -581,14 +581,32 @@ describe ArtiMark do
       converted = artimark.convert(text)
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
       expect(head.element_children[0].a).to eq ['title', 'the title of the book in the text.']
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup',
+          ['p',
+            'text.']])
+
     end
 
-    it 'should specify lang' do
-      text = "lang:ja\n\n日本語 text."
+    it 'should specify title on each page' do
+      text = "title:page1\n\n1st page.\nnewpage:\ntitle:page2\nh1:2nd page"
       artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title')
       converted = artimark.convert(text)
-      root = Nokogiri::XML::Document.parse(converted[0]).root
-      expect(root['lang']).to eq 'ja'
+      # 1st page
+      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+      expect(head.element_children[0].a).to eq ['title', 'page1']
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup',
+          ['p',
+            '1st page.']])
+      # 2nd page
+      head = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
+      expect(head.element_children[0].a).to eq ['title', 'page2']
+      body = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['h1',"2nd page"])
     end
 
 

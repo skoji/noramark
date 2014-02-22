@@ -1479,6 +1479,121 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
+  # commandname_for_special_line_command = (newpage_command | explicit_paragraph_command)
+  def _commandname_for_special_line_command
+
+    _save = self.pos
+    while true # choice
+      _tmp = apply(:_newpage_command)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_explicit_paragraph_command)
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_commandname_for_special_line_command unless _tmp
+    return _tmp
+  end
+
+  # newpage_command = command:command &{ command[:name] == 'newpage' }
+  def _newpage_command
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_command)
+      command = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  command[:name] == 'newpage' ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_newpage_command unless _tmp
+    return _tmp
+  end
+
+  # newpage = < lh - newpage_command:c ":" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
+  def _newpage
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_newpage_command)
+        c = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string(":")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply(:_documentcontent)
+        @result = nil unless _tmp
+        unless _tmp
+          _tmp = true
+          self.pos = _save2
+        end
+        content = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_nl)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:newpage, c, content, raw:text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_newpage unless _tmp
+    return _tmp
+  end
+
   # explicit_paragraph_command = command:c &{ c[:name] == 'p' }
   def _explicit_paragraph_command
 
@@ -1903,7 +2018,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # line_command = < lh - !explicit_paragraph_command command:c ":" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
+  # line_command = < lh - !commandname_for_special_line_command command:c ":" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
   def _line_command
 
     _save = self.pos
@@ -1923,7 +2038,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
           break
         end
         _save2 = self.pos
-        _tmp = apply(:_explicit_paragraph_command)
+        _tmp = apply(:_commandname_for_special_line_command)
         _tmp = _tmp ? nil : true
         self.pos = _save2
         unless _tmp
@@ -2078,7 +2193,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # paragraph_delimiter = (block_delimiter | preformatted_command_head | line_block)
+  # paragraph_delimiter = (block_delimiter | preformatted_command_head | line_block | newpage)
   def _paragraph_delimiter
 
     _save = self.pos
@@ -2090,6 +2205,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
       _tmp = apply(:_line_block)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_newpage)
       break if _tmp
       self.pos = _save
       break
@@ -2659,8 +2777,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = header*:headers - block*:blocks - eof_comment? eof { headers.concat blocks.select{ |x| !x.nil?} }
-  def _root
+  # page = header*:headers - (!newpage block)*:blocks { headers.concat blocks.select{ |x| !x.nil?} }
+  def _page
 
     _save = self.pos
     while true # sequence
@@ -2684,7 +2802,24 @@ class ArtiMark::Parser < KPeg::CompiledParser
       end
       _ary = []
       while true
-        _tmp = apply(:_block)
+
+        _save3 = self.pos
+        while true # sequence
+          _save4 = self.pos
+          _tmp = apply(:_newpage)
+          _tmp = _tmp ? nil : true
+          self.pos = _save4
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = apply(:_block)
+          unless _tmp
+            self.pos = _save3
+          end
+          break
+        end # end sequence
+
         _ary << @result if _tmp
         break unless _tmp
       end
@@ -2695,16 +2830,81 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      @result = begin;  headers.concat blocks.select{ |x| !x.nil?} ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_page unless _tmp
+    return _tmp
+  end
+
+  # newpaged_page = newpage:newpage page:page { page.unshift newpage }
+  def _newpaged_page
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_newpage)
+      newpage = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_page)
+      page = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  page.unshift newpage ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_newpaged_page unless _tmp
+    return _tmp
+  end
+
+  # root = page:page newpaged_page*:pages - eof_comment? eof { pages.inject(page) { |build_page, next_page| build_page + next_page } }
+  def _root
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_page)
+      page = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _ary = []
+      while true
+        _tmp = apply(:_newpaged_page)
+        _ary << @result if _tmp
+        break unless _tmp
+      end
+      _tmp = true
+      @result = _ary
+      pages = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
       end
-      _save3 = self.pos
+      _save2 = self.pos
       _tmp = apply(:_eof_comment)
       unless _tmp
         _tmp = true
-        self.pos = _save3
+        self.pos = _save2
       end
       unless _tmp
         self.pos = _save
@@ -2715,7 +2915,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  headers.concat blocks.select{ |x| !x.nil?} ; end
+      @result = begin;  pages.inject(page) { |build_page, next_page| build_page + next_page } ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2762,6 +2962,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:c \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
   Rules[:_img_command] = rule_info("img_command", "command:c &{ c[:name] == 'img' && c[:args].size == 2}")
   Rules[:_img_inline] = rule_info("img_inline", "< \"[\" img_command:c \"]\" > { create_item(:inline, c, nil, raw: text) }")
+  Rules[:_commandname_for_special_line_command] = rule_info("commandname_for_special_line_command", "(newpage_command | explicit_paragraph_command)")
+  Rules[:_newpage_command] = rule_info("newpage_command", "command:command &{ command[:name] == 'newpage' }")
+  Rules[:_newpage] = rule_info("newpage", "< lh - newpage_command:c \":\" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }")
   Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:c &{ c[:name] == 'p' }")
   Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< lh - explicit_paragraph_command:c \":\" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }")
   Rules[:_unordered_list] = rule_info("unordered_list", "< unordered_item+:items > { create_item(:ul, nil, items, raw: text) }")
@@ -2771,11 +2974,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
   Rules[:_definition_item] = rule_info("definition_item", "< lh \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
-  Rules[:_line_command] = rule_info("line_command", "< lh - !explicit_paragraph_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
+  Rules[:_line_command] = rule_info("line_command", "< lh - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
   Rules[:_block] = rule_info("block", "(preformatted_block | line_block | explicit_block | paragraph_group):block empty_line* {block}")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
-  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block)")
+  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage)")
   Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
   Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
   Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")
@@ -2787,6 +2990,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
   Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
   Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content le { content }")
-  Rules[:_root] = rule_info("root", "header*:headers - block*:blocks - eof_comment? eof { headers.concat blocks.select{ |x| !x.nil?} }")
+  Rules[:_page] = rule_info("page", "header*:headers - (!newpage block)*:blocks { headers.concat blocks.select{ |x| !x.nil?} }")
+  Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page.unshift newpage }")
+  Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { pages.inject(page) { |build_page, next_page| build_page + next_page } }")
   # :startdoc:
 end

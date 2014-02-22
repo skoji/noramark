@@ -51,9 +51,16 @@ img_command = command:c &{ c[:name] == 'img' && c[:args].size == 2}
 img_inline = < '[' img_command:c  ']' > { create_item(:inline, c, nil, raw: text) } 
 
 # special line commands
+commandname_for_special_line_command = newpage_command | explicit_paragraph_command
+
+# newpage
+newpage_command = command:command &{ command[:name] == 'newpage' }
+newpage = < lh - newpage_command:c ':' documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
+
 # explicit paragraph
 explicit_paragraph_command = command:c &{ c[:name] == 'p' }
 explicit_paragraph = < lh - explicit_paragraph_command:c ':' documentcontent?:content le empty_line*> { create_item(:paragraph, c, content, raw:text) }
+
 
 # unordered list
 unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
@@ -71,13 +78,13 @@ items_list = unordered_list | ordered_list | definition_list
 
 
 # generic line command
-line_command = < lh - !explicit_paragraph_command command:c ':' documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
+line_command = < lh - !commandname_for_special_line_command command:c ':' documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
 
 # blocks
-line_block = items_list | line_command 
+line_block =  items_list | line_command 
 block = (preformatted_block | line_block  | explicit_block | paragraph_group):block empty_line* {block}
 block_delimiter = blockhead | blockend 
-paragraph_delimiter = block_delimiter | preformatted_command_head | line_block 
+paragraph_delimiter = block_delimiter | preformatted_command_head | line_block | newpage
 
 
 #header
@@ -95,7 +102,11 @@ documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_te
 documentcontent = (inline | !inline char)+:content  ~parse_text(content)
 documentline = lh documentcontent:content le { content }
 
+#page
+page = header*:headers - (!newpage block)*:blocks { headers.concat blocks.select{ |x| !x.nil?} }
+newpaged_page = newpage:newpage page:page { page.unshift newpage }
 #root
-root = header*:headers - block*:blocks - eof_comment? eof { headers.concat blocks.select{ |x| !x.nil?} }
+root = page:page newpaged_page*:pages - eof_comment? eof { pages.inject(page) { |build_page, next_page| build_page + next_page } }
+
 
 
