@@ -13,6 +13,7 @@ module ArtiMark
       def initialize(param = {})
         @context = Context.new(param)
         article_writer = TagWriter.create('article', self)
+        section_writer = TagWriter.create('section', self)
         link_writer = TagWriter.create('a', self, trailer: '', 
                                        item_preprocessor: proc do |item|
                                          (item[:attrs] ||= {}).merge!({:href => [ item[:args][0] ]})
@@ -44,7 +45,10 @@ module ArtiMark
                                'd' => TagWriter.create('div', self),
                                'art' => article_writer,
                                'arti' => article_writer,
-                               'article' => article_writer
+                               'article' => article_writer,
+                               'sec' => section_writer,
+                               'sect' => section_writer,
+                               'section' => section_writer,
                              }),
           :line_command =>
           WriterSelector.new(self,

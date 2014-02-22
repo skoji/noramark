@@ -191,6 +191,69 @@ describe ArtiMark do
      ) 
     end
 
+    it 'should convert article with yet anther notation' do
+      text = "article {\n in the article.\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+     expect(body.element_children[0].selector_and_children).to eq(
+      ['article',
+       ['div.pgroup',
+        ['p', 'in the article.']
+       ]
+      ]
+     ) 
+    end
+
+    it 'should convert section ' do
+      text = "art {\nsec {\n section in the article. \n}\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+      ['article',
+       ['section',
+       ['div.pgroup',
+        ['p', 'section in the article.']
+       ]
+       ]
+      ]
+     ) 
+    end
+
+    it 'should convert section with other notation' do
+      text = "art {\nsect {\n section in the article. \n}\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+      ['article',
+       ['section',
+       ['div.pgroup',
+        ['p', 'section in the article.']
+       ]
+       ]
+      ]
+     ) 
+    end
+
+    it 'should convert section with yet other notation' do
+      text = "art {\nsection {\n section in the article. \n}\n}"
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+      ['article',
+       ['section',
+       ['div.pgroup',
+        ['p', 'section in the article.']
+       ]
+       ]
+      ]
+     ) 
+    end
+
+
 
     it 'should handle block image' do
       text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
