@@ -658,5 +658,24 @@ EOF
       expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
       expect(body.element_children[1].selector_and_children).to eq(["pre", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"])
     end
+    it 'should convert preformatted code' do
+      text = <<EOF
+normal line.
+precode <<END
+d {
+   this will not converted to div or p or pgroup.
+line_command: this will be not converted too.
+}
+END
+normal line again.
+EOF
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
+      expect(body.element_children[1].selector_and_children).to eq(["pre", ["code", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"]])
+      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
+    end
+
   end
 end

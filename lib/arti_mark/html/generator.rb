@@ -139,7 +139,9 @@ module ArtiMark
           # pre-formatted
           :preformatted =>
           TagWriter.create('pre', self,write_body_preprocessor: proc do |item|
+                             output "<code>" if item[:name] == 'precode'
                              output item[:children].join "\n"
+                             output "</code>" if item[:name] == 'precode'
                              :done
                            end)
           }
