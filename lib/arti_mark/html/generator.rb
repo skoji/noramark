@@ -25,6 +25,7 @@ module ArtiMark
         abstract_item_writer = AbstractItemWriter.new self
         @writers = {
           :page => abstract_item_writer,
+          :headers => abstract_item_writer,
           :paragraph =>
           TagWriter.create('p', self, chop_last_space: true,
                            item_preprocessor: proc do |item|

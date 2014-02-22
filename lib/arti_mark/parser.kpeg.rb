@@ -2777,8 +2777,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # page = header*:headers - (!newpage block)*:blocks { create_item(:page, nil, (headers + blocks.select{ |x| !x.nil?})) }
-  def _page
+  # headers = header*:headers { create_item(:headers, nil, headers) }
+  def _headers
 
     _save = self.pos
     while true # sequence
@@ -2795,6 +2795,29 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      @result = begin;  create_item(:headers, nil, headers) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_headers unless _tmp
+    return _tmp
+  end
+
+  # page = headers:headers - (!newpage block)*:blocks { create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) }
+  def _page
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_headers)
+      headers = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -2803,19 +2826,19 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _ary = []
       while true
 
-        _save3 = self.pos
+        _save2 = self.pos
         while true # sequence
-          _save4 = self.pos
+          _save3 = self.pos
           _tmp = apply(:_newpage)
           _tmp = _tmp ? nil : true
-          self.pos = _save4
+          self.pos = _save3
           unless _tmp
-            self.pos = _save3
+            self.pos = _save2
             break
           end
           _tmp = apply(:_block)
           unless _tmp
-            self.pos = _save3
+            self.pos = _save2
           end
           break
         end # end sequence
@@ -2830,7 +2853,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:page, nil, (headers + blocks.select{ |x| !x.nil?})) ; end
+      @result = begin;  create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2990,7 +3013,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
   Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
   Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content le { content }")
-  Rules[:_page] = rule_info("page", "header*:headers - (!newpage block)*:blocks { create_item(:page, nil, (headers + blocks.select{ |x| !x.nil?})) }")
+  Rules[:_headers] = rule_info("headers", "header*:headers { create_item(:headers, nil, headers) }")
+  Rules[:_page] = rule_info("page", "headers:headers - (!newpage block)*:blocks { create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) }")
   Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }")
   Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { [ page ] + pages }")
   # :startdoc:
