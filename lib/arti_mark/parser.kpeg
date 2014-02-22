@@ -38,6 +38,12 @@ blockend = lh - '}' - le empty_line*
 blockbody = (!blockend block)+:body { body } 
 explicit_block = < blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }
 
+# preformatted block
+preformatted_command = command:command &{ ['pre', 'precode'].include? command[:name] }
+preformatted_command_head = lh - preformatted_command:command - '<<' &/[\w0-9]/ { command }
+preformat_end(start) = lh word:delimiter &{ delimiter == start }
+preformatted_block = < lh - preformatted_command_head:command !nl word:delimiter nl (!preformat_end(delimiter) (lh charstring nl))+:content preformat_end(delimiter) > { create_item(:preformatted, command, content, raw: text) }
+
 # inline command
 inline = img_inline | common_inline
 common_inline = < '[' command:c '{' documentcontent_except('}'):content '}' ']' > { create_item(:inline, c, content, raw: text) }
@@ -69,9 +75,9 @@ line_command = < lh - !explicit_paragraph_command command:c ':' documentcontent?
 
 # blocks
 line_block = items_list | line_command 
-block = (line_block  | explicit_block | paragraph_group):block empty_line* {block}
+block = (preformatted_block | line_block  | explicit_block | paragraph_group):block empty_line* {block}
 block_delimiter = blockhead | blockend 
-paragraph_delimiter = block_delimiter | line_block 
+paragraph_delimiter = block_delimiter | preformatted_command_head | line_block 
 
 
 #header

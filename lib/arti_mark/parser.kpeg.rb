@@ -1082,6 +1082,253 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
+  # preformatted_command = command:command &{ ['pre', 'precode'].include? command[:name] }
+  def _preformatted_command
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_command)
+      command = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  ['pre', 'precode'].include? command[:name] ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_preformatted_command unless _tmp
+    return _tmp
+  end
+
+  # preformatted_command_head = lh - preformatted_command:command - "<<" &/[\w0-9]/ { command }
+  def _preformatted_command_head
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_preformatted_command)
+      command = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("<<")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = scan(/\A(?-mix:[\w0-9])/)
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  command ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_preformatted_command_head unless _tmp
+    return _tmp
+  end
+
+  # preformat_end = lh word:delimiter &{ delimiter == start }
+  def _preformat_end(start)
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_word)
+      delimiter = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  delimiter == start ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_preformat_end unless _tmp
+    return _tmp
+  end
+
+  # preformatted_block = < lh - preformatted_command_head:command !nl word:delimiter nl (!preformat_end(delimiter) lh charstring nl)+:content preformat_end(delimiter) > { create_item(:preformatted, command, content, raw: text) }
+  def _preformatted_block
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_preformatted_command_head)
+        command = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply(:_nl)
+        _tmp = _tmp ? nil : true
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_word)
+        delimiter = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_nl)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save3 = self.pos
+        _ary = []
+
+        _save4 = self.pos
+        while true # sequence
+          _save5 = self.pos
+          _tmp = apply_with_args(:_preformat_end, delimiter)
+          _tmp = _tmp ? nil : true
+          self.pos = _save5
+          unless _tmp
+            self.pos = _save4
+            break
+          end
+          _tmp = apply(:_lh)
+          unless _tmp
+            self.pos = _save4
+            break
+          end
+          _tmp = apply(:_charstring)
+          unless _tmp
+            self.pos = _save4
+            break
+          end
+          _tmp = apply(:_nl)
+          unless _tmp
+            self.pos = _save4
+          end
+          break
+        end # end sequence
+
+        if _tmp
+          _ary << @result
+          while true
+
+            _save6 = self.pos
+            while true # sequence
+              _save7 = self.pos
+              _tmp = apply_with_args(:_preformat_end, delimiter)
+              _tmp = _tmp ? nil : true
+              self.pos = _save7
+              unless _tmp
+                self.pos = _save6
+                break
+              end
+              _tmp = apply(:_lh)
+              unless _tmp
+                self.pos = _save6
+                break
+              end
+              _tmp = apply(:_charstring)
+              unless _tmp
+                self.pos = _save6
+                break
+              end
+              _tmp = apply(:_nl)
+              unless _tmp
+                self.pos = _save6
+              end
+              break
+            end # end sequence
+
+            _ary << @result if _tmp
+            break unless _tmp
+          end
+          _tmp = true
+          @result = _ary
+        else
+          self.pos = _save3
+        end
+        content = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply_with_args(:_preformat_end, delimiter)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:preformatted, command, content, raw: text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_preformatted_block unless _tmp
+    return _tmp
+  end
+
   # inline = (img_inline | common_inline)
   def _inline
 
@@ -1764,7 +2011,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block = (line_block | explicit_block | paragraph_group):block empty_line* {block}
+  # block = (preformatted_block | line_block | explicit_block | paragraph_group):block empty_line* {block}
   def _block
 
     _save = self.pos
@@ -1772,6 +2019,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # choice
+        _tmp = apply(:_preformatted_block)
+        break if _tmp
+        self.pos = _save1
         _tmp = apply(:_line_block)
         break if _tmp
         self.pos = _save1
@@ -1828,12 +2078,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # paragraph_delimiter = (block_delimiter | line_block)
+  # paragraph_delimiter = (block_delimiter | preformatted_command_head | line_block)
   def _paragraph_delimiter
 
     _save = self.pos
     while true # choice
       _tmp = apply(:_block_delimiter)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_preformatted_command_head)
       break if _tmp
       self.pos = _save
       _tmp = apply(:_line_block)
@@ -2501,6 +2754,10 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le empty_line*")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }")
+  Rules[:_preformatted_command] = rule_info("preformatted_command", "command:command &{ ['pre', 'precode'].include? command[:name] }")
+  Rules[:_preformatted_command_head] = rule_info("preformatted_command_head", "lh - preformatted_command:command - \"<<\" &/[\\w0-9]/ { command }")
+  Rules[:_preformat_end] = rule_info("preformat_end", "lh word:delimiter &{ delimiter == start }")
+  Rules[:_preformatted_block] = rule_info("preformatted_block", "< lh - preformatted_command_head:command !nl word:delimiter nl (!preformat_end(delimiter) lh charstring nl)+:content preformat_end(delimiter) > { create_item(:preformatted, command, content, raw: text) }")
   Rules[:_inline] = rule_info("inline", "(img_inline | common_inline)")
   Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:c \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
   Rules[:_img_command] = rule_info("img_command", "command:c &{ c[:name] == 'img' && c[:args].size == 2}")
@@ -2516,9 +2773,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
   Rules[:_line_command] = rule_info("line_command", "< lh - !explicit_paragraph_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
-  Rules[:_block] = rule_info("block", "(line_block | explicit_block | paragraph_group):block empty_line* {block}")
+  Rules[:_block] = rule_info("block", "(preformatted_block | line_block | explicit_block | paragraph_group):block empty_line* {block}")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
-  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | line_block)")
+  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block)")
   Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
   Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
   Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")

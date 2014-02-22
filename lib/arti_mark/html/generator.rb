@@ -136,6 +136,12 @@ module ArtiMark
           :stylesheets => header_writer,
           :title => header_writer,
           :lang => header_writer,
+          # pre-formatted
+          :preformatted =>
+          TagWriter.create('pre', self,write_body_preprocessor: proc do |item|
+                             output item[:children].join "\n"
+                             :done
+                           end)
           }
       end
 
