@@ -695,5 +695,9 @@ EOF
       expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
     end
 
+    it 'should raise error' do
+      text = "d {\n block is\nd {\n nested but\nd {\n not terminated }"
+      expect { ArtiMark::Document.new(:lang => 'ja', :title => 'foo').convert(text) }.to raise_error KPeg::CompiledParser::ParseError
+    end
   end
 end

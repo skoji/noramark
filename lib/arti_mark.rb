@@ -40,8 +40,7 @@ module ArtiMark
       }
       @parser = Parser.new(text)
       if (!@parser.parse)
-        puts @parser.show_error
-        exit -1
+        raise @parser.raise_error
       end
       @generator.convert(@parser.result)
 
