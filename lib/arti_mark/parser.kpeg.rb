@@ -31,7 +31,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # eof_comment = lh space* "//" (!eof .)*
+  # eof_comment = lh space* "#" (!eof .)*
   def _eof_comment
 
     _save = self.pos
@@ -50,7 +50,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = match_string("//")
+      _tmp = match_string("#")
       unless _tmp
         self.pos = _save
         break
@@ -87,7 +87,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # comment = lh space* "//" (!nl .)* nl empty_line*
+  # comment = lh space* "#" (!nl .)* nl empty_line*
   def _comment
 
     _save = self.pos
@@ -106,7 +106,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = match_string("//")
+      _tmp = match_string("#")
       unless _tmp
         self.pos = _save
         break
@@ -2126,7 +2126,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block = (preformatted_block | line_block | explicit_block | paragraph_group | headed_section):block empty_line* {block}
+  # block = (preformatted_block | headed_section | line_block | explicit_block | paragraph_group):block empty_line* {block}
   def _block
 
     _save = self.pos
@@ -2137,6 +2137,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
         _tmp = apply(:_preformatted_block)
         break if _tmp
         self.pos = _save1
+        _tmp = apply(:_headed_section)
+        break if _tmp
+        self.pos = _save1
         _tmp = apply(:_line_block)
         break if _tmp
         self.pos = _save1
@@ -2144,9 +2147,6 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break if _tmp
         self.pos = _save1
         _tmp = apply(:_paragraph_group)
-        break if _tmp
-        self.pos = _save1
-        _tmp = apply(:_headed_section)
         break if _tmp
         self.pos = _save1
         break
@@ -2223,34 +2223,47 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # h_start_mark = "#"+:h &{ h.length == n }
+  # h_start_mark = < "="+ ":" > &{ text.length - 1 == n }
   def _h_start_mark(n)
 
     _save = self.pos
     while true # sequence
+      _text_start = self.pos
+
       _save1 = self.pos
-      _ary = []
-      _tmp = match_string("#")
-      if _tmp
-        _ary << @result
-        while true
-          _tmp = match_string("#")
-          _ary << @result if _tmp
-          break unless _tmp
+      while true # sequence
+        _save2 = self.pos
+        _tmp = match_string("=")
+        if _tmp
+          while true
+            _tmp = match_string("=")
+            break unless _tmp
+          end
+          _tmp = true
+        else
+          self.pos = _save2
         end
-        _tmp = true
-        @result = _ary
-      else
-        self.pos = _save1
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string(":")
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
       end
-      h = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _save2 = self.pos
-      _tmp = begin;  h.length == n ; end
-      self.pos = _save2
+      _save3 = self.pos
+      _tmp = begin;  text.length - 1 == n ; end
+      self.pos = _save3
       unless _tmp
         self.pos = _save
       end
@@ -2261,34 +2274,57 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # h_markup_terminator = "#"+:h &{ h.length <= n }
+  # h_markup_terminator = lh - < "="+ ":" > &{ text.length - 1 <= n }
   def _h_markup_terminator(n)
 
     _save = self.pos
     while true # sequence
-      _save1 = self.pos
-      _ary = []
-      _tmp = match_string("#")
-      if _tmp
-        _ary << @result
-        while true
-          _tmp = match_string("#")
-          _ary << @result if _tmp
-          break unless _tmp
-        end
-        _tmp = true
-        @result = _ary
-      else
-        self.pos = _save1
-      end
-      h = @result
+      _tmp = apply(:_lh)
       unless _tmp
         self.pos = _save
         break
       end
-      _save2 = self.pos
-      _tmp = begin;  h.length <= n ; end
-      self.pos = _save2
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _save2 = self.pos
+        _tmp = match_string("=")
+        if _tmp
+          while true
+            _tmp = match_string("=")
+            break unless _tmp
+          end
+          _tmp = true
+        else
+          self.pos = _save2
+        end
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string(":")
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save3 = self.pos
+      _tmp = begin;  text.length - 1 <= n ; end
+      self.pos = _save3
       unless _tmp
         self.pos = _save
       end
@@ -3244,8 +3280,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules = {}
   Rules[:_eof] = rule_info("eof", "!.")
   Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
-  Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"//\" (!eof .)*")
-  Rules[:_comment] = rule_info("comment", "lh space* \"//\" (!nl .)* nl empty_line*")
+  Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"\#\" (!eof .)*")
+  Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl empty_line*")
   Rules[:__hyphen_] = rule_info("-", "(space | comment)*")
   Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
@@ -3290,11 +3326,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
   Rules[:_line_command] = rule_info("line_command", "< lh - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
-  Rules[:_block] = rule_info("block", "(preformatted_block | line_block | explicit_block | paragraph_group | headed_section):block empty_line* {block}")
+  Rules[:_block] = rule_info("block", "(preformatted_block | headed_section | line_block | explicit_block | paragraph_group):block empty_line* {block}")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
   Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage | headed_start)")
-  Rules[:_h_start_mark] = rule_info("h_start_mark", "\"\#\"+:h &{ h.length == n }")
-  Rules[:_h_markup_terminator] = rule_info("h_markup_terminator", "\"\#\"+:h &{ h.length <= n }")
+  Rules[:_h_start_mark] = rule_info("h_start_mark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
+  Rules[:_h_markup_terminator] = rule_info("h_markup_terminator", "lh - < \"=\"+ \":\" > &{ text.length - 1 <= n }")
   Rules[:_h_start] = rule_info("h_start", "lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }")
   Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
   Rules[:_headed_start] = rule_info("headed_start", "(h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))")

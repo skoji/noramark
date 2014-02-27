@@ -30,8 +30,8 @@ Or install it yourself as:
 
 an example of markup text
 
-    // line begins with // is a comment.
-    // you don't need to indent artimark text.
+    # line begins with # is a comment.
+    # you don't need to indent artimark text.
 
     lang: en
     title: test title
@@ -81,22 +81,22 @@ The converted XHTML file
 
 another example of markup text
 
-    // Markdown style heading will creates section
+    # Markdown-ish heading will creates section
 
     lang: en
     title: test title
     stylesheets: css/normalize.css, css/main.css
     
-    # this is the first heading
+    =: this is the first heading
 
     This line is in a section.
     This line is in a section.
 
-    ## this is the second heading
+    ==: this is the second heading
 
     This section is nested.
 
-    # this is the third heading
+    =: this is the third heading
 
     will terminate lower level section
 

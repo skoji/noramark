@@ -3,8 +3,8 @@
 # literals
 eof = !.
 space = ' ' | '\t' 
-eof_comment = lh space* "//" (!eof .)*
-comment =   lh space* "//" (!nl .)* nl empty_line*
+eof_comment = lh space* "#" (!eof .)*
+comment =   lh space* "#" (!nl .)* nl empty_line*
 - =  ( space | comment )*
 empty_line = lh - nl
 nl = /\r?\n/
@@ -82,13 +82,13 @@ line_command = < lh - !commandname_for_special_line_command command:c ':' docume
 
 # blocks
 line_block =  items_list | line_command 
-block = (preformatted_block | line_block  | explicit_block | paragraph_group | headed_section ):block empty_line* {block}
+block = (preformatted_block | headed_section | line_block  | explicit_block | paragraph_group ):block empty_line* {block}
 block_delimiter = blockhead | blockend 
 paragraph_delimiter = block_delimiter | preformatted_command_head | line_block | newpage | headed_start
 
 # markdown-style headings
-h_start_mark(n) = '#'+:h &{ h.length == n }
-h_markup_terminator(n) = '#'+:h &{ h.length <= n }
+h_start_mark(n) = < '='+ ':' > &{ text.length - 1 == n }
+h_markup_terminator(n) = lh - < '='+ ':' > &{ text.length - 1 <= n }
 
 h_start(n) = lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }
 h_section(n) = < h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }

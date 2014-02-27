@@ -611,7 +611,7 @@ describe ArtiMark do
 
 
     it 'should ignore comments' do
-      text = "//この行はコメントです\nここから、パラグラフがはじまります。\n //これもコメント\n「二行目です。」\n三行目です。\n\n// これもコメント\n\n ここから、次のパラグラフです。"
+      text = "# この行はコメントです\nここから、パラグラフがはじまります。\n # これもコメント\n「二行目です。」\n三行目です。\n\n# これもコメント\n\n ここから、次のパラグラフです。"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -702,7 +702,7 @@ EOF
 
     context 'markdown style' do
       it 'should convert markdown style heading' do
-        text = "# タイトルです。\r\nこれは、セクションの中です。"
+        text = "=: タイトルです。\r\nこれは、セクションの中です。"
         artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
         converted = artimark.convert(text)
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -715,7 +715,7 @@ EOF
       )
       end
       it 'should markdown style heading interrupted by other headed section' do
-        text = "# タイトルです。\r\nこれは、セクションの中です。\n # また次のセクションです。\n次のセクションの中です。"
+        text = "=: タイトルです。\r\nこれは、セクションの中です。\n =: また次のセクションです。\n次のセクションの中です。"
         artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
         converted = artimark.convert(text)
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -733,7 +733,7 @@ EOF
       )
       end
       it 'should markdown style heading not interrupted by other explicit section' do
-        text = "# タイトルです。\r\nこれは、セクションの中です。\n section {\n h2: また次のセクションです。\n入れ子になります。\n}\nこのように。"
+        text = "=: タイトルです。\r\nこれは、セクションの中です。\n section {\n h2: また次のセクションです。\n入れ子になります。\n}\nこのように。"
         artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
         converted = artimark.convert(text)
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -752,7 +752,7 @@ EOF
       )
       end
       it 'should markdown style heading not interrupted by smaller section' do
-        text = "# タイトルです。\r\nこれは、セクションの中です。\n ## また次のセクションです。\n 入れ子になります。\n### さらに中のセクション \nさらに入れ子になっているはず。\n#ここで次のセクションです。\n脱出しているはずです。"
+        text = "=: タイトルです。\r\nこれは、セクションの中です。\n ==: また次のセクションです。\n 入れ子になります。\n===: さらに中のセクション \nさらに入れ子になっているはず。\n=:ここで次のセクションです。\n脱出しているはずです。"
         artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
         converted = artimark.convert(text)
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
