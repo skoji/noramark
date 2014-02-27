@@ -42,7 +42,6 @@ module ArtiMark
       if (!@parser.parse)
         raise @parser.raise_error
       end
-      
       @generator.convert(@parser.result)
     end
   end

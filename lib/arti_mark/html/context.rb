@@ -10,7 +10,7 @@ module ArtiMark
         @stylesheets = param[:stylesheets] || []
         @stylesheets_alt = param[:stylesheets_alt] || []
         @enable_pgroup = param[:enable_pgroup] || true
-        @paragraph_type = param[:paragraph_type]
+        @paragraph_style = param[:paragraph_style]
         @pages = Result.new
         @block_delimiter_stack = []
         head_inserter do
@@ -31,11 +31,15 @@ module ArtiMark
         @pages.last.sub!(/[[:space:]]+$/, '')
       end
 
-      def paragraph_type
-        if @paragraph_type
-          @paragraph_type
+      def paragraph_style=(style)
+        @paragraph_style = style
+      end
+      
+      def paragraph_style
+        if @paragraph_style
+          @paragraph_style
         elsif @lang.split('-')[0] == 'ja' 
-          'paragraph-group'
+          'use-paragraph-group'
         else
           'default'
         end

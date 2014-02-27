@@ -2736,7 +2736,71 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # header = (stylesheets | title | lang) empty_line*
+  # paragraph_style = < lh - "paragraph-style:" !le charstring:l nl > { create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) }
+  def _paragraph_style
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string("paragraph-style:")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply(:_le)
+        _tmp = _tmp ? nil : true
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_charstring)
+        l = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_nl)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_paragraph_style unless _tmp
+    return _tmp
+  end
+
+  # header = (stylesheets | title | lang | paragraph_style) empty_line*
   def _header
 
     _save = self.pos
@@ -2751,6 +2815,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break if _tmp
         self.pos = _save1
         _tmp = apply(:_lang)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_paragraph_style)
         break if _tmp
         self.pos = _save1
         break
@@ -3338,7 +3405,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
   Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
   Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")
-  Rules[:_header] = rule_info("header", "(stylesheets | title | lang) empty_line*")
+  Rules[:_paragraph_style] = rule_info("paragraph_style", "< lh - \"paragraph-style:\" !le charstring:l nl > { create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) }")
+  Rules[:_header] = rule_info("header", "(stylesheets | title | lang | paragraph_style) empty_line*")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
   Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")

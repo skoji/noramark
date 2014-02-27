@@ -21,6 +21,9 @@ module ArtiMark
           end,
           :lang => proc do |item|
             @context.lang = escape_html item[:lang].strip
+          end,
+          :paragraph_style => proc do |item|
+            @context.paragraph_style = item[:paragraph_style].strip
           end
         }
       end

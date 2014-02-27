@@ -134,6 +134,7 @@ module ArtiMark
           :stylesheets => header_writer,
           :title => header_writer,
           :lang => header_writer,
+          :paragraph_style => header_writer,
           # pre-formatted
           :preformatted =>
           TagWriter.create('pre', self,write_body_preprocessor: proc do |item|
@@ -141,7 +142,13 @@ module ArtiMark
                              output item[:children].join "\n"
                              output "</code>" if item[:name] == 'precode'
                              :done
-                           end)
+                           end),
+          #break
+          :br =>
+            TagWriter.create('br', self, item_preprocessor: proc do |item|
+                               item[:no_body] = true
+                               item
+                             end),
           }
       end
 

@@ -36,6 +36,44 @@ describe ArtiMark do
           ['p', 'ここから、次のパラグラフです。']]
       )
     end
+    it 'should convert simple paragraph in english mode' do
+      text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+      artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['p', 
+         'paragraph begins.', ['br', ''],
+         '2nd line.', ['br', ''],
+         '3rd line.'
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['p', 'next paragraph.']
+      )
+    end
+
+    it 'should convert simple paragraph in japanese mode, but paragraph mode is default' do
+      text = "paragraph-style: default\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      converted = artimark.convert(text)
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['p', 
+         'paragraph begins.', ['br', ''],
+         '2nd line.', ['br', ''],
+         '3rd line.'
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['p', 'next paragraph.']
+      )
+    end
+
     it 'should convert paragraph with header' do
       text = "h1: タイトルです。\r\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -591,7 +629,7 @@ describe ArtiMark do
 
     it 'should specify title on each page' do
       text = "title:page1\n\n1st page.\nnewpage:\ntitle:page2\nh1:2nd page"
-      artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title')
+      artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title', :paragraph_style => 'use-paragraph-group')
       converted = artimark.convert(text)
       # 1st page
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
