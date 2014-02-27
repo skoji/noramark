@@ -4,6 +4,7 @@ require 'arti_mark/html/result'
 require 'arti_mark/html/context'
 require 'arti_mark/html/tag_writer'
 require 'arti_mark/html/header_writer'
+require 'arti_mark/html/paragraph_writer'
 require 'arti_mark/html/writer_selector'
 require 'arti_mark/html/abstract_item_writer'
 module ArtiMark
@@ -22,26 +23,13 @@ module ArtiMark
                                        end)
 
         header_writer = HeaderWriter.new self
+        paragraph_writer = ParagraphWriter.new self
         abstract_item_writer = AbstractItemWriter.new self
         @writers = {
           :page => abstract_item_writer,
           :headers => abstract_item_writer,
-          :paragraph =>
-          TagWriter.create('p', self, chop_last_space: true,
-                           item_preprocessor: proc do |item|
-                             add_class(item, 'noindent') if item[:children][0] =~/^(「|『|（)/  # TODO: should be plaggable}
-                             item
-                           end
-                           ),
-          :paragraph_group =>
-          TagWriter.create("div", self,
-                           item_preprocessor: proc do |item|
-                             add_class item, 'pgroup'
-                             item[:no_tag] = true unless @context.enable_pgroup
-                             item
-                           end
-                           ),
-
+          :paragraph => paragraph_writer,
+          :paragraph_group => paragraph_writer,
           :block =>
           WriterSelector.new(self,
                              {
