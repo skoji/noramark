@@ -3,8 +3,8 @@
 # literals
 eof = !.
 space = ' ' | '\t' 
-eof_comment = lh space* "#" (!eof .)*
-comment =   lh space* "#" (!nl .)* nl empty_line*
+eof_comment = lh space* "//" (!eof .)*
+comment =   lh space* "//" (!nl .)* nl empty_line*
 - =  ( space | comment )*
 empty_line = lh - nl
 nl = /\r?\n/

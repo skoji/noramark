@@ -30,8 +30,8 @@ Or install it yourself as:
 
 an example of markup text
 
-    # line begins with # is a comment.
-    # you don't need to indent artimark text.
+    // line begins with // is a comment.
+    // you don't need to indent artimark text.
 
     lang: en
     title: test title

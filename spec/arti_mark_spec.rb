@@ -611,7 +611,7 @@ describe ArtiMark do
 
 
     it 'should ignore comments' do
-      text = "#この行はコメントです\nここから、パラグラフがはじまります。\n#これもコメント\n「二行目です。」\n三行目です。\n\n#これもコメント\n\n ここから、次のパラグラフです。"
+      text = "//この行はコメントです\nここから、パラグラフがはじまります。\n //これもコメント\n「二行目です。」\n三行目です。\n\n// これもコメント\n\n ここから、次のパラグラフです。"
       artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -698,6 +698,22 @@ EOF
     it 'should raise error' do
       text = "d {\n block is\nd {\n nested but\nd {\n not terminated }"
       expect { ArtiMark::Document.new(:lang => 'ja', :title => 'foo').convert(text) }.to raise_error KPeg::CompiledParser::ParseError
+    end
+
+    context 'markdown style' do
+      it 'should convert markdown style heading' do
+        text = "# タイトルです。\r\nこれは、セクションです。"
+        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+        converted = artimark.convert(text)
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 1
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+          ['h1', 'タイトルです。'],
+          ['div.pgroup', 
+           ['p', 'ここから、パラグラフがはじまります。']]]
+      )
+      end
     end
   end
 end

@@ -31,7 +31,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # eof_comment = lh space* "#" (!eof .)*
+  # eof_comment = lh space* "//" (!eof .)*
   def _eof_comment
 
     _save = self.pos
@@ -50,7 +50,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = match_string("#")
+      _tmp = match_string("//")
       unless _tmp
         self.pos = _save
         break
@@ -87,7 +87,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # comment = lh space* "#" (!nl .)* nl empty_line*
+  # comment = lh space* "//" (!nl .)* nl empty_line*
   def _comment
 
     _save = self.pos
@@ -106,7 +106,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = match_string("#")
+      _tmp = match_string("//")
       unless _tmp
         self.pos = _save
         break
@@ -2953,8 +2953,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules = {}
   Rules[:_eof] = rule_info("eof", "!.")
   Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
-  Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"\#\" (!eof .)*")
-  Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl empty_line*")
+  Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"//\" (!eof .)*")
+  Rules[:_comment] = rule_info("comment", "lh space* \"//\" (!nl .)* nl empty_line*")
   Rules[:__hyphen_] = rule_info("-", "(space | comment)*")
   Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
