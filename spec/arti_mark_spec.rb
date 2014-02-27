@@ -751,6 +751,32 @@ EOF
            ['p', 'このように。']]]
       )
       end
+      it 'should markdown style heading not interrupted by smaller section' do
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n ## また次のセクションです。\n 入れ子になります。\n### さらに中のセクション \nさらに入れ子になっているはず。\n#ここで次のセクションです。\n脱出しているはずです。"
+        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+        converted = artimark.convert(text)
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+          ['h1', 'タイトルです。'],
+          ['div.pgroup', 
+           ['p', 'これは、セクションの中です。']],
+           ['section',
+             ['h2', 'また次のセクションです。'],
+             ['div.pgroup', 
+              ['p', '入れ子になります。']],
+            ['section',
+             ['h3', 'さらに中のセクション'],
+             ['div.pgroup', 
+              ['p', 'さらに入れ子になっているはず。']]]]] )
+        expect(body.element_children[1].selector_and_children).to eq(
+        ['section',
+          ['h1', 'ここで次のセクションです。'],
+          ['div.pgroup', 
+           ['p', '脱出しているはずです。']]])
+
+      end
 
     end
   end

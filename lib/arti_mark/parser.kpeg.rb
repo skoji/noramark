@@ -2261,8 +2261,8 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # h_start_mark_nup = "#"+:h &{ h.length >= n }
-  def _h_start_mark_nup(n)
+  # h_markup_terminator = "#"+:h &{ h.length <= n }
+  def _h_markup_terminator(n)
 
     _save = self.pos
     while true # sequence
@@ -2287,7 +2287,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break
       end
       _save2 = self.pos
-      _tmp = begin;  h.length >= n ; end
+      _tmp = begin;  h.length <= n ; end
       self.pos = _save2
       unless _tmp
         self.pos = _save
@@ -2295,7 +2295,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_h_start_mark_nup unless _tmp
+    set_failed_rule :_h_markup_terminator unless _tmp
     return _tmp
   end
 
@@ -2342,7 +2342,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # h_section = < h_start(n):h (!h_start_mark_nup(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }
+  # h_section = < h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }
   def _h_section(n)
 
     _save = self.pos
@@ -2363,7 +2363,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply_with_args(:_h_start_mark_nup, n)
+          _tmp = apply_with_args(:_h_markup_terminator, n)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
@@ -2392,7 +2392,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
             _save6 = self.pos
             while true # sequence
               _save7 = self.pos
-              _tmp = apply_with_args(:_h_start_mark_nup, n)
+              _tmp = apply_with_args(:_h_markup_terminator, n)
               _tmp = _tmp ? nil : true
               self.pos = _save7
               unless _tmp
@@ -2448,16 +2448,62 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # headed_start = h_start(1)
+  # headed_start = (h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))
   def _headed_start
-    _tmp = apply_with_args(:_h_start, 1)
+
+    _save = self.pos
+    while true # choice
+      _tmp = apply_with_args(:_h_start, 1)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_start, 2)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_start, 3)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_start, 4)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_start, 5)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_start, 6)
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
     set_failed_rule :_headed_start unless _tmp
     return _tmp
   end
 
-  # headed_section = h_section(1)
+  # headed_section = (h_section(1) | h_section(2) | h_section(3) | h_section(4) | h_section(5) | h_section(6))
   def _headed_section
-    _tmp = apply_with_args(:_h_section, 1)
+
+    _save = self.pos
+    while true # choice
+      _tmp = apply_with_args(:_h_section, 1)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_section, 2)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_section, 3)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_section, 4)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_section, 5)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_h_section, 6)
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
     set_failed_rule :_headed_section unless _tmp
     return _tmp
   end
@@ -3248,11 +3294,11 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
   Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage | headed_start)")
   Rules[:_h_start_mark] = rule_info("h_start_mark", "\"\#\"+:h &{ h.length == n }")
-  Rules[:_h_start_mark_nup] = rule_info("h_start_mark_nup", "\"\#\"+:h &{ h.length >= n }")
+  Rules[:_h_markup_terminator] = rule_info("h_markup_terminator", "\"\#\"+:h &{ h.length <= n }")
   Rules[:_h_start] = rule_info("h_start", "lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }")
-  Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_start_mark_nup(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
-  Rules[:_headed_start] = rule_info("headed_start", "h_start(1)")
-  Rules[:_headed_section] = rule_info("headed_section", "h_section(1)")
+  Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
+  Rules[:_headed_start] = rule_info("headed_start", "(h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))")
+  Rules[:_headed_section] = rule_info("headed_section", "(h_section(1) | h_section(2) | h_section(3) | h_section(4) | h_section(5) | h_section(6))")
   Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
   Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
   Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")

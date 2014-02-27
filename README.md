@@ -76,6 +76,62 @@ The converted XHTML file
     </div>
     </div>
     </article>
+    </body>
+    </html>
+
+another example of markup text
+
+    // Markdown style heading will creates section
+
+    lang: en
+    title: test title
+    stylesheets: css/normalize.css, css/main.css
+    
+    # this is the first heading
+
+    This line is in a section.
+    This line is in a section.
+
+    ## this is the second heading
+
+    This section is nested.
+
+    # this is the third heading
+
+    will terminate lower level section
+
+The converted XHTML file
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+    <title>test title</title>
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    </head>
+    <body>
+    <section><h1>this is the first heading</h1>
+    <div class='pgroup'><p>This line is in a section.</p>
+    <p>This line is in a section.</p>
+    </div>
+    <section><h2>this is the second heading</h2>
+    <div class='pgroup'><p>This section is nested.</p>
+    </div>
+    </section>
+    </section>
+    <section><h1>this is the third heading</h1>
+    <div class='pgroup'><p>will terminate lower level section</p>
+    </div>
+    </section>
+    </body>
+    </html>    
+    
+
+
+
+
+
+
 
 In a near future version, you will be able to add custom commands.
 
