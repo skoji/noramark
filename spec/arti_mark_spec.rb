@@ -56,8 +56,8 @@ describe ArtiMark do
     end
 
     it 'should convert simple paragraph in japanese mode, but paragraph mode is default' do
-      text = "paragraph-style: default\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
-      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+      text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+      artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title', :paragraph_style => :default)
       converted = artimark.convert(text)
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children.size).to eq 2
@@ -629,7 +629,7 @@ describe ArtiMark do
 
     it 'should specify title on each page' do
       text = "title:page1\n\n1st page.\nnewpage:\ntitle:page2\nh1:2nd page"
-      artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title', :paragraph_style => 'use-paragraph-group')
+      artimark = ArtiMark::Document.new(:lang => 'en', :title => 'the document title', :paragraph_style => :use_paragraph_group)
       converted = artimark.convert(text)
       # 1st page
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')

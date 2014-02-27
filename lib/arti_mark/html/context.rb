@@ -10,7 +10,7 @@ module ArtiMark
         @stylesheets = param[:stylesheets] || []
         @stylesheets_alt = param[:stylesheets_alt] || []
         @enable_pgroup = param[:enable_pgroup] || true
-        @paragraph_style = param[:paragraph_style]
+        self.paragraph_style = param[:paragraph_style]
         @pages = Result.new
         @block_delimiter_stack = []
         head_inserter do
@@ -32,6 +32,8 @@ module ArtiMark
       end
 
       def paragraph_style=(style)
+        return if style.nil?
+        raise "paragrapy_style accepts only :default or :use_paragraph_group but is #{style}" if style != :default && style != :use_paragraph_group
         @paragraph_style = style
       end
       
@@ -39,9 +41,9 @@ module ArtiMark
         if @paragraph_style
           @paragraph_style
         elsif @lang.split('-')[0] == 'ja' 
-          'use-paragraph-group'
+          :use_paragraph_group
         else
-          'default'
+          :default
         end
       end
       def head_inserter(&block)

@@ -5,7 +5,7 @@ module ArtiMark
       def initialize(generator)
         @generator = generator
         @context = generator.context
-        @writer_set = { 'use-paragraph-group' => {
+        @writer_set = { use_paragraph_group: {
           :paragraph =>
           TagWriter.create('p', @generator, chop_last_space: true,
                            item_preprocessor: proc do |item|
@@ -22,7 +22,7 @@ module ArtiMark
                            end
                            )
           },
-          'default' => {
+          default: {
           :paragraph => 
           TagWriter.create(nil, @generator, chop_last_space: true,
                            item_preprocessor: proc do |item|
