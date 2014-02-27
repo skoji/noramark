@@ -2126,7 +2126,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # block = (preformatted_block | line_block | explicit_block | paragraph_group):block empty_line* {block}
+  # block = (preformatted_block | line_block | explicit_block | paragraph_group | headed_section):block empty_line* {block}
   def _block
 
     _save = self.pos
@@ -2144,6 +2144,9 @@ class ArtiMark::Parser < KPeg::CompiledParser
         break if _tmp
         self.pos = _save1
         _tmp = apply(:_paragraph_group)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_headed_section)
         break if _tmp
         self.pos = _save1
         break
@@ -2193,7 +2196,7 @@ class ArtiMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # paragraph_delimiter = (block_delimiter | preformatted_command_head | line_block | newpage)
+  # paragraph_delimiter = (block_delimiter | preformatted_command_head | line_block | newpage | headed_start)
   def _paragraph_delimiter
 
     _save = self.pos
@@ -2210,10 +2213,252 @@ class ArtiMark::Parser < KPeg::CompiledParser
       _tmp = apply(:_newpage)
       break if _tmp
       self.pos = _save
+      _tmp = apply(:_headed_start)
+      break if _tmp
+      self.pos = _save
       break
     end # end choice
 
     set_failed_rule :_paragraph_delimiter unless _tmp
+    return _tmp
+  end
+
+  # h_start_mark = "#"+:h &{ h.length == n }
+  def _h_start_mark(n)
+
+    _save = self.pos
+    while true # sequence
+      _save1 = self.pos
+      _ary = []
+      _tmp = match_string("#")
+      if _tmp
+        _ary << @result
+        while true
+          _tmp = match_string("#")
+          _ary << @result if _tmp
+          break unless _tmp
+        end
+        _tmp = true
+        @result = _ary
+      else
+        self.pos = _save1
+      end
+      h = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save2 = self.pos
+      _tmp = begin;  h.length == n ; end
+      self.pos = _save2
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_h_start_mark unless _tmp
+    return _tmp
+  end
+
+  # h_start_mark_nup = "#"+:h &{ h.length >= n }
+  def _h_start_mark_nup(n)
+
+    _save = self.pos
+    while true # sequence
+      _save1 = self.pos
+      _ary = []
+      _tmp = match_string("#")
+      if _tmp
+        _ary << @result
+        while true
+          _tmp = match_string("#")
+          _ary << @result if _tmp
+          break unless _tmp
+        end
+        _tmp = true
+        @result = _ary
+      else
+        self.pos = _save1
+      end
+      h = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save2 = self.pos
+      _tmp = begin;  h.length >= n ; end
+      self.pos = _save2
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_h_start_mark_nup unless _tmp
+    return _tmp
+  end
+
+  # h_start = lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }
+  def _h_start(n)
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply_with_args(:_h_start_mark, n)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_charstring)
+      s = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_le)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  { level: n, heading: s } ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_h_start unless _tmp
+    return _tmp
+  end
+
+  # h_section = < h_start(n):h (!h_start_mark_nup(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }
+  def _h_section(n)
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply_with_args(:_h_start, n)
+        h = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _ary = []
+
+        _save3 = self.pos
+        while true # sequence
+          _save4 = self.pos
+          _tmp = apply_with_args(:_h_start_mark_nup, n)
+          _tmp = _tmp ? nil : true
+          self.pos = _save4
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _save5 = self.pos
+          _tmp = apply(:_eof)
+          _tmp = _tmp ? nil : true
+          self.pos = _save5
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = apply(:_block)
+          unless _tmp
+            self.pos = _save3
+          end
+          break
+        end # end sequence
+
+        if _tmp
+          _ary << @result
+          while true
+
+            _save6 = self.pos
+            while true # sequence
+              _save7 = self.pos
+              _tmp = apply_with_args(:_h_start_mark_nup, n)
+              _tmp = _tmp ? nil : true
+              self.pos = _save7
+              unless _tmp
+                self.pos = _save6
+                break
+              end
+              _save8 = self.pos
+              _tmp = apply(:_eof)
+              _tmp = _tmp ? nil : true
+              self.pos = _save8
+              unless _tmp
+                self.pos = _save6
+                break
+              end
+              _tmp = apply(:_block)
+              unless _tmp
+                self.pos = _save6
+              end
+              break
+            end # end sequence
+
+            _ary << @result if _tmp
+            break unless _tmp
+          end
+          _tmp = true
+          @result = _ary
+        else
+          self.pos = _save2
+        end
+        content = @result
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:h_section, h, content, raw: text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_h_section unless _tmp
+    return _tmp
+  end
+
+  # headed_start = h_start(1)
+  def _headed_start
+    _tmp = apply_with_args(:_h_start, 1)
+    set_failed_rule :_headed_start unless _tmp
+    return _tmp
+  end
+
+  # headed_section = h_section(1)
+  def _headed_section
+    _tmp = apply_with_args(:_h_section, 1)
+    set_failed_rule :_headed_section unless _tmp
     return _tmp
   end
 
@@ -2999,9 +3244,15 @@ class ArtiMark::Parser < KPeg::CompiledParser
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list)")
   Rules[:_line_command] = rule_info("line_command", "< lh - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
-  Rules[:_block] = rule_info("block", "(preformatted_block | line_block | explicit_block | paragraph_group):block empty_line* {block}")
+  Rules[:_block] = rule_info("block", "(preformatted_block | line_block | explicit_block | paragraph_group | headed_section):block empty_line* {block}")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
-  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage)")
+  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage | headed_start)")
+  Rules[:_h_start_mark] = rule_info("h_start_mark", "\"\#\"+:h &{ h.length == n }")
+  Rules[:_h_start_mark_nup] = rule_info("h_start_mark_nup", "\"\#\"+:h &{ h.length >= n }")
+  Rules[:_h_start] = rule_info("h_start", "lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }")
+  Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_start_mark_nup(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
+  Rules[:_headed_start] = rule_info("headed_start", "h_start(1)")
+  Rules[:_headed_section] = rule_info("headed_section", "h_section(1)")
   Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
   Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
   Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")

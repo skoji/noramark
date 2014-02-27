@@ -82,17 +82,25 @@ line_command = < lh - !commandname_for_special_line_command command:c ':' docume
 
 # blocks
 line_block =  items_list | line_command 
-block = (preformatted_block | line_block  | explicit_block | paragraph_group):block empty_line* {block}
+block = (preformatted_block | line_block  | explicit_block | paragraph_group | headed_section ):block empty_line* {block}
 block_delimiter = blockhead | blockend 
-paragraph_delimiter = block_delimiter | preformatted_command_head | line_block | newpage
+paragraph_delimiter = block_delimiter | preformatted_command_head | line_block | newpage | headed_start
 
+# markdown-style headings
+h_start_mark(n) = '#'+:h &{ h.length == n }
+h_start_mark_nup(n) = '#'+:h &{ h.length >= n }
+
+h_start(n) = lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }
+h_section(n) = < h_start(n):h (!h_start_mark_nup(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }
+
+headed_start = h_start(1)
+headed_section = h_section(1)
 
 #header
 stylesheets = < lh - 'stylesheets:' !le charstring:s nl  > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }
 title = < lh - 'title:' !le charstring:t nl  > { create_item(:title, {:title => t }, nil, raw:text) }
 lang = < lh - 'lang:' !le charstring:l nl  > { create_item(:lang, {:lang => l }, nil, raw:text) }
 header = (stylesheets | title | lang) empty_line*
-
 
 # texts
 char = < /[[:print:]]/ > { text }

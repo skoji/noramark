@@ -702,7 +702,7 @@ EOF
 
     context 'markdown style' do
       it 'should convert markdown style heading' do
-        text = "# タイトルです。\r\nこれは、セクションです。"
+        text = "# タイトルです。\r\nこれは、セクションの中です。"
         artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
         converted = artimark.convert(text)
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -711,9 +711,47 @@ EOF
         ['section',
           ['h1', 'タイトルです。'],
           ['div.pgroup', 
-           ['p', 'ここから、パラグラフがはじまります。']]]
+           ['p', 'これは、セクションの中です。']]]
       )
       end
+      it 'should markdown style heading interrupted by other headed section' do
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n # また次のセクションです。\n次のセクションの中です。"
+        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+        converted = artimark.convert(text)
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+          ['h1', 'タイトルです。'],
+          ['div.pgroup', 
+           ['p', 'これは、セクションの中です。']]])
+        expect(body.element_children[1].selector_and_children).to eq(
+        ['section',
+          ['h1', 'また次のセクションです。'],
+          ['div.pgroup', 
+           ['p', '次のセクションの中です。']]]
+      )
+      end
+      it 'should markdown style heading not interrupted by other explicit section' do
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n section {\n h2: また次のセクションです。\n入れ子になります。\n}\nこのように。"
+        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+        converted = artimark.convert(text)
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 1
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+          ['h1', 'タイトルです。'],
+          ['div.pgroup', 
+           ['p', 'これは、セクションの中です。']],
+           ['section',
+             ['h2', 'また次のセクションです。'],
+             ['div.pgroup', 
+              ['p', '入れ子になります。']]],
+          ['div.pgroup', 
+           ['p', 'このように。']]]
+      )
+      end
+
     end
   end
 end
