@@ -738,7 +738,7 @@ EOF
       expect { ArtiMark::Document.new(:lang => 'ja', :title => 'foo').convert(text) }.to raise_error KPeg::CompiledParser::ParseError
     end
 
-    context 'markdown style' do
+    describe 'markdown style' do
       it 'should convert markdown style heading' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。"
         artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
@@ -815,7 +815,22 @@ EOF
            ['p', '脱出しているはずです。']]])
 
       end
-
+    end
+    describe 'create file' do
+      before { @basedir = File.join(File.dirname(__FILE__), 'created_files') }
+      after { Dir.glob(File.join(@basedir, '*.xhtml')) { |file| File.delete file } }
+      it 'should create default file' do
+        text = "some text"
+        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title')
+        artimark.convert(text).write_as_files(directory: @basedir)
+        expect(Dir.glob(File.join(@basedir, '*.xhtml'))[0]).to match /noramark_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_00001.xhtml/
+      end
+      it 'should create named file' do
+        text = "some text"
+        artimark = ArtiMark::Document.new(:lang => 'ja', :title => 'the document title', filename_prefix: 'nora-test-file' )
+        artimark.convert(text).write_as_files(directory: @basedir)
+        expect(Dir.glob(File.join(@basedir, '*.xhtml'))[0]).to match /nora-test-file_00001.xhtml/
+      end
     end
   end
 end

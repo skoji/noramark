@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'arti_mark/html/util'
-require 'arti_mark/html/result'
+require 'arti_mark/html/pages'
 require 'arti_mark/html/context'
 require 'arti_mark/html/tag_writer'
 require 'arti_mark/html/header_writer'

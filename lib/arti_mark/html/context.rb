@@ -10,8 +10,8 @@ module ArtiMark
         @stylesheets = param[:stylesheets] || []
         @stylesheets_alt = param[:stylesheets_alt] || []
         @enable_pgroup = param[:enable_pgroup] || true
-        self.paragraph_style = param[:paragraph_style]
-        @pages = Result.new
+        self.paragraph_style= param[:paragraph_style]
+        @pages = Pages.new(param[:filename_prefix], param[:sequence_format])
         @block_delimiter_stack = []
         head_inserter do
           ret = ""
@@ -27,6 +27,11 @@ module ArtiMark
           ret
         end
       end
+
+      def created_files
+        @pages.created_files
+      end
+      
       def chop_last_space
         @pages.last.sub!(/[[:space:]]+$/, '')
       end
