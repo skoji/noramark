@@ -6,8 +6,9 @@ module ArtiMark
   class Document
     private_class_method :new 
 
-    def self.open(src, param = {})
+    def self.parse(string_or_io, param = {})
       instance = new param
+      src = string_or_io.respond_to?(:read) ? string_or_io.read : string_or_io
       yield instance if block_given?
       instance.instance_eval do 
         @preprocessors.each do
