@@ -27,7 +27,11 @@ module ArtiMark
           page = @result[num]
           page.nil? ? nil : page[:content]
         end
-        
+
+        def pages
+          @result
+        end
+
         def write_as_files(directory: nil)
           dir = directory || Dir.pwd
           Dir.chdir(dir) do
