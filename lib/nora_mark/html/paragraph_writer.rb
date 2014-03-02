@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-module ArtiMark
+module NoraMark
   module Html
     class ParagraphWriter
       def initialize(generator)

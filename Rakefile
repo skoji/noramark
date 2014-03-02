@@ -7,6 +7,6 @@ rule(/\.kpeg\.rb/ => proc {|task_name| task_name.sub(/kpeg\.rb$/, 'kpeg')}) do
 end
 
 desc "run rspec"
-task :test => ["lib/arti_mark/parser.kpeg.rb"] do
+task :test => ["lib/nora_mark/parser.kpeg.rb"] do
   system 'rspec'
 end

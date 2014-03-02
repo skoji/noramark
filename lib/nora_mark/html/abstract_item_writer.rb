@@ -1,4 +1,4 @@
-module ArtiMark
+module NoraMark
   module Html
     class AbstractItemWriter
       def initialize(generator)

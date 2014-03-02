@@ -1,6 +1,6 @@
 require 'kpeg/compiled_parser'
 
-class ArtiMark::Parser < KPeg::CompiledParser
+class NoraMark::Parser < KPeg::CompiledParser
   # :stopdoc:
 
   # eof = !.

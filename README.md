@@ -1,16 +1,16 @@
-# ArtiMark
+# NoraMark
 
-ArtiMark is a simple text markup language. It is designed to create XHTML files for EPUB books. Its default mode is for Japanese text.
+NoraMark is a simple text markup language. It is designed to create XHTML files for EPUB books. Its default mode is for Japanese text.
 
 **CAUTION This is very early alpha version, so it's not stable at all, even the markup syntax**
-In the next release,  the library name will change from ArtiMark to NoraMark.
+In the next release,  the library name will change from NoraMark to NoraMark.
 In NoraMark, the syntax will be more stable.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'arti_mark'
+    gem 'nora_mark'
 
 And then execute:
 
@@ -18,19 +18,19 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install arti_mark
+    $ gem install nora_mark
 
 ## Usage
 
-    require 'arti_mark'
+    require 'nora_mark'
 
-    document = ArtiMark::Document.parse(string_or_io)
+    document = NoraMark::Document.parse(string_or_io)
     put document.html[0] # outputs 1st page of converted XHTML file
 
 An example of markup text (text is in english, but the paragraph style is japanese)
 
     # line begins with # is a comment.
-    # you don't need to indent artimark text.
+    # you don't need to indent noramark text.
 
     lang: ja
     title: test title
@@ -45,7 +45,7 @@ An example of markup text (text is in english, but the paragraph style is japane
 
         d.column {
             This block will produce div.column.
-            Inline commands like [link(http://github.com/skoji/arti_mark/){this}] and [s.strong{this}] is available.
+            Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [s.strong{this}] is available.
         }
     }
 
@@ -71,7 +71,7 @@ The converted XHTML file
     <div class='column'>
     <div class='pgroup'>
     <p>This block will produce div.column.</p>
-    <p>Inline commands like <a href='http://github.com/skoji/arti_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
+    <p>Inline commands like <a href='http://github.com/skoji/nora_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
     </div>
     </div>
     </article>
@@ -81,7 +81,7 @@ The converted XHTML file
 Another example of markup text in non-japanese (paragraph style is default)
 
     # line begins with # is a comment.
-    # you don't need to indent artimark text.
+    # you don't need to indent noramark text.
 
     lang: en
     title: test title
@@ -96,7 +96,7 @@ Another example of markup text in non-japanese (paragraph style is default)
 
         d.column {
             This block will produce div.column.
-            Inline commands like [link(http://github.com/skoji/arti_mark/){this}] and [s.strong{this}] is available.
+            Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [s.strong{this}] is available.
         }
     }
 
@@ -115,7 +115,7 @@ The converted XHTML file
     <p>article comes here.<br />linebreak will produce paragraph.</p>
     <p>blank line will produce paragraph</p>
     <div class='column'>
-    <p>This block will produce div.column.<br />Inline commands like <a href='http://github.com/skoji/arti_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
+    <p>This block will produce div.column.<br />Inline commands like <a href='http://github.com/skoji/nora_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
     </div>
     </article>
     </body>

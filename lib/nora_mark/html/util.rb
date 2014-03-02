@@ -1,4 +1,4 @@
-module ArtiMark
+module NoraMark
   module Html
     module Util
       def escape_html(string)

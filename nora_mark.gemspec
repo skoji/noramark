@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/arti_mark/version', __FILE__)
+require File.expand_path('../lib/nora_mark/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ["KOJIMA Satoshi"]
@@ -11,9 +11,9 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.name          = "arti_mark"
+  gem.name          = "nora_mark"
   gem.require_paths = ["lib"]
-  gem.version       = ArtiMark::VERSION
+  gem.version       = NoraMark::VERSION
 
   gem.required_ruby_version = '>= 2.0.0'
   gem.add_dependency "kpeg"

@@ -1,4 +1,4 @@
-module ArtiMark
+module NoraMark
   module Html
     class WriterSelector
       def initialize(generator, tag_writers = {}, trailer_default: "\n" )

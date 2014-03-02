@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-require 'arti_mark/html/util'
-require 'arti_mark/html/pages'
-require 'arti_mark/html/context'
-require 'arti_mark/html/tag_writer'
-require 'arti_mark/html/header_writer'
-require 'arti_mark/html/paragraph_writer'
-require 'arti_mark/html/writer_selector'
-require 'arti_mark/html/abstract_item_writer'
-module ArtiMark
+require 'nora_mark/html/util'
+require 'nora_mark/html/pages'
+require 'nora_mark/html/context'
+require 'nora_mark/html/tag_writer'
+require 'nora_mark/html/header_writer'
+require 'nora_mark/html/paragraph_writer'
+require 'nora_mark/html/writer_selector'
+require 'nora_mark/html/abstract_item_writer'
+module NoraMark
   module Html
     class Generator
       include Util
@@ -35,7 +35,7 @@ module ArtiMark
                              {
                                'd' => TagWriter.create('div', self),
                                'art' => article_writer,
-                               'arti' => article_writer,
+                               'nora' => article_writer,
                                'article' => article_writer,
                                'sec' => section_writer,
                                'sect' => section_writer,

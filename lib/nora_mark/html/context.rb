@@ -1,4 +1,4 @@
-module ArtiMark
+module NoraMark
   module Html
     class Context
       attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup
@@ -6,7 +6,7 @@ module ArtiMark
         @head_inserters = []
         @toc = []
         @lang = param[:lang] || 'en'
-        @title = param[:title] || 'ArtiMark generated document'
+        @title = param[:title] || 'NoraMark generated document'
         @stylesheets = param[:stylesheets] || []
         @stylesheets_alt = param[:stylesheets_alt] || []
         @enable_pgroup = param[:enable_pgroup] || true

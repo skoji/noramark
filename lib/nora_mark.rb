@@ -1,8 +1,8 @@
-require "arti_mark/version"
-require 'arti_mark/html/generator'
-require 'arti_mark/parser'
+require "nora_mark/version"
+require 'nora_mark/html/generator'
+require 'nora_mark/parser'
 
-module ArtiMark
+module NoraMark
   class Document
     private_class_method :new 
 

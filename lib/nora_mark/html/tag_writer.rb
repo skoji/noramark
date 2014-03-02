@@ -1,4 +1,4 @@
-module ArtiMark
+module NoraMark
   module Html
     class TagWriter
       include Util

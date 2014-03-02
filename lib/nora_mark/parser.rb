@@ -1,6 +1,6 @@
-require 'arti_mark/parser.kpeg'
+require 'nora_mark/parser.kpeg'
 
-module ArtiMark
+module NoraMark
   class Parser
     def create_item(type, command, children = [], raw: nil)
       children[0].sub!(/^[[:space:]]+/, '') if !children.nil? && children[0].is_a?(String)

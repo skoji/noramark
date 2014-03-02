@@ -1,5 +1,5 @@
 require 'securerandom'
-module ArtiMark
+module NoraMark
   module Html
     class Context
       class Pages
