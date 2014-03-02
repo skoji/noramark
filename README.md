@@ -3,8 +3,9 @@
 NoraMark is a simple text markup language. It is designed to create XHTML files for EPUB books. Its default mode is for Japanese text.
 
 **CAUTION This is very early alpha version, so it's not stable at all, even the markup syntax**
+
 In the next release,  the library name will change from NoraMark to NoraMark.
-In NoraMark, the syntax will be more stable.
+In NoraMark release version, the syntax will be more stable.
 
 ## Installation
 
