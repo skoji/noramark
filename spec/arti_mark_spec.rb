@@ -825,13 +825,15 @@ EOF
         text = "some text"
         artimark = ArtiMark::Document.parse(text, :lang => 'ja', :title => 'the title')
         artimark.html.write_as_files(directory: @basedir)
-        expect(Dir.glob(File.join(@basedir, '*.xhtml'))[0]).to match /noramark_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_00001.xhtml/
+        expect(File.basename(Dir.glob(File.join(@basedir, '*.xhtml'))[0])).to match /noramark_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_00001.xhtml/
       end
       it 'should create named file' do
-        text = "some text"
-        artimark = ArtiMark::Document.parse(text, :lang => 'ja', :title => 'the document title', filename_prefix: 'nora-test-file' )
+        text = "some text\nnewpage:\nnext page"
+        artimark = ArtiMark::Document.parse(text, :lang => 'ja', :title => 'the document title', filename_base: 'nora-test-file', sequence_format: '%03d' )
         artimark.html.write_as_files(directory: @basedir)
-        expect(Dir.glob(File.join(@basedir, '*.xhtml'))[0]).to match /nora-test-file_00001.xhtml/
+        files = Dir.glob(File.join(@basedir, '*.xhtml'))
+        expect(File.basename(files[0])).to eq 'nora-test-file_001.xhtml'
+        expect(File.basename(files[1])).to eq 'nora-test-file_002.xhtml'
       end
     end
   end

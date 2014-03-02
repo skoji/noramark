@@ -11,7 +11,7 @@ module ArtiMark
         @stylesheets_alt = param[:stylesheets_alt] || []
         @enable_pgroup = param[:enable_pgroup] || true
         self.paragraph_style= param[:paragraph_style]
-        @pages = Pages.new(param[:filename_prefix], param[:sequence_format])
+        @pages = Pages.new(param[:filename_base], param[:sequence_format])
         @block_delimiter_stack = []
         head_inserter do
           ret = ""

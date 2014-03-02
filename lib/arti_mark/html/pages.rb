@@ -4,8 +4,8 @@ module ArtiMark
     class Context
       class Pages
         attr_reader :created_files
-        def initialize(filename_prefix = nil, sequence_format='%05d')
-          @filename_prefix = filename_prefix || "noramark_#{SecureRandom.uuid}"
+        def initialize(filename_base = nil, sequence_format='%05d')
+          @filename_base = filename_base || "noramark_#{SecureRandom.uuid}"
           @sequence_format = sequence_format || '%05d'
           @result = []
         end
@@ -20,7 +20,7 @@ module ArtiMark
         
         def <<(page)
           seq = @result.size + 1
-          @result << { content: page, filename: "#{@filename_prefix}_#{@sequence_format%(seq)}.xhtml" }
+          @result << { content: page, filename: "#{@filename_base}_#{@sequence_format%(seq)}.xhtml" }
         end
 
         def [](num)

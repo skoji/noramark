@@ -24,9 +24,8 @@ Or install it yourself as:
 
     require 'arti_mark'
 
-    document = ArtiMark::Document.new()
-    document.convert(string_or_io)
-    put document.result[0] # outputs 1st page of converted XHTML file
+    document = ArtiMark::Document.parse(string_or_io)
+    put document.html[0] # outputs 1st page of converted XHTML file
 
 An example of markup text (text is in english, but the paragraph style is japanese)
 
