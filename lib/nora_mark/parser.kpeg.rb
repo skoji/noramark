@@ -157,7 +157,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # - = (space | comment)*
+  # - = (space | comment | eof_comment)*
   def __hyphen_
     while true
 
@@ -167,6 +167,9 @@ class NoraMark::Parser < KPeg::CompiledParser
         break if _tmp
         self.pos = _save1
         _tmp = apply(:_comment)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_eof_comment)
         break if _tmp
         self.pos = _save1
         break
@@ -505,91 +508,72 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # parameter = < (/[^,)]/* | "\"" /[^"]/* "\"" | "'" /[^']/* "'") > { text }
+  # parameter = (/[^,)]/* | "\"" /[^"]/* "\"" | "'" /[^']/* "'")
   def _parameter
 
     _save = self.pos
-    while true # sequence
-      _text_start = self.pos
+    while true # choice
+      while true
+        _tmp = scan(/\A(?-mix:[^,)])/)
+        break unless _tmp
+      end
+      _tmp = true
+      break if _tmp
+      self.pos = _save
 
-      _save1 = self.pos
-      while true # choice
+      _save2 = self.pos
+      while true # sequence
+        _tmp = match_string("\"")
+        unless _tmp
+          self.pos = _save2
+          break
+        end
         while true
-          _tmp = scan(/\A(?-mix:[^,)])/)
+          _tmp = scan(/\A(?-mix:[^"])/)
           break unless _tmp
         end
         _tmp = true
-        break if _tmp
-        self.pos = _save1
-
-        _save3 = self.pos
-        while true # sequence
-          _tmp = match_string("\"")
-          unless _tmp
-            self.pos = _save3
-            break
-          end
-          while true
-            _tmp = scan(/\A(?-mix:[^"])/)
-            break unless _tmp
-          end
-          _tmp = true
-          unless _tmp
-            self.pos = _save3
-            break
-          end
-          _tmp = match_string("\"")
-          unless _tmp
-            self.pos = _save3
-          end
+        unless _tmp
+          self.pos = _save2
           break
-        end # end sequence
+        end
+        _tmp = match_string("\"")
+        unless _tmp
+          self.pos = _save2
+        end
+        break
+      end # end sequence
 
-        break if _tmp
-        self.pos = _save1
+      break if _tmp
+      self.pos = _save
 
-        _save5 = self.pos
-        while true # sequence
-          _tmp = match_string("'")
-          unless _tmp
-            self.pos = _save5
-            break
-          end
-          while true
-            _tmp = scan(/\A(?-mix:[^'])/)
-            break unless _tmp
-          end
-          _tmp = true
-          unless _tmp
-            self.pos = _save5
-            break
-          end
-          _tmp = match_string("'")
-          unless _tmp
-            self.pos = _save5
-          end
+      _save4 = self.pos
+      while true # sequence
+        _tmp = match_string("'")
+        unless _tmp
+          self.pos = _save4
           break
-        end # end sequence
-
-        break if _tmp
-        self.pos = _save1
+        end
+        while true
+          _tmp = scan(/\A(?-mix:[^'])/)
+          break unless _tmp
+        end
+        _tmp = true
+        unless _tmp
+          self.pos = _save4
+          break
+        end
+        _tmp = match_string("'")
+        unless _tmp
+          self.pos = _save4
+        end
         break
-      end # end choice
+      end # end sequence
 
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  text ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
+      break if _tmp
+      self.pos = _save
       break
-    end # end sequence
+    end # end choice
 
     set_failed_rule :_parameter unless _tmp
     return _tmp
@@ -3349,7 +3333,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
   Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"\#\" (!eof .)*")
   Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl empty_line*")
-  Rules[:__hyphen_] = rule_info("-", "(space | comment)*")
+  Rules[:__hyphen_] = rule_info("-", "(space | comment | eof_comment)*")
   Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
   Rules[:_lh] = rule_info("lh", "/^/")
@@ -3361,7 +3345,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_idname] = rule_info("idname", "\"\#\" word:idname { idname }")
   Rules[:_idnames] = rule_info("idnames", "idname*:idnames { idnames }")
   Rules[:_commandname] = rule_info("commandname", "word:name idnames?:idnames classnames?:classes { {:name => name, :ids => idnames, :classes => classes} }")
-  Rules[:_parameter] = rule_info("parameter", "< (/[^,)]/* | \"\\\"\" /[^\"]/* \"\\\"\" | \"'\" /[^']/* \"'\") > { text }")
+  Rules[:_parameter] = rule_info("parameter", "(/[^,)]/* | \"\\\"\" /[^\"]/* \"\\\"\" | \"'\" /[^']/* \"'\")")
   Rules[:_parameters] = rule_info("parameters", "< parameter (\",\" parameter)* > { text }")
   Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:arg - \")\")? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }")
   Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")

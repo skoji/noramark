@@ -1,11 +1,11 @@
 %% name = NoraMark::Parser
 
 # literals
-eof = !.
+eof = !. 
 space = ' ' | '\t' 
-eof_comment = lh space* "#" (!eof .)*
+eof_comment = lh space* "#" (!eof .)* 
 comment =   lh space* "#" (!nl .)* nl empty_line*
-- =  ( space | comment )*
+- =  ( space | comment | eof_comment)*
 empty_line = lh - nl
 nl = /\r?\n/
 lh = /^/
@@ -21,7 +21,7 @@ idname = '#' word:idname { idname }
 idnames = (idname)*:idnames { idnames }
 
 commandname = word:name idnames?:idnames classnames?:classes  { {:name => name, :ids => idnames, :classes => classes} }
-parameter = < ( /[^,)]/* | '"' /[^"]/* '"' | "'" /[^']/* "'" ) > { text }
+parameter = ( /[^,)]/* | '"' /[^"]/* '"' | "'" /[^']/* "'" ) 
 parameters = < parameter (',' parameter)* > { text }
 command = commandname:cn ('(' - parameters:arg - ')')? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }
 

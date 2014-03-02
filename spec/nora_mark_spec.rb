@@ -649,7 +649,7 @@ describe NoraMark do
 
 
     it 'should ignore comments' do
-      text = "# この行はコメントです\nここから、パラグラフがはじまります。\n # これもコメント\n「二行目です。」\n三行目です。\n\n# これもコメント\n\n ここから、次のパラグラフです。"
+      text = "# この行はコメントです\nここから、パラグラフがはじまります。\n # これもコメント\n「二行目です。」\n三行目です。\n\n# これもコメント\n\n ここから、次のパラグラフです。\n#最後のコメントです"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
