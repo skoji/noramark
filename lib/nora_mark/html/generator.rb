@@ -35,7 +35,7 @@ module NoraMark
                              {
                                'd' => TagWriter.create('div', self),
                                'art' => article_writer,
-                               'nora' => article_writer,
+                               'arti' => article_writer,
                                'article' => article_writer,
                                'sec' => section_writer,
                                'sect' => section_writer,

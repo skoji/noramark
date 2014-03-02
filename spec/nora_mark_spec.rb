@@ -216,7 +216,7 @@ describe NoraMark do
     end
 
     it 'should convert article with other notation' do
-      text = "nora {\n in the article.\n}"
+      text = "arti {\n in the article.\n}"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
