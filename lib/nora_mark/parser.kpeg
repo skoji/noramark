@@ -110,7 +110,6 @@ header = (stylesheets | title | lang | paragraph_style ) empty_line*
 char = < /[[:print:]]/ > { text }
 charstring = < char* > { text }
 char_except(e) = char:c &{ c != e }
-charstring_except(e) = < char_except(e)* > { text }
 documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_text(content)
 documentcontent = (inline | !inline char)+:content  ~parse_text(content)
 documentline = lh documentcontent:content le { content }

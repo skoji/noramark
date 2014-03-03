@@ -679,7 +679,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # parameters = parameter:parameter ("," - parameter)*:rest_parameters { p rest_parameters; [parameter] + rest_parameters }
+  # parameters = parameter:parameter ("," - parameter)*:rest_parameters { [parameter] + rest_parameters }
   def _parameters
 
     _save = self.pos
@@ -722,7 +722,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  p rest_parameters; [parameter] + rest_parameters ; end
+      @result = begin;  [parameter] + rest_parameters ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3003,36 +3003,6 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # charstring_except = < char_except(e)* > { text }
-  def _charstring_except(e)
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-      while true
-        _tmp = apply_with_args(:_char_except, e)
-        break unless _tmp
-      end
-      _tmp = true
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  text ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_charstring_except unless _tmp
-    return _tmp
-  end
-
   # documentcontent_except = (inline | !inline char_except(e))+:content {parse_text(content)}
   def _documentcontent_except(e)
 
@@ -3446,7 +3416,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_parameter_quoted] = rule_info("parameter_quoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
   Rules[:_parameter_single_quoted] = rule_info("parameter_single_quoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
   Rules[:_parameter] = rule_info("parameter", "(parameter_quoted | parameter_single_quoted | parameter_normal):value { value }")
-  Rules[:_parameters] = rule_info("parameters", "parameter:parameter (\",\" - parameter)*:rest_parameters { p rest_parameters; [parameter] + rest_parameters }")
+  Rules[:_parameters] = rule_info("parameters", "parameter:parameter (\",\" - parameter)*:rest_parameters { [parameter] + rest_parameters }")
   Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:args - \")\")? { args ||= []; cn.merge({ :args => args }) }")
   Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
@@ -3494,7 +3464,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
   Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")
-  Rules[:_charstring_except] = rule_info("charstring_except", "< char_except(e)* > { text }")
   Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
   Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
   Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content le { content }")
