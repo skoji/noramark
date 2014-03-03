@@ -7,6 +7,10 @@ NoraMark is a simple text markup language. It is designed to create XHTML files 
 
 In non-beta release version, the syntax will be more stable.
 
+## Requirements
+
+* Ruby 2.0.0 or greater
+
 ## Installation
 
 Add this line to your application's Gemfile:
