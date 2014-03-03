@@ -83,23 +83,6 @@ module NoraMark
         end
       end
 
-      def enter_block(lexed)
-        @block_delimiter_stack.push(lexed[:delimiter])
-      end
-
-      def exit_block(lexed)
-        @block_delimiter_stack.pop
-        nil
-      end
-
-      def block_close?(line)
-        line == (@block_delimiter_stack.last || '') + '}'
-      end
-
-      def toc=(label)
-        @toc[-1] = label if @toc.size > 0
-      end
-
       def <<(text)
         if @pages.size == 0 || @pages.last.frozen?
           start_html
