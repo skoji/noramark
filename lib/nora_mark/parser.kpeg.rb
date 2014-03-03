@@ -1163,7 +1163,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformatted_command = command:command &{ ['pre', 'precode'].include? command[:name] }
+  # preformatted_command = command:command &{ ['pre', 'code'].include? command[:name] }
   def _preformatted_command
 
     _save = self.pos
@@ -1175,7 +1175,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save1 = self.pos
-      _tmp = begin;  ['pre', 'precode'].include? command[:name] ; end
+      _tmp = begin;  ['pre', 'code'].include? command[:name] ; end
       self.pos = _save1
       unless _tmp
         self.pos = _save
@@ -1187,8 +1187,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformatted_command_head = lh - preformatted_command:command - "<<" &/[\w0-9]/ { command }
-  def _preformatted_command_head
+  # preformatted_command_head_simple = lh - preformatted_command:command - "{" nl { command }
+  def _preformatted_command_head_simple
 
     _save = self.pos
     while true # sequence
@@ -1213,14 +1213,12 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = match_string("<<")
+      _tmp = match_string("{")
       unless _tmp
         self.pos = _save
         break
       end
-      _save1 = self.pos
-      _tmp = scan(/\A(?-mix:[\w0-9])/)
-      self.pos = _save1
+      _tmp = apply(:_nl)
       unless _tmp
         self.pos = _save
         break
@@ -1233,12 +1231,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformatted_command_head unless _tmp
+    set_failed_rule :_preformatted_command_head_simple unless _tmp
     return _tmp
   end
 
-  # preformat_end = lh word:delimiter &{ delimiter == start }
-  def _preformat_end(start)
+  # preformatted_command_head_complex = lh - preformatted_command:command - "{//" nl { command }
+  def _preformatted_command_head_complex
 
     _save = self.pos
     while true # sequence
@@ -1247,27 +1245,116 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_word)
-      delimiter = @result
+      _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
       end
-      _save1 = self.pos
-      _tmp = begin;  delimiter == start ; end
-      self.pos = _save1
+      _tmp = apply(:_preformatted_command)
+      command = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("{//")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_nl)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  command ; end
+      _tmp = true
       unless _tmp
         self.pos = _save
       end
       break
     end # end sequence
 
-    set_failed_rule :_preformat_end unless _tmp
+    set_failed_rule :_preformatted_command_head_complex unless _tmp
     return _tmp
   end
 
-  # preformatted_block = < lh - preformatted_command_head:command !nl word:delimiter nl (!preformat_end(delimiter) lh charstring nl)+:content preformat_end(delimiter) > { create_item(:preformatted, command, content, raw: text) }
-  def _preformatted_block
+  # preformatted_command_head = (preformatted_command_head_complex | preformatted_command_head_simple)
+  def _preformatted_command_head
+
+    _save = self.pos
+    while true # choice
+      _tmp = apply(:_preformatted_command_head_complex)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_preformatted_command_head_simple)
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_preformatted_command_head unless _tmp
+    return _tmp
+  end
+
+  # preformat_end_simple = blockend
+  def _preformat_end_simple
+    _tmp = apply(:_blockend)
+    set_failed_rule :_preformat_end_simple unless _tmp
+    return _tmp
+  end
+
+  # preformat_end_complex = lh - "//}" - le empty_line*
+  def _preformat_end_complex
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_lh)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("//}")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_le)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_empty_line)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_preformat_end_complex unless _tmp
+    return _tmp
+  end
+
+  # preformatted_block_simple = < lh - preformatted_command_head_simple:command - (!preformat_end_simple lh charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
+  def _preformatted_block_simple
 
     _save = self.pos
     while true # sequence
@@ -1285,57 +1372,43 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_preformatted_command_head)
+        _tmp = apply(:_preformatted_command_head_simple)
         command = @result
         unless _tmp
           self.pos = _save1
           break
         end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
         _save2 = self.pos
-        _tmp = apply(:_nl)
-        _tmp = _tmp ? nil : true
-        self.pos = _save2
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_word)
-        delimiter = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_nl)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _save3 = self.pos
         _ary = []
 
-        _save4 = self.pos
+        _save3 = self.pos
         while true # sequence
-          _save5 = self.pos
-          _tmp = apply_with_args(:_preformat_end, delimiter)
+          _save4 = self.pos
+          _tmp = apply(:_preformat_end_simple)
           _tmp = _tmp ? nil : true
-          self.pos = _save5
+          self.pos = _save4
           unless _tmp
-            self.pos = _save4
+            self.pos = _save3
             break
           end
           _tmp = apply(:_lh)
           unless _tmp
-            self.pos = _save4
+            self.pos = _save3
             break
           end
           _tmp = apply(:_charstring)
           unless _tmp
-            self.pos = _save4
+            self.pos = _save3
             break
           end
           _tmp = apply(:_nl)
           unless _tmp
-            self.pos = _save4
+            self.pos = _save3
           end
           break
         end # end sequence
@@ -1344,29 +1417,29 @@ class NoraMark::Parser < KPeg::CompiledParser
           _ary << @result
           while true
 
-            _save6 = self.pos
+            _save5 = self.pos
             while true # sequence
-              _save7 = self.pos
-              _tmp = apply_with_args(:_preformat_end, delimiter)
+              _save6 = self.pos
+              _tmp = apply(:_preformat_end_simple)
               _tmp = _tmp ? nil : true
-              self.pos = _save7
+              self.pos = _save6
               unless _tmp
-                self.pos = _save6
+                self.pos = _save5
                 break
               end
               _tmp = apply(:_lh)
               unless _tmp
-                self.pos = _save6
+                self.pos = _save5
                 break
               end
               _tmp = apply(:_charstring)
               unless _tmp
-                self.pos = _save6
+                self.pos = _save5
                 break
               end
               _tmp = apply(:_nl)
               unless _tmp
-                self.pos = _save6
+                self.pos = _save5
               end
               break
             end # end sequence
@@ -1377,14 +1450,14 @@ class NoraMark::Parser < KPeg::CompiledParser
           _tmp = true
           @result = _ary
         else
-          self.pos = _save3
+          self.pos = _save2
         end
         content = @result
         unless _tmp
           self.pos = _save1
           break
         end
-        _tmp = apply_with_args(:_preformat_end, delimiter)
+        _tmp = apply(:_preformat_end_simple)
         unless _tmp
           self.pos = _save1
         end
@@ -1405,6 +1478,154 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       break
     end # end sequence
+
+    set_failed_rule :_preformatted_block_simple unless _tmp
+    return _tmp
+  end
+
+  # preformatted_block_complex = < lh - preformatted_command_head_complex:command - (!preformat_end_complex lh charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
+  def _preformatted_block_complex
+
+    _save = self.pos
+    while true # sequence
+      _text_start = self.pos
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_lh)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_preformatted_command_head_complex)
+        command = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _ary = []
+
+        _save3 = self.pos
+        while true # sequence
+          _save4 = self.pos
+          _tmp = apply(:_preformat_end_complex)
+          _tmp = _tmp ? nil : true
+          self.pos = _save4
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = apply(:_lh)
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = apply(:_charstring)
+          unless _tmp
+            self.pos = _save3
+            break
+          end
+          _tmp = apply(:_nl)
+          unless _tmp
+            self.pos = _save3
+          end
+          break
+        end # end sequence
+
+        if _tmp
+          _ary << @result
+          while true
+
+            _save5 = self.pos
+            while true # sequence
+              _save6 = self.pos
+              _tmp = apply(:_preformat_end_complex)
+              _tmp = _tmp ? nil : true
+              self.pos = _save6
+              unless _tmp
+                self.pos = _save5
+                break
+              end
+              _tmp = apply(:_lh)
+              unless _tmp
+                self.pos = _save5
+                break
+              end
+              _tmp = apply(:_charstring)
+              unless _tmp
+                self.pos = _save5
+                break
+              end
+              _tmp = apply(:_nl)
+              unless _tmp
+                self.pos = _save5
+              end
+              break
+            end # end sequence
+
+            _ary << @result if _tmp
+            break unless _tmp
+          end
+          _tmp = true
+          @result = _ary
+        else
+          self.pos = _save2
+        end
+        content = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_preformat_end_complex)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  create_item(:preformatted, command, content, raw: text) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_preformatted_block_complex unless _tmp
+    return _tmp
+  end
+
+  # preformatted_block = (preformatted_block_complex | preformatted_block_simple)
+  def _preformatted_block
+
+    _save = self.pos
+    while true # choice
+      _tmp = apply(:_preformatted_block_complex)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_preformatted_block_simple)
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
 
     set_failed_rule :_preformatted_block unless _tmp
     return _tmp
@@ -3425,10 +3646,15 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le empty_line*")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }")
-  Rules[:_preformatted_command] = rule_info("preformatted_command", "command:command &{ ['pre', 'precode'].include? command[:name] }")
-  Rules[:_preformatted_command_head] = rule_info("preformatted_command_head", "lh - preformatted_command:command - \"<<\" &/[\\w0-9]/ { command }")
-  Rules[:_preformat_end] = rule_info("preformat_end", "lh word:delimiter &{ delimiter == start }")
-  Rules[:_preformatted_block] = rule_info("preformatted_block", "< lh - preformatted_command_head:command !nl word:delimiter nl (!preformat_end(delimiter) lh charstring nl)+:content preformat_end(delimiter) > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_preformatted_command] = rule_info("preformatted_command", "command:command &{ ['pre', 'code'].include? command[:name] }")
+  Rules[:_preformatted_command_head_simple] = rule_info("preformatted_command_head_simple", "lh - preformatted_command:command - \"{\" nl { command }")
+  Rules[:_preformatted_command_head_complex] = rule_info("preformatted_command_head_complex", "lh - preformatted_command:command - \"{//\" nl { command }")
+  Rules[:_preformatted_command_head] = rule_info("preformatted_command_head", "(preformatted_command_head_complex | preformatted_command_head_simple)")
+  Rules[:_preformat_end_simple] = rule_info("preformat_end_simple", "blockend")
+  Rules[:_preformat_end_complex] = rule_info("preformat_end_complex", "lh - \"//}\" - le empty_line*")
+  Rules[:_preformatted_block_simple] = rule_info("preformatted_block_simple", "< lh - preformatted_command_head_simple:command - (!preformat_end_simple lh charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_preformatted_block_complex] = rule_info("preformatted_block_complex", "< lh - preformatted_command_head_complex:command - (!preformat_end_complex lh charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_preformatted_block] = rule_info("preformatted_block", "(preformatted_block_complex | preformatted_block_simple)")
   Rules[:_inline] = rule_info("inline", "(img_inline | common_inline)")
   Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:c \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
   Rules[:_img_command] = rule_info("img_command", "command:c &{ c[:name] == 'img' && c[:args].size == 2}")

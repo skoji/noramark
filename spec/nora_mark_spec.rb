@@ -703,12 +703,12 @@ describe NoraMark do
     it 'should convert preformatted text' do
       text = <<EOF
 normal line.
-pre <<END
+pre {//
 d {
    this will not converted to div or p or pgroup.
 line_command: this will be not converted too.
 }
-END
+//}
 EOF
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
@@ -719,12 +719,12 @@ EOF
     it 'should convert preformatted code' do
       text = <<EOF
 normal line.
-precode <<END
+code {//
 d {
    this will not converted to div or p or pgroup.
 line_command: this will be not converted too.
 }
-END
+//}
 normal line again.
 EOF
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
@@ -732,6 +732,37 @@ EOF
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
       expect(body.element_children[1].selector_and_children).to eq(["pre", ["code", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"]])
+      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
+    end
+
+    it 'should convert preformatted text (simple notation)' do
+      text = <<EOF
+normal line.
+pre {
+line_command: this will be not converted too.
+}
+normal line again.
+EOF
+      noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
+      expect(body.element_children[1].selector_and_children).to eq(["pre", "line_command: this will be not converted too."])
+      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
+    end
+    it 'should convert preformatted code (simple notation)' do
+      text = <<EOF
+normal line.
+code {
+line_command: this will be not converted too.
+}
+normal line again.
+EOF
+      noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
+      expect(body.element_children[1].selector_and_children).to eq(["pre", ["code", "line_command: this will be not converted too."]])
       expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
     end
 

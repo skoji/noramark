@@ -42,10 +42,15 @@ blockbody = (!blockend block)+:body { body }
 explicit_block = < blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }
 
 # preformatted block
-preformatted_command = command:command &{ ['pre', 'precode'].include? command[:name] }
-preformatted_command_head = lh - preformatted_command:command - '<<' &/[\w0-9]/ { command }
-preformat_end(start) = lh word:delimiter &{ delimiter == start }
-preformatted_block = < lh - preformatted_command_head:command !nl word:delimiter nl (!preformat_end(delimiter) (lh charstring nl))+:content preformat_end(delimiter) > { create_item(:preformatted, command, content, raw: text) }
+preformatted_command = command:command &{ ['pre', 'code'].include? command[:name] }
+preformatted_command_head_simple = lh - preformatted_command:command - '{' nl { command }
+preformatted_command_head_complex = lh - preformatted_command:command - '{//' nl { command }
+preformatted_command_head = preformatted_command_head_complex | preformatted_command_head_simple
+preformat_end_simple = blockend
+preformat_end_complex = lh - '//}' - le empty_line*
+preformatted_block_simple = < lh - preformatted_command_head_simple:command - (!preformat_end_simple (lh charstring nl))+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
+preformatted_block_complex = < lh - preformatted_command_head_complex:command - (!preformat_end_complex (lh charstring nl))+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
+preformatted_block = preformatted_block_complex | preformatted_block_simple
 
 # inline command
 inline = img_inline | common_inline
