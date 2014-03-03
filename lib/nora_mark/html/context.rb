@@ -11,7 +11,7 @@ module NoraMark
         @stylesheets_alt = param[:stylesheets_alt] || []
         @enable_pgroup = param[:enable_pgroup] || true
         self.paragraph_style= param[:paragraph_style]
-        @pages = Pages.new(param[:filename_base], param[:sequence_format])
+        @pages = Pages.new(param[:sequence_format])
         @block_delimiter_stack = []
         head_inserter do
           ret = ""
@@ -28,6 +28,10 @@ module NoraMark
         end
       end
 
+      def file_basename=(name)
+        @pages.file_basename = name
+      end
+      
       def created_files
         @pages.created_files
       end

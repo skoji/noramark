@@ -3339,7 +3339,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = page:page newpaged_page*:pages - eof_comment? eof { [ page ] + pages }
+  # root = page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }
   def _root
 
     _save = self.pos
@@ -3383,7 +3383,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  [ page ] + pages ; end
+      @result = begin;  create_item(:document, {:name => @document_name} , [ page ] + pages) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3470,6 +3470,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_headers] = rule_info("headers", "header*:headers { create_item(:headers, nil, headers) }")
   Rules[:_page] = rule_info("page", "headers:headers - (!newpage block)*:blocks { create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) }")
   Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }")
-  Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { [ page ] + pages }")
+  Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }")
   # :startdoc:
 end

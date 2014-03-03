@@ -4,8 +4,8 @@ module NoraMark
     class Context
       class Pages
         attr_reader :created_files
-        def initialize(filename_base = nil, sequence_format='%05d')
-          @filename_base = filename_base || "noramark_#{SecureRandom.uuid}"
+        attr_accessor :file_basename
+        def initialize(sequence_format='%05d')
           @sequence_format = sequence_format || '%05d'
           @result = []
         end
@@ -20,7 +20,7 @@ module NoraMark
         
         def <<(page)
           seq = @result.size + 1
-          @result << { content: page, filename: "#{@filename_base}_#{@sequence_format%(seq)}.xhtml" }
+          @result << { content: page, filename: "#{@file_basename}_#{@sequence_format%(seq)}.xhtml" }
         end
 
         def [](num)

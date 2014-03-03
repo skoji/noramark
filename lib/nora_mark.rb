@@ -1,6 +1,7 @@
 require "nora_mark/version"
 require 'nora_mark/html/generator'
 require 'nora_mark/parser'
+require 'securerandom'
 
 module NoraMark
   class Document
@@ -15,7 +16,7 @@ module NoraMark
           |pr|
           src = pr.call(src)
         end
-        @parser = Parser.new(src)
+        @parser = Parser.new(src, document_name: @document_name)
         if (!@parser.parse)
           raise @parser.raise_error
         end
@@ -39,6 +40,7 @@ module NoraMark
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                        ]
       @html_generator = Html::Generator.new(param)
+      @document_name = param[:document_name] || "noramark_#{SecureRandom.uuid}"
     end 
 
 

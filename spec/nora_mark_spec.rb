@@ -829,7 +829,7 @@ EOF
       end
       it 'should create named file' do
         text = "some text\nnewpage:\nnext page"
-        noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the document title', filename_base: 'nora-test-file', sequence_format: '%03d' )
+        noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the document title', document_name: 'nora-test-file', sequence_format: '%03d' )
         noramark.html.write_as_files(directory: @basedir)
         files = Dir.glob(File.join(@basedir, '*.xhtml'))
         expect(File.basename(files[0])).to eq 'nora-test-file_001.xhtml'

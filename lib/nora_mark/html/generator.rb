@@ -26,6 +26,7 @@ module NoraMark
         paragraph_writer = ParagraphWriter.new self
         abstract_item_writer = AbstractItemWriter.new self
         @writers = {
+          :document => abstract_item_writer,
           :page => abstract_item_writer,
           :headers => abstract_item_writer,
           :paragraph => paragraph_writer,
@@ -153,7 +154,9 @@ module NoraMark
       end
 
       def convert(parsed_result)
-        parsed_result.each {
+        children = parsed_result[:children]
+        @context.file_basename = parsed_result[:name]
+        children.each {
           |item|
           to_html(item)
         }
