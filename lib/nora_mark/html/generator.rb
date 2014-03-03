@@ -105,8 +105,8 @@ module NoraMark
           :dtdd =>
           TagWriter.create('', self, chop_last_space: true, item_preprocessor: proc do |item| item[:no_tag] = true; item end,
                            write_body_preprocessor: proc do |item|
-                             output "<dt>"; write_array item[:args][0]; output "</dt>"
-                             output "<dd>"; write_array item[:args][1]; output "</dd>"
+                             output "<dt>"; write_array item[:args][0]; output "</dt>\n"
+                             output "<dd>"; write_array item[:args][1]; output "</dd>\n"
                              :done
                            end),
           :newpage =>

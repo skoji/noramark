@@ -82,7 +82,11 @@ ordered_item = < lh num ':' documentcontent:content le > { create_item(:li, nil,
 definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
 definition_item = < lh ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
 
-items_list = unordered_list | ordered_list | definition_list
+# long definition list
+long_definition_list = < long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }
+long_definition_item = < lh ';:' - documentcontent_except('{'):term '{' - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+
+items_list = unordered_list | ordered_list | definition_list | long_definition_list
 
 
 # generic line command

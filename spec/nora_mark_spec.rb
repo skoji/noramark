@@ -585,6 +585,28 @@ describe NoraMark do
         ])
     end
 
+    it 'should handle long definition list ' do
+      text = "this is normal line.\n;: 1st {\n this is the first definition\n}\n;: 2nd { \nblah :blah.\n}\n;: 3rd{\n this term is the last.\n}\nthe list ends."
+      noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 3
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'this is normal line.']
+        ])
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['dl', 
+         ['dt', '1st'],['dd', ['div.pgroup', ['p', 'this is the first definition']]],
+         ['dt', '2nd'],['dd', ['div.pgroup', ['p', 'blah :blah.']]],
+         ['dt', '3rd'],['dd', ['div.pgroup', ['p', 'this term is the last.']]]
+        ])
+      expect(body.element_children[2].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'the list ends.']
+        ])
+    end
+
     it 'should escape html' do
       text = ";:definition<div>:</div>&"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
