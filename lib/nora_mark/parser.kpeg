@@ -21,9 +21,12 @@ idname = '#' word:idname { idname }
 idnames = (idname)*:idnames { idnames }
 
 commandname = word:name idnames?:idnames classnames?:classes  { {:name => name, :ids => idnames, :classes => classes} }
-parameter = ( /[^,)]/* | '"' /[^"]/* '"' | "'" /[^']/* "'" ) 
-parameters = < parameter (',' parameter)* > { text }
-command = commandname:cn ('(' - parameters:arg - ')')? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }
+parameter_normal = < /[^,)]/* > { text }
+parameter_quoted = '"' < /[^"]/* > '"' - &/[,)]/  { text }
+parameter_single_quoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
+parameter = (parameter_quoted | parameter_single_quoted | parameter_normal ):value { value }
+parameters = parameter:parameter (',' - parameter)*:rest_parameters { [parameter] + rest_parameters }
+command = commandname:cn ('(' - parameters:args - ')')? { args ||= []; cn.merge({ :args => args }) }
 
 # paragraph
 implicit_paragraph = < (!paragraph_delimiter - documentline:p -) > { create_item(:paragraph, nil, p, raw: text) }

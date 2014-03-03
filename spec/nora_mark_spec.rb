@@ -110,7 +110,7 @@ describe NoraMark do
     end
 
     it 'should convert div without pgroup' do
-      text = "d(wo-pgroup) {\n1st line. \n}"
+      text = "d('wo-pgroup') {\n1st line. \n}"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -294,7 +294,7 @@ describe NoraMark do
 
 
     it 'should handle block image' do
-      text = "this is normal line.\nimage(./image1.jpg, alt text): caption text"
+      text = "this is normal line.\nimage(./image1.jpg, \"alt text\"): caption text"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')

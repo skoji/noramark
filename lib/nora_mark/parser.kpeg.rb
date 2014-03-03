@@ -508,116 +508,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # parameter = (/[^,)]/* | "\"" /[^"]/* "\"" | "'" /[^']/* "'")
-  def _parameter
+  # parameter_normal = < /[^,)]/* > { text }
+  def _parameter_normal
 
     _save = self.pos
-    while true # choice
+    while true # sequence
+      _text_start = self.pos
       while true
         _tmp = scan(/\A(?-mix:[^,)])/)
         break unless _tmp
       end
       _tmp = true
-      break if _tmp
-      self.pos = _save
-
-      _save2 = self.pos
-      while true # sequence
-        _tmp = match_string("\"")
-        unless _tmp
-          self.pos = _save2
-          break
-        end
-        while true
-          _tmp = scan(/\A(?-mix:[^"])/)
-          break unless _tmp
-        end
-        _tmp = true
-        unless _tmp
-          self.pos = _save2
-          break
-        end
-        _tmp = match_string("\"")
-        unless _tmp
-          self.pos = _save2
-        end
-        break
-      end # end sequence
-
-      break if _tmp
-      self.pos = _save
-
-      _save4 = self.pos
-      while true # sequence
-        _tmp = match_string("'")
-        unless _tmp
-          self.pos = _save4
-          break
-        end
-        while true
-          _tmp = scan(/\A(?-mix:[^'])/)
-          break unless _tmp
-        end
-        _tmp = true
-        unless _tmp
-          self.pos = _save4
-          break
-        end
-        _tmp = match_string("'")
-        unless _tmp
-          self.pos = _save4
-        end
-        break
-      end # end sequence
-
-      break if _tmp
-      self.pos = _save
-      break
-    end # end choice
-
-    set_failed_rule :_parameter unless _tmp
-    return _tmp
-  end
-
-  # parameters = < parameter ("," parameter)* > { text }
-  def _parameters
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_parameter)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        while true
-
-          _save3 = self.pos
-          while true # sequence
-            _tmp = match_string(",")
-            unless _tmp
-              self.pos = _save3
-              break
-            end
-            _tmp = apply(:_parameter)
-            unless _tmp
-              self.pos = _save3
-            end
-            break
-          end # end sequence
-
-          break unless _tmp
-        end
-        _tmp = true
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
       if _tmp
         text = get_text(_text_start)
       end
@@ -633,11 +534,207 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
+    set_failed_rule :_parameter_normal unless _tmp
+    return _tmp
+  end
+
+  # parameter_quoted = "\"" < /[^"]/* > "\"" - &/[,)]/ { text }
+  def _parameter_quoted
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("\"")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _text_start = self.pos
+      while true
+        _tmp = scan(/\A(?-mix:[^"])/)
+        break unless _tmp
+      end
+      _tmp = true
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("\"")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save2 = self.pos
+      _tmp = scan(/\A(?-mix:[,)])/)
+      self.pos = _save2
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  text ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_parameter_quoted unless _tmp
+    return _tmp
+  end
+
+  # parameter_single_quoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
+  def _parameter_single_quoted
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("'")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _text_start = self.pos
+      while true
+        _tmp = scan(/\A(?-mix:[^'])/)
+        break unless _tmp
+      end
+      _tmp = true
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("'")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save2 = self.pos
+      _tmp = scan(/\A(?-mix:[,)])/)
+      self.pos = _save2
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  text ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_parameter_single_quoted unless _tmp
+    return _tmp
+  end
+
+  # parameter = (parameter_quoted | parameter_single_quoted | parameter_normal):value { value }
+  def _parameter
+
+    _save = self.pos
+    while true # sequence
+
+      _save1 = self.pos
+      while true # choice
+        _tmp = apply(:_parameter_quoted)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_parameter_single_quoted)
+        break if _tmp
+        self.pos = _save1
+        _tmp = apply(:_parameter_normal)
+        break if _tmp
+        self.pos = _save1
+        break
+      end # end choice
+
+      value = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  value ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_parameter unless _tmp
+    return _tmp
+  end
+
+  # parameters = parameter:parameter ("," - parameter)*:rest_parameters { p rest_parameters; [parameter] + rest_parameters }
+  def _parameters
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_parameter)
+      parameter = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _ary = []
+      while true
+
+        _save2 = self.pos
+        while true # sequence
+          _tmp = match_string(",")
+          unless _tmp
+            self.pos = _save2
+            break
+          end
+          _tmp = apply(:__hyphen_)
+          unless _tmp
+            self.pos = _save2
+            break
+          end
+          _tmp = apply(:_parameter)
+          unless _tmp
+            self.pos = _save2
+          end
+          break
+        end # end sequence
+
+        _ary << @result if _tmp
+        break unless _tmp
+      end
+      _tmp = true
+      @result = _ary
+      rest_parameters = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  p rest_parameters; [parameter] + rest_parameters ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
     set_failed_rule :_parameters unless _tmp
     return _tmp
   end
 
-  # command = commandname:cn ("(" - parameters:arg - ")")? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }
+  # command = commandname:cn ("(" - parameters:args - ")")? { args ||= []; cn.merge({ :args => args }) }
   def _command
 
     _save = self.pos
@@ -663,7 +760,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         _tmp = apply(:_parameters)
-        arg = @result
+        args = @result
         unless _tmp
           self.pos = _save2
           break
@@ -688,7 +785,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  arg ||= ''; cn.merge({ :args => arg.split(',') }) ; end
+      @result = begin;  args ||= []; cn.merge({ :args => args }) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3345,9 +3442,12 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_idname] = rule_info("idname", "\"\#\" word:idname { idname }")
   Rules[:_idnames] = rule_info("idnames", "idname*:idnames { idnames }")
   Rules[:_commandname] = rule_info("commandname", "word:name idnames?:idnames classnames?:classes { {:name => name, :ids => idnames, :classes => classes} }")
-  Rules[:_parameter] = rule_info("parameter", "(/[^,)]/* | \"\\\"\" /[^\"]/* \"\\\"\" | \"'\" /[^']/* \"'\")")
-  Rules[:_parameters] = rule_info("parameters", "< parameter (\",\" parameter)* > { text }")
-  Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:arg - \")\")? { arg ||= ''; cn.merge({ :args => arg.split(',') }) }")
+  Rules[:_parameter_normal] = rule_info("parameter_normal", "< /[^,)]/* > { text }")
+  Rules[:_parameter_quoted] = rule_info("parameter_quoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
+  Rules[:_parameter_single_quoted] = rule_info("parameter_single_quoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
+  Rules[:_parameter] = rule_info("parameter", "(parameter_quoted | parameter_single_quoted | parameter_normal):value { value }")
+  Rules[:_parameters] = rule_info("parameters", "parameter:parameter (\",\" - parameter)*:rest_parameters { p rest_parameters; [parameter] + rest_parameters }")
+  Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:args - \")\")? { args ||= []; cn.merge({ :args => args }) }")
   Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
   Rules[:_paragraph_group] = rule_info("paragraph_group", "< paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }")
