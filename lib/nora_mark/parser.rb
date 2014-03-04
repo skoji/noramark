@@ -4,10 +4,14 @@ module NoraMark
   class Parser
 
     def initialize(src, document_name: nil)
-      @document_name = document_name
-      super src
+       @document_name = document_name
+       super src
     end
-    
+
+    def create_frontmatter(yaml)
+      item = {:type => :frontmatter, :content => YAML.load(yaml.join("\n")) }
+    end
+
     def create_item(type, command, children = [], raw: nil)
       children[0].sub!(/^[[:space:]]+/, '') if !children.nil? && children[0].is_a?(String)
       item = {:type => type, :children => children, :raw_text => raw }.merge command || {}

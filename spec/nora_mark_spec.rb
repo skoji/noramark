@@ -619,7 +619,13 @@ describe NoraMark do
     end
 
     it 'should specify stylesheets' do
-      text = "stylesheets:css/default.css, css/specific.css, css/iphone.css:(only screen and (min-device-width : 320px) and (max-device-width : 480px))\n\ntext.\n"
+      text = <<EOF
+---
+stylesheets: [ css/default.css, css/specific.css, [ css/iphone.css, 'only screen and (min-device-width : 320px) and (max-device-width : 480px)']]
+---
+text.
+
+EOF
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the document title')
       converted = noramark.html
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
@@ -636,7 +642,7 @@ describe NoraMark do
     end
 
     it 'should specify title' do
-      text = "title:the title of the book in the text.\n\ntext."
+      text = "---\ntitle: the title of the book in the text.\n---\n\ntext."
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
@@ -650,7 +656,7 @@ describe NoraMark do
     end
 
     it 'should specify title on each page' do
-      text = "title:page1\n\n1st page.\nnewpage:\ntitle:page2\nh1:2nd page"
+      text = "---\ntitle: page1\n---\n\n1st page.\nnewpage:\n---\ntitle: page2\n---\nh1:2nd page"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title', :paragraph_style => :use_paragraph_group)
       converted = noramark.html
       # 1st page
@@ -710,7 +716,7 @@ describe NoraMark do
     end
 
     it 'should convert h1 in article after title' do
-      text = "stylesheets: css/default.css\ntitle: foo\narticle.atogaki {\n\nh1: あとがき。\n\natogaki\n}"
+      text = "---\nstylesheets: css/default.css\ntitle: foo\n---\narticle.atogaki {\n\nh1: あとがき。\n\natogaki\n}"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -889,6 +895,7 @@ EOF
         expect(File.basename(files[0])).to eq 'nora-test-file_001.xhtml'
         expect(File.basename(files[1])).to eq 'nora-test-file_002.xhtml'
       end
+
     end
   end
 end

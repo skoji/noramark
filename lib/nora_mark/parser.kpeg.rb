@@ -2977,285 +2977,127 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # stylesheets = < lh - "stylesheets:" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }
-  def _stylesheets
+  # frontmatter_separator = lh - "---" - nl
+  def _frontmatter_separator
 
     _save = self.pos
     while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("stylesheets:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _save2 = self.pos
-        _tmp = apply(:_le)
-        _tmp = _tmp ? nil : true
-        self.pos = _save2
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_charstring)
-        s = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_nl)
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
-      if _tmp
-        text = get_text(_text_start)
-      end
+      _tmp = apply(:_lh)
       unless _tmp
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) ; end
-      _tmp = true
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("---")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_nl)
       unless _tmp
         self.pos = _save
       end
       break
     end # end sequence
 
-    set_failed_rule :_stylesheets unless _tmp
+    set_failed_rule :_frontmatter_separator unless _tmp
     return _tmp
   end
 
-  # title = < lh - "title:" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }
-  def _title
+  # frontmatter = frontmatter_separator (!frontmatter_separator lh charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
+  def _frontmatter
 
     _save = self.pos
     while true # sequence
-      _text_start = self.pos
-
+      _tmp = apply(:_frontmatter_separator)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _save1 = self.pos
+      _ary = []
+
+      _save2 = self.pos
       while true # sequence
+        _save3 = self.pos
+        _tmp = apply(:_frontmatter_separator)
+        _tmp = _tmp ? nil : true
+        self.pos = _save3
+        unless _tmp
+          self.pos = _save2
+          break
+        end
         _tmp = apply(:_lh)
         unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("title:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _save2 = self.pos
-        _tmp = apply(:_le)
-        _tmp = _tmp ? nil : true
-        self.pos = _save2
-        unless _tmp
-          self.pos = _save1
+          self.pos = _save2
           break
         end
         _tmp = apply(:_charstring)
-        t = @result
         unless _tmp
-          self.pos = _save1
+          self.pos = _save2
           break
         end
         _tmp = apply(:_nl)
         unless _tmp
-          self.pos = _save1
+          self.pos = _save2
         end
         break
       end # end sequence
 
       if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:title, {:title => t }, nil, raw:text) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
+        _ary << @result
+        while true
 
-    set_failed_rule :_title unless _tmp
-    return _tmp
-  end
+          _save4 = self.pos
+          while true # sequence
+            _save5 = self.pos
+            _tmp = apply(:_frontmatter_separator)
+            _tmp = _tmp ? nil : true
+            self.pos = _save5
+            unless _tmp
+              self.pos = _save4
+              break
+            end
+            _tmp = apply(:_lh)
+            unless _tmp
+              self.pos = _save4
+              break
+            end
+            _tmp = apply(:_charstring)
+            unless _tmp
+              self.pos = _save4
+              break
+            end
+            _tmp = apply(:_nl)
+            unless _tmp
+              self.pos = _save4
+            end
+            break
+          end # end sequence
 
-  # lang = < lh - "lang:" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }
-  def _lang
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
+          _ary << @result if _tmp
+          break unless _tmp
         end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("lang:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _save2 = self.pos
-        _tmp = apply(:_le)
-        _tmp = _tmp ? nil : true
-        self.pos = _save2
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_charstring)
-        l = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_nl)
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:lang, {:lang => l }, nil, raw:text) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_lang unless _tmp
-    return _tmp
-  end
-
-  # paragraph_style = < lh - "paragraph-style:" !le charstring:l nl > { create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) }
-  def _paragraph_style
-
-    _save = self.pos
-    while true # sequence
-      _text_start = self.pos
-
-      _save1 = self.pos
-      while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string("paragraph-style:")
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _save2 = self.pos
-        _tmp = apply(:_le)
-        _tmp = _tmp ? nil : true
-        self.pos = _save2
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_charstring)
-        l = @result
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:_nl)
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
-      if _tmp
-        text = get_text(_text_start)
-      end
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_paragraph_style unless _tmp
-    return _tmp
-  end
-
-  # header = (stylesheets | title | lang | paragraph_style) empty_line*
-  def _header
-
-    _save = self.pos
-    while true # sequence
-
-      _save1 = self.pos
-      while true # choice
-        _tmp = apply(:_stylesheets)
-        break if _tmp
+        _tmp = true
+        @result = _ary
+      else
         self.pos = _save1
-        _tmp = apply(:_title)
-        break if _tmp
-        self.pos = _save1
-        _tmp = apply(:_lang)
-        break if _tmp
-        self.pos = _save1
-        _tmp = apply(:_paragraph_style)
-        break if _tmp
-        self.pos = _save1
+      end
+      yaml = @result
+      unless _tmp
+        self.pos = _save
         break
-      end # end choice
-
+      end
+      _tmp = apply(:_frontmatter_separator)
       unless _tmp
         self.pos = _save
         break
@@ -3267,11 +3109,17 @@ class NoraMark::Parser < KPeg::CompiledParser
       _tmp = true
       unless _tmp
         self.pos = _save
+        break
+      end
+      @result = begin;  create_frontmatter(yaml) ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
       end
       break
     end # end sequence
 
-    set_failed_rule :_header unless _tmp
+    set_failed_rule :_frontmatter unless _tmp
     return _tmp
   end
 
@@ -3574,43 +3422,19 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # headers = header*:headers { create_item(:headers, nil, headers) }
-  def _headers
-
-    _save = self.pos
-    while true # sequence
-      _ary = []
-      while true
-        _tmp = apply(:_header)
-        _ary << @result if _tmp
-        break unless _tmp
-      end
-      _tmp = true
-      @result = _ary
-      headers = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  create_item(:headers, nil, headers) ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_headers unless _tmp
-    return _tmp
-  end
-
-  # page = headers:headers - (!newpage block)*:blocks { create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) }
+  # page = frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }
   def _page
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_headers)
-      headers = @result
+      _save1 = self.pos
+      _tmp = apply(:_frontmatter)
+      @result = nil unless _tmp
+      unless _tmp
+        _tmp = true
+        self.pos = _save1
+      end
+      frontmatter = @result
       unless _tmp
         self.pos = _save
         break
@@ -3623,19 +3447,19 @@ class NoraMark::Parser < KPeg::CompiledParser
       _ary = []
       while true
 
-        _save2 = self.pos
+        _save3 = self.pos
         while true # sequence
-          _save3 = self.pos
+          _save4 = self.pos
           _tmp = apply(:_newpage)
           _tmp = _tmp ? nil : true
-          self.pos = _save3
+          self.pos = _save4
           unless _tmp
-            self.pos = _save2
+            self.pos = _save3
             break
           end
           _tmp = apply(:_block)
           unless _tmp
-            self.pos = _save2
+            self.pos = _save3
           end
           break
         end # end sequence
@@ -3650,7 +3474,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) ; end
+      @result = begin;  create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3815,19 +3639,15 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
   Rules[:_headed_start] = rule_info("headed_start", "(h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))")
   Rules[:_headed_section] = rule_info("headed_section", "(h_section(1) | h_section(2) | h_section(3) | h_section(4) | h_section(5) | h_section(6))")
-  Rules[:_stylesheets] = rule_info("stylesheets", "< lh - \"stylesheets:\" !le charstring:s nl > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }")
-  Rules[:_title] = rule_info("title", "< lh - \"title:\" !le charstring:t nl > { create_item(:title, {:title => t }, nil, raw:text) }")
-  Rules[:_lang] = rule_info("lang", "< lh - \"lang:\" !le charstring:l nl > { create_item(:lang, {:lang => l }, nil, raw:text) }")
-  Rules[:_paragraph_style] = rule_info("paragraph_style", "< lh - \"paragraph-style:\" !le charstring:l nl > { create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) }")
-  Rules[:_header] = rule_info("header", "(stylesheets | title | lang | paragraph_style) empty_line*")
+  Rules[:_frontmatter_separator] = rule_info("frontmatter_separator", "lh - \"---\" - nl")
+  Rules[:_frontmatter] = rule_info("frontmatter", "frontmatter_separator (!frontmatter_separator lh charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
   Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")
   Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
   Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
   Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content le { content }")
-  Rules[:_headers] = rule_info("headers", "header*:headers { create_item(:headers, nil, headers) }")
-  Rules[:_page] = rule_info("page", "headers:headers - (!newpage block)*:blocks { create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) }")
+  Rules[:_page] = rule_info("page", "frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }")
   Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }")
   Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }")
   # :startdoc:

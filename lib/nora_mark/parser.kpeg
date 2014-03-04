@@ -108,12 +108,9 @@ h_section(n) = < h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { 
 headed_start = h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6)
 headed_section = h_section(1) | h_section(2)| h_section(3)| h_section(4)| h_section(5) | h_section(6)
 
-#header
-stylesheets = < lh - 'stylesheets:' !le charstring:s nl  > { create_item(:stylesheets, {:stylesheets => s.split(',').map(&:strip)}, nil, raw:text) }
-title = < lh - 'title:' !le charstring:t nl  > { create_item(:title, {:title => t }, nil, raw:text) }
-lang = < lh - 'lang:' !le charstring:l nl  > { create_item(:lang, {:lang => l }, nil, raw:text) }
-paragraph_style = < lh - 'paragraph-style:' !le charstring:l nl  > { create_item(:paragraph_style, {:paragraph_style => l }, nil, raw:text) }
-header = (stylesheets | title | lang | paragraph_style ) empty_line*
+# frontmatter
+frontmatter_separator = lh - '---' - nl
+frontmatter = frontmatter_separator (!frontmatter_separator (lh charstring nl))+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
 
 # texts
 char = < /[[:print:]]/ > { text }
@@ -124,8 +121,7 @@ documentcontent = (inline | !inline char)+:content  ~parse_text(content)
 documentline = lh documentcontent:content le { content }
 
 #page
-headers = header*:headers { create_item(:headers, nil, headers) }
-page = headers:headers - (!newpage block)*:blocks { create_item(:page, nil, [headers] + blocks.select{ |x| !x.nil?}) }
+page = frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }
 newpaged_page = newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }
 
 #root

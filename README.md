@@ -37,10 +37,13 @@ An example of markup text (text is in english, but the paragraph style is japane
     # line begins with # is a comment.
     # you don't need to indent noramark text.
 
+    # page/document metadata in YAML frontmatter
+    ---
     lang: ja
     title: test title
-    stylesheets: css/normalize.css, css/main.css
-
+    stylesheets: [css/normalize.css, css/main.css]
+    ---
+    
     art {
         h1: header 1
         article comes here.
@@ -88,9 +91,11 @@ Another example of markup text in non-japanese (paragraph style is default)
     # line begins with # is a comment.
     # you don't need to indent noramark text.
 
+    ---
     lang: en
     title: test title
-    stylesheets: css/normalize.css, css/main.css
+    stylesheets: [ css/normalize.css, css/main.css] 
+    ---
 
     art {
         h1: header 1
@@ -131,9 +136,11 @@ Another example of markup text
 
     # Markdown-ish heading will creates section
 
+    ---
     lang: ja
     title: test title
     stylesheets: css/normalize.css, css/main.css
+    ---
     
     =: this is the first heading
 
@@ -151,7 +158,7 @@ Another example of markup text
 The converted XHTML file
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="en">
     <head>
     <title>test title</title>
     <link rel="stylesheet" type="text/css" href="css/normalize.css" />
@@ -173,12 +180,6 @@ The converted XHTML file
     </section>
     </body>
     </html>    
-    
-
-
-
-
-
 
 
 In a near future version, you will be able to add custom commands.

@@ -3,7 +3,7 @@ require 'nora_mark/html/util'
 require 'nora_mark/html/pages'
 require 'nora_mark/html/context'
 require 'nora_mark/html/tag_writer'
-require 'nora_mark/html/header_writer'
+require 'nora_mark/html/frontmatter_writer'
 require 'nora_mark/html/paragraph_writer'
 require 'nora_mark/html/writer_selector'
 require 'nora_mark/html/abstract_item_writer'
@@ -22,7 +22,7 @@ module NoraMark
                                          item
                                        end)
 
-        header_writer = HeaderWriter.new self
+        frontmatter_writer = FrontmatterWriter.new self
         paragraph_writer = ParagraphWriter.new self
         abstract_item_writer = AbstractItemWriter.new self
         @writers = {
@@ -131,11 +131,8 @@ module NoraMark
                              output "<h#{item[:level]}>#{item[:heading].strip}</h#{item[:level]}>\n"
                              :continue
                            end),
-          # headers
-          :stylesheets => header_writer,
-          :title => header_writer,
-          :lang => header_writer,
-          :paragraph_style => header_writer,
+          # frontmatter
+          :frontmatter => frontmatter_writer,
           # pre-formatted
           :preformatted =>
           TagWriter.create('pre', self,write_body_preprocessor: proc do |item|
