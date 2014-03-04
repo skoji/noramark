@@ -1,4 +1,5 @@
 require 'nora_mark/parser.kpeg'
+require 'yaml'
 
 module NoraMark
   class Parser

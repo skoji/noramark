@@ -8,7 +8,6 @@ comment =   space* "#" (!nl .)* nl empty_line*
 - =  ( space | comment | eof_comment)*
 empty_line = - nl
 nl = /\r?\n/
-lh = /^/
 le = nl | eof
 word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
 num = < [0-9]+ > { text.to_i }
@@ -72,25 +71,25 @@ explicit_paragraph = < - explicit_paragraph_command:c ':' documentcontent?:conte
 
 # unordered list
 unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
-unordered_item = < lh '*:' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
+unordered_item = < '*:' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
 
 # ordered list
 ordered_list = < ordered_item+:items > { create_item(:ol, nil, items, raw: text) }
-ordered_item = < lh num ':' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
+ordered_item = < num ':' documentcontent:content le > { create_item(:li, nil, content, raw: text) }
 
 # definition list
 definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
-definition_item = < lh ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+definition_item = < - ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
 
 # long definition list
 long_definition_list = < long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }
-long_definition_item = < lh ';:' - documentcontent_except('{'):term '{' - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+long_definition_item = < - ';:' - documentcontent_except('{'):term '{' - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
 
 items_list = unordered_list | ordered_list | definition_list | long_definition_list
 
 
 # generic line command
-line_command = < lh - !commandname_for_special_line_command command:c ':' documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
+line_command = < - !commandname_for_special_line_command command:c ':' documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
 
 # blocks
 line_block =  items_list | line_command 
@@ -100,17 +99,17 @@ paragraph_delimiter = block_delimiter | preformatted_command_head | line_block |
 
 # markdown-style headings
 h_start_mark(n) = < '='+ ':' > &{ text.length - 1 == n }
-h_markup_terminator(n) = lh - < '='+ ':' > &{ text.length - 1 <= n }
+h_markup_terminator(n) = - < '='+ ':' > &{ text.length - 1 <= n }
 
-h_start(n) = lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }
+h_start(n) = - h_start_mark(n) charstring:s le { { level: n, heading: s } }
 h_section(n) = < h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }
 
 headed_start = h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6)
 headed_section = h_section(1) | h_section(2)| h_section(3)| h_section(4)| h_section(5) | h_section(6)
 
 # frontmatter
-frontmatter_separator = lh - '---' - nl
-frontmatter = frontmatter_separator (!frontmatter_separator (lh charstring nl))+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
+frontmatter_separator =  - '---' - nl
+frontmatter = frontmatter_separator (!frontmatter_separator ( charstring nl))+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
 
 # texts
 char = < /[[:print:]]/ > { text }
@@ -118,7 +117,7 @@ charstring = < char* > { text }
 char_except(e) = char:c &{ c != e }
 documentcontent_except(e) = (inline | !inline char_except(e))+:content ~parse_text(content)
 documentcontent = (inline | !inline char)+:content  ~parse_text(content)
-documentline = lh documentcontent:content le { content }
+documentline = documentcontent:content le { content }
 
 #page
 page = frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }

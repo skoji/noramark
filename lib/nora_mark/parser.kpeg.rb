@@ -200,13 +200,6 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # lh = /^/
-  def _lh
-    _tmp = scan(/\A(?-mix:^)/)
-    set_failed_rule :_lh unless _tmp
-    return _tmp
-  end
-
   # le = (nl | eof)
   def _le
 
@@ -1948,7 +1941,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # unordered_item = < lh "*:" documentcontent:content le > { create_item(:li, nil, content, raw: text) }
+  # unordered_item = < "*:" documentcontent:content le > { create_item(:li, nil, content, raw: text) }
   def _unordered_item
 
     _save = self.pos
@@ -1957,11 +1950,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = match_string("*:")
         unless _tmp
           self.pos = _save1
@@ -2040,7 +2028,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ordered_item = < lh num ":" documentcontent:content le > { create_item(:li, nil, content, raw: text) }
+  # ordered_item = < num ":" documentcontent:content le > { create_item(:li, nil, content, raw: text) }
   def _ordered_item
 
     _save = self.pos
@@ -2049,11 +2037,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = apply(:_num)
         unless _tmp
           self.pos = _save1
@@ -2137,7 +2120,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # definition_item = < lh ";:" - documentcontent_except(':'):term ":" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+  # definition_item = < - ";:" - documentcontent_except(':'):term ":" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
   def _definition_item
 
     _save = self.pos
@@ -2146,7 +2129,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
+        _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
           break
@@ -2250,7 +2233,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # long_definition_item = < lh ";:" - documentcontent_except('{'):term "{" - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+  # long_definition_item = < - ";:" - documentcontent_except('{'):term "{" - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
   def _long_definition_item
 
     _save = self.pos
@@ -2259,7 +2242,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
+        _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
           break
@@ -2361,7 +2344,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # line_command = < lh - !commandname_for_special_line_command command:c ":" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
+  # line_command = < - !commandname_for_special_line_command command:c ":" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
   def _line_command
 
     _save = self.pos
@@ -2370,11 +2353,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
@@ -2617,16 +2595,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # h_markup_terminator = lh - < "="+ ":" > &{ text.length - 1 <= n }
+  # h_markup_terminator = - < "="+ ":" > &{ text.length - 1 <= n }
   def _h_markup_terminator(n)
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -2678,16 +2651,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # h_start = lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }
+  # h_start = - h_start_mark(n) charstring:s le { { level: n, heading: s } }
   def _h_start(n)
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -2887,16 +2855,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # frontmatter_separator = lh - "---" - nl
+  # frontmatter_separator = - "---" - nl
   def _frontmatter_separator
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -2923,7 +2886,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # frontmatter = frontmatter_separator (!frontmatter_separator lh charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
+  # frontmatter = frontmatter_separator (!frontmatter_separator charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
   def _frontmatter
 
     _save = self.pos
@@ -2942,11 +2905,6 @@ class NoraMark::Parser < KPeg::CompiledParser
         _tmp = apply(:_frontmatter_separator)
         _tmp = _tmp ? nil : true
         self.pos = _save3
-        unless _tmp
-          self.pos = _save2
-          break
-        end
-        _tmp = apply(:_lh)
         unless _tmp
           self.pos = _save2
           break
@@ -2973,11 +2931,6 @@ class NoraMark::Parser < KPeg::CompiledParser
             _tmp = apply(:_frontmatter_separator)
             _tmp = _tmp ? nil : true
             self.pos = _save5
-            unless _tmp
-              self.pos = _save4
-              break
-            end
-            _tmp = apply(:_lh)
             unless _tmp
               self.pos = _save4
               break
@@ -3299,16 +3252,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # documentline = lh documentcontent:content le { content }
+  # documentline = documentcontent:content le { content }
   def _documentline
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:_documentcontent)
       content = @result
       unless _tmp
@@ -3489,7 +3437,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:__hyphen_] = rule_info("-", "(space | comment | eof_comment)*")
   Rules[:_empty_line] = rule_info("empty_line", "- nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
-  Rules[:_lh] = rule_info("lh", "/^/")
   Rules[:_le] = rule_info("le", "(nl | eof)")
   Rules[:_word] = rule_info("word", "< /[\\w0-9]/ (\"-\" | /[\\w0-9]/)* > { text }")
   Rules[:_num] = rule_info("num", "< [0-9]+ > { text.to_i }")
@@ -3530,33 +3477,33 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:c &{ c[:name] == 'p' }")
   Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< - explicit_paragraph_command:c \":\" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }")
   Rules[:_unordered_list] = rule_info("unordered_list", "< unordered_item+:items > { create_item(:ul, nil, items, raw: text) }")
-  Rules[:_unordered_item] = rule_info("unordered_item", "< lh \"*:\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
+  Rules[:_unordered_item] = rule_info("unordered_item", "< \"*:\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
   Rules[:_ordered_list] = rule_info("ordered_list", "< ordered_item+:items > { create_item(:ol, nil, items, raw: text) }")
-  Rules[:_ordered_item] = rule_info("ordered_item", "< lh num \":\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
+  Rules[:_ordered_item] = rule_info("ordered_item", "< num \":\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
   Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
-  Rules[:_definition_item] = rule_info("definition_item", "< lh \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
+  Rules[:_definition_item] = rule_info("definition_item", "< - \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
   Rules[:_long_definition_list] = rule_info("long_definition_list", "< long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
-  Rules[:_long_definition_item] = rule_info("long_definition_item", "< lh \";:\" - documentcontent_except('{'):term \"{\" - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
+  Rules[:_long_definition_item] = rule_info("long_definition_item", "< - \";:\" - documentcontent_except('{'):term \"{\" - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list | long_definition_list)")
-  Rules[:_line_command] = rule_info("line_command", "< lh - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
+  Rules[:_line_command] = rule_info("line_command", "< - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
   Rules[:_block] = rule_info("block", "(preformatted_block | headed_section | line_block | explicit_block | paragraph_group):block empty_line* {block}")
   Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
   Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage | headed_start)")
   Rules[:_h_start_mark] = rule_info("h_start_mark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
-  Rules[:_h_markup_terminator] = rule_info("h_markup_terminator", "lh - < \"=\"+ \":\" > &{ text.length - 1 <= n }")
-  Rules[:_h_start] = rule_info("h_start", "lh - h_start_mark(n) charstring:s le { { level: n, heading: s } }")
+  Rules[:_h_markup_terminator] = rule_info("h_markup_terminator", "- < \"=\"+ \":\" > &{ text.length - 1 <= n }")
+  Rules[:_h_start] = rule_info("h_start", "- h_start_mark(n) charstring:s le { { level: n, heading: s } }")
   Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
   Rules[:_headed_start] = rule_info("headed_start", "(h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))")
   Rules[:_headed_section] = rule_info("headed_section", "(h_section(1) | h_section(2) | h_section(3) | h_section(4) | h_section(5) | h_section(6))")
-  Rules[:_frontmatter_separator] = rule_info("frontmatter_separator", "lh - \"---\" - nl")
-  Rules[:_frontmatter] = rule_info("frontmatter", "frontmatter_separator (!frontmatter_separator lh charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }")
+  Rules[:_frontmatter_separator] = rule_info("frontmatter_separator", "- \"---\" - nl")
+  Rules[:_frontmatter] = rule_info("frontmatter", "frontmatter_separator (!frontmatter_separator charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }")
   Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
   Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
   Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")
   Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
   Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
-  Rules[:_documentline] = rule_info("documentline", "lh documentcontent:content le { content }")
+  Rules[:_documentline] = rule_info("documentline", "documentcontent:content le { content }")
   Rules[:_page] = rule_info("page", "frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }")
   Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }")
   Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }")
