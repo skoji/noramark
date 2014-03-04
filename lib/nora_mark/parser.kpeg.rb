@@ -31,16 +31,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # eof_comment = lh space* "#" (!eof .)*
+  # eof_comment = space* "#" (!eof .)*
   def _eof_comment
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       while true
         _tmp = apply(:_space)
         break unless _tmp
@@ -87,16 +82,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # comment = lh space* "#" (!nl .)* nl empty_line*
+  # comment = space* "#" (!nl .)* nl empty_line*
   def _comment
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       while true
         _tmp = apply(:_space)
         break unless _tmp
@@ -182,16 +172,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # empty_line = lh - nl
+  # empty_line = - nl
   def _empty_line
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -928,16 +913,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # blockhead = lh - command:command - "{" - nl empty_line* { command }
+  # blockhead = - command:command - "{" - nl empty_line* { command }
   def _blockhead
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -990,16 +970,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # blockend = lh - "}" - le empty_line*
+  # blockend = - "}" - le empty_line*
   def _blockend
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -1187,16 +1162,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformatted_command_head_simple = lh - preformatted_command:command - "{" nl { command }
+  # preformatted_command_head_simple = - preformatted_command:command - "{" nl { command }
   def _preformatted_command_head_simple
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -1235,16 +1205,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformatted_command_head_complex = lh - preformatted_command:command - "{//" nl { command }
+  # preformatted_command_head_complex = - preformatted_command:command - "{//" nl { command }
   def _preformatted_command_head_complex
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -1308,16 +1273,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformat_end_complex = lh - "//}" - le empty_line*
+  # preformat_end_complex = - "//}" - le empty_line*
   def _preformat_end_complex
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_lh)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -1353,7 +1313,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformatted_block_simple = < lh - preformatted_command_head_simple:command - (!preformat_end_simple lh charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
+  # preformatted_block_simple = < preformatted_command_head_simple:command - (!preformat_end_simple charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
   def _preformatted_block_simple
 
     _save = self.pos
@@ -1362,16 +1322,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = apply(:_preformatted_command_head_simple)
         command = @result
         unless _tmp
@@ -1392,11 +1342,6 @@ class NoraMark::Parser < KPeg::CompiledParser
           _tmp = apply(:_preformat_end_simple)
           _tmp = _tmp ? nil : true
           self.pos = _save4
-          unless _tmp
-            self.pos = _save3
-            break
-          end
-          _tmp = apply(:_lh)
           unless _tmp
             self.pos = _save3
             break
@@ -1423,11 +1368,6 @@ class NoraMark::Parser < KPeg::CompiledParser
               _tmp = apply(:_preformat_end_simple)
               _tmp = _tmp ? nil : true
               self.pos = _save6
-              unless _tmp
-                self.pos = _save5
-                break
-              end
-              _tmp = apply(:_lh)
               unless _tmp
                 self.pos = _save5
                 break
@@ -1483,7 +1423,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # preformatted_block_complex = < lh - preformatted_command_head_complex:command - (!preformat_end_complex lh charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
+  # preformatted_block_complex = < preformatted_command_head_complex:command - (!preformat_end_complex charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
   def _preformatted_block_complex
 
     _save = self.pos
@@ -1492,16 +1432,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = apply(:__hyphen_)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = apply(:_preformatted_command_head_complex)
         command = @result
         unless _tmp
@@ -1522,11 +1452,6 @@ class NoraMark::Parser < KPeg::CompiledParser
           _tmp = apply(:_preformat_end_complex)
           _tmp = _tmp ? nil : true
           self.pos = _save4
-          unless _tmp
-            self.pos = _save3
-            break
-          end
-          _tmp = apply(:_lh)
           unless _tmp
             self.pos = _save3
             break
@@ -1553,11 +1478,6 @@ class NoraMark::Parser < KPeg::CompiledParser
               _tmp = apply(:_preformat_end_complex)
               _tmp = _tmp ? nil : true
               self.pos = _save6
-              unless _tmp
-                self.pos = _save5
-                break
-              end
-              _tmp = apply(:_lh)
               unless _tmp
                 self.pos = _save5
                 break
@@ -1823,7 +1743,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # newpage = < lh - newpage_command:c ":" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
+  # newpage = < - newpage_command:c ":" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
   def _newpage
 
     _save = self.pos
@@ -1832,11 +1752,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
@@ -1920,7 +1835,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # explicit_paragraph = < lh - explicit_paragraph_command:c ":" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }
+  # explicit_paragraph = < - explicit_paragraph_command:c ":" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }
   def _explicit_paragraph
 
     _save = self.pos
@@ -1929,11 +1844,6 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_lh)
-        unless _tmp
-          self.pos = _save1
-          break
-        end
         _tmp = apply(:__hyphen_)
         unless _tmp
           self.pos = _save1
@@ -3574,10 +3484,10 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules = {}
   Rules[:_eof] = rule_info("eof", "!.")
   Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
-  Rules[:_eof_comment] = rule_info("eof_comment", "lh space* \"\#\" (!eof .)*")
-  Rules[:_comment] = rule_info("comment", "lh space* \"\#\" (!nl .)* nl empty_line*")
+  Rules[:_eof_comment] = rule_info("eof_comment", "space* \"\#\" (!eof .)*")
+  Rules[:_comment] = rule_info("comment", "space* \"\#\" (!nl .)* nl empty_line*")
   Rules[:__hyphen_] = rule_info("-", "(space | comment | eof_comment)*")
-  Rules[:_empty_line] = rule_info("empty_line", "lh - nl")
+  Rules[:_empty_line] = rule_info("empty_line", "- nl")
   Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
   Rules[:_lh] = rule_info("lh", "/^/")
   Rules[:_le] = rule_info("le", "(nl | eof)")
@@ -3597,18 +3507,18 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
   Rules[:_paragraph_group] = rule_info("paragraph_group", "< paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }")
-  Rules[:_blockhead] = rule_info("blockhead", "lh - command:command - \"{\" - nl empty_line* { command }")
-  Rules[:_blockend] = rule_info("blockend", "lh - \"}\" - le empty_line*")
+  Rules[:_blockhead] = rule_info("blockhead", "- command:command - \"{\" - nl empty_line* { command }")
+  Rules[:_blockend] = rule_info("blockend", "- \"}\" - le empty_line*")
   Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
   Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }")
   Rules[:_preformatted_command] = rule_info("preformatted_command", "command:command &{ ['pre', 'code'].include? command[:name] }")
-  Rules[:_preformatted_command_head_simple] = rule_info("preformatted_command_head_simple", "lh - preformatted_command:command - \"{\" nl { command }")
-  Rules[:_preformatted_command_head_complex] = rule_info("preformatted_command_head_complex", "lh - preformatted_command:command - \"{//\" nl { command }")
+  Rules[:_preformatted_command_head_simple] = rule_info("preformatted_command_head_simple", "- preformatted_command:command - \"{\" nl { command }")
+  Rules[:_preformatted_command_head_complex] = rule_info("preformatted_command_head_complex", "- preformatted_command:command - \"{//\" nl { command }")
   Rules[:_preformatted_command_head] = rule_info("preformatted_command_head", "(preformatted_command_head_complex | preformatted_command_head_simple)")
   Rules[:_preformat_end_simple] = rule_info("preformat_end_simple", "blockend")
-  Rules[:_preformat_end_complex] = rule_info("preformat_end_complex", "lh - \"//}\" - le empty_line*")
-  Rules[:_preformatted_block_simple] = rule_info("preformatted_block_simple", "< lh - preformatted_command_head_simple:command - (!preformat_end_simple lh charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }")
-  Rules[:_preformatted_block_complex] = rule_info("preformatted_block_complex", "< lh - preformatted_command_head_complex:command - (!preformat_end_complex lh charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_preformat_end_complex] = rule_info("preformat_end_complex", "- \"//}\" - le empty_line*")
+  Rules[:_preformatted_block_simple] = rule_info("preformatted_block_simple", "< preformatted_command_head_simple:command - (!preformat_end_simple charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_preformatted_block_complex] = rule_info("preformatted_block_complex", "< preformatted_command_head_complex:command - (!preformat_end_complex charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }")
   Rules[:_preformatted_block] = rule_info("preformatted_block", "(preformatted_block_complex | preformatted_block_simple)")
   Rules[:_inline] = rule_info("inline", "(img_inline | common_inline)")
   Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:c \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
@@ -3616,9 +3526,9 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_img_inline] = rule_info("img_inline", "< \"[\" img_command:c \"]\" > { create_item(:inline, c, nil, raw: text) }")
   Rules[:_commandname_for_special_line_command] = rule_info("commandname_for_special_line_command", "(newpage_command | explicit_paragraph_command)")
   Rules[:_newpage_command] = rule_info("newpage_command", "command:command &{ command[:name] == 'newpage' }")
-  Rules[:_newpage] = rule_info("newpage", "< lh - newpage_command:c \":\" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }")
+  Rules[:_newpage] = rule_info("newpage", "< - newpage_command:c \":\" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }")
   Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:c &{ c[:name] == 'p' }")
-  Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< lh - explicit_paragraph_command:c \":\" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }")
+  Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< - explicit_paragraph_command:c \":\" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }")
   Rules[:_unordered_list] = rule_info("unordered_list", "< unordered_item+:items > { create_item(:ul, nil, items, raw: text) }")
   Rules[:_unordered_item] = rule_info("unordered_item", "< lh \"*:\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
   Rules[:_ordered_list] = rule_info("ordered_list", "< ordered_item+:items > { create_item(:ol, nil, items, raw: text) }")

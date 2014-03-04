@@ -3,10 +3,10 @@
 # literals
 eof = !. 
 space = ' ' | '\t' 
-eof_comment = lh space* "#" (!eof .)* 
-comment =   lh space* "#" (!nl .)* nl empty_line*
+eof_comment = space* "#" (!eof .)* 
+comment =   space* "#" (!nl .)* nl empty_line*
 - =  ( space | comment | eof_comment)*
-empty_line = lh - nl
+empty_line = - nl
 nl = /\r?\n/
 lh = /^/
 le = nl | eof
@@ -36,20 +36,20 @@ paragraph = explicit_paragraph | implicit_paragraph
 paragraph_group = < paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }
 
 # explicit block 
-blockhead = lh - command:command - '{' - nl empty_line* { command }
-blockend = lh - '}' - le empty_line*
+blockhead = - command:command - '{' - nl empty_line* { command }
+blockend =  - '}' - le empty_line*
 blockbody = (!blockend block)+:body { body } 
 explicit_block = < blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }
 
 # preformatted block
 preformatted_command = command:command &{ ['pre', 'code'].include? command[:name] }
-preformatted_command_head_simple = lh - preformatted_command:command - '{' nl { command }
-preformatted_command_head_complex = lh - preformatted_command:command - '{//' nl { command }
+preformatted_command_head_simple = - preformatted_command:command - '{' nl { command }
+preformatted_command_head_complex = - preformatted_command:command - '{//' nl { command }
 preformatted_command_head = preformatted_command_head_complex | preformatted_command_head_simple
 preformat_end_simple = blockend
-preformat_end_complex = lh - '//}' - le empty_line*
-preformatted_block_simple = < lh - preformatted_command_head_simple:command - (!preformat_end_simple (lh charstring nl))+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
-preformatted_block_complex = < lh - preformatted_command_head_complex:command - (!preformat_end_complex (lh charstring nl))+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
+preformat_end_complex = - '//}' - le empty_line*
+preformatted_block_simple = < preformatted_command_head_simple:command - (!preformat_end_simple (charstring nl))+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
+preformatted_block_complex = < preformatted_command_head_complex:command - (!preformat_end_complex (charstring nl))+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
 preformatted_block = preformatted_block_complex | preformatted_block_simple
 
 # inline command
@@ -63,11 +63,11 @@ commandname_for_special_line_command = newpage_command | explicit_paragraph_comm
 
 # newpage
 newpage_command = command:command &{ command[:name] == 'newpage' }
-newpage = < lh - newpage_command:c ':' documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
+newpage = < - newpage_command:c ':' documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
 
 # explicit paragraph
 explicit_paragraph_command = command:c &{ c[:name] == 'p' }
-explicit_paragraph = < lh - explicit_paragraph_command:c ':' documentcontent?:content le empty_line*> { create_item(:paragraph, c, content, raw:text) }
+explicit_paragraph = < - explicit_paragraph_command:c ':' documentcontent?:content le empty_line*> { create_item(:paragraph, c, content, raw:text) }
 
 
 # unordered list
