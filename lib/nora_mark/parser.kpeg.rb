@@ -3,18 +3,18 @@ require 'kpeg/compiled_parser'
 class NoraMark::Parser < KPeg::CompiledParser
   # :stopdoc:
 
-  # eof = !.
-  def _eof
+  # Eof = !.
+  def _Eof
     _save = self.pos
     _tmp = get_byte
     _tmp = _tmp ? nil : true
     self.pos = _save
-    set_failed_rule :_eof unless _tmp
+    set_failed_rule :_Eof unless _tmp
     return _tmp
   end
 
-  # space = (" " | "\\t")
-  def _space
+  # Space = (" " | "\\t")
+  def _Space
 
     _save = self.pos
     while true # choice
@@ -27,17 +27,17 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end choice
 
-    set_failed_rule :_space unless _tmp
+    set_failed_rule :_Space unless _tmp
     return _tmp
   end
 
-  # eof_comment = space* "#" (!eof .)*
-  def _eof_comment
+  # EofComment = Space* "#" (!Eof .)*
+  def _EofComment
 
     _save = self.pos
     while true # sequence
       while true
-        _tmp = apply(:_space)
+        _tmp = apply(:_Space)
         break unless _tmp
       end
       _tmp = true
@@ -55,7 +55,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_eof)
+          _tmp = apply(:_Eof)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
@@ -78,17 +78,17 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_eof_comment unless _tmp
+    set_failed_rule :_EofComment unless _tmp
     return _tmp
   end
 
-  # comment = space* "#" (!nl .)* nl empty_line*
-  def _comment
+  # Comment = Space* "#" (!Nl .)* Nl EmptyLine*
+  def _Comment
 
     _save = self.pos
     while true # sequence
       while true
-        _tmp = apply(:_space)
+        _tmp = apply(:_Space)
         break unless _tmp
       end
       _tmp = true
@@ -106,7 +106,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_nl)
+          _tmp = apply(:_Nl)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
@@ -127,13 +127,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       unless _tmp
         self.pos = _save
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -143,23 +143,23 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_comment unless _tmp
+    set_failed_rule :_Comment unless _tmp
     return _tmp
   end
 
-  # - = (space | comment | eof_comment)*
+  # - = (Space | Comment | EofComment)*
   def __hyphen_
     while true
 
       _save1 = self.pos
       while true # choice
-        _tmp = apply(:_space)
+        _tmp = apply(:_Space)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_comment)
+        _tmp = apply(:_Comment)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_eof_comment)
+        _tmp = apply(:_EofComment)
         break if _tmp
         self.pos = _save1
         break
@@ -172,8 +172,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # empty_line = - nl
-  def _empty_line
+  # EmptyLine = - Nl
+  def _EmptyLine
 
     _save = self.pos
     while true # sequence
@@ -182,44 +182,44 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       unless _tmp
         self.pos = _save
       end
       break
     end # end sequence
 
-    set_failed_rule :_empty_line unless _tmp
+    set_failed_rule :_EmptyLine unless _tmp
     return _tmp
   end
 
-  # nl = /\r?\n/
-  def _nl
+  # Nl = /\r?\n/
+  def _Nl
     _tmp = scan(/\A(?-mix:\r?\n)/)
-    set_failed_rule :_nl unless _tmp
+    set_failed_rule :_Nl unless _tmp
     return _tmp
   end
 
-  # le = (nl | eof)
-  def _le
+  # Le = (Nl | Eof)
+  def _Le
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_eof)
+      _tmp = apply(:_Eof)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_le unless _tmp
+    set_failed_rule :_Le unless _tmp
     return _tmp
   end
 
-  # word = < /[\w0-9]/ ("-" | /[\w0-9]/)* > { text }
-  def _word
+  # Word = < /[\w0-9]/ ("-" | /[\w0-9]/)* > { text }
+  def _Word
 
     _save = self.pos
     while true # sequence
@@ -269,12 +269,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_word unless _tmp
+    set_failed_rule :_Word unless _tmp
     return _tmp
   end
 
-  # num = < [0-9]+ > { text.to_i }
-  def _num
+  # Num = < [0-9]+ > { text.to_i }
+  def _Num
 
     _save = self.pos
     while true # sequence
@@ -319,12 +319,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_num unless _tmp
+    set_failed_rule :_Num unless _tmp
     return _tmp
   end
 
-  # classname = "." word:classname { classname }
-  def _classname
+  # ClassName = "." Word:classname { classname }
+  def _ClassName
 
     _save = self.pos
     while true # sequence
@@ -333,7 +333,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_word)
+      _tmp = apply(:_Word)
       classname = @result
       unless _tmp
         self.pos = _save
@@ -347,18 +347,18 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_classname unless _tmp
+    set_failed_rule :_ClassName unless _tmp
     return _tmp
   end
 
-  # classnames = classname*:classnames { classnames }
-  def _classnames
+  # ClassNames = ClassName*:classnames { classnames }
+  def _ClassNames
 
     _save = self.pos
     while true # sequence
       _ary = []
       while true
-        _tmp = apply(:_classname)
+        _tmp = apply(:_ClassName)
         _ary << @result if _tmp
         break unless _tmp
       end
@@ -377,12 +377,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_classnames unless _tmp
+    set_failed_rule :_ClassNames unless _tmp
     return _tmp
   end
 
-  # idname = "#" word:idname { idname }
-  def _idname
+  # IdName = "#" Word:idname { idname }
+  def _IdName
 
     _save = self.pos
     while true # sequence
@@ -391,7 +391,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_word)
+      _tmp = apply(:_Word)
       idname = @result
       unless _tmp
         self.pos = _save
@@ -405,18 +405,18 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_idname unless _tmp
+    set_failed_rule :_IdName unless _tmp
     return _tmp
   end
 
-  # idnames = idname*:idnames { idnames }
-  def _idnames
+  # IdNames = IdName*:idnames { idnames }
+  def _IdNames
 
     _save = self.pos
     while true # sequence
       _ary = []
       while true
-        _tmp = apply(:_idname)
+        _tmp = apply(:_IdName)
         _ary << @result if _tmp
         break unless _tmp
       end
@@ -435,23 +435,23 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_idnames unless _tmp
+    set_failed_rule :_IdNames unless _tmp
     return _tmp
   end
 
-  # commandname = word:name idnames?:idnames classnames?:classes { {name: name, ids: idnames, classes: classes} }
-  def _commandname
+  # CommandName = Word:name IdNames?:idnames ClassNames?:classes { {name: name, ids: idnames, classes: classes} }
+  def _CommandName
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_word)
+      _tmp = apply(:_Word)
       name = @result
       unless _tmp
         self.pos = _save
         break
       end
       _save1 = self.pos
-      _tmp = apply(:_idnames)
+      _tmp = apply(:_IdNames)
       @result = nil unless _tmp
       unless _tmp
         _tmp = true
@@ -463,7 +463,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save2 = self.pos
-      _tmp = apply(:_classnames)
+      _tmp = apply(:_ClassNames)
       @result = nil unless _tmp
       unless _tmp
         _tmp = true
@@ -482,12 +482,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_commandname unless _tmp
+    set_failed_rule :_CommandName unless _tmp
     return _tmp
   end
 
-  # parameter_normal = < /[^,)]/* > { text }
-  def _parameter_normal
+  # ParameterNormal = < /[^,)]/* > { text }
+  def _ParameterNormal
 
     _save = self.pos
     while true # sequence
@@ -512,12 +512,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_parameter_normal unless _tmp
+    set_failed_rule :_ParameterNormal unless _tmp
     return _tmp
   end
 
-  # parameter_quoted = "\"" < /[^"]/* > "\"" - &/[,)]/ { text }
-  def _parameter_quoted
+  # ParameterQuoted = "\"" < /[^"]/* > "\"" - &/[,)]/ { text }
+  def _ParameterQuoted
 
     _save = self.pos
     while true # sequence
@@ -564,12 +564,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_parameter_quoted unless _tmp
+    set_failed_rule :_ParameterQuoted unless _tmp
     return _tmp
   end
 
-  # parameter_single_quoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
-  def _parameter_single_quoted
+  # ParameterSingleQuoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
+  def _ParameterSingleQuoted
 
     _save = self.pos
     while true # sequence
@@ -616,25 +616,25 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_parameter_single_quoted unless _tmp
+    set_failed_rule :_ParameterSingleQuoted unless _tmp
     return _tmp
   end
 
-  # parameter = (parameter_quoted | parameter_single_quoted | parameter_normal):value { value }
-  def _parameter
+  # Parameter = (ParameterQuoted | ParameterSingleQuoted | ParameterNormal):value { value }
+  def _Parameter
 
     _save = self.pos
     while true # sequence
 
       _save1 = self.pos
       while true # choice
-        _tmp = apply(:_parameter_quoted)
+        _tmp = apply(:_ParameterQuoted)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_parameter_single_quoted)
+        _tmp = apply(:_ParameterSingleQuoted)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_parameter_normal)
+        _tmp = apply(:_ParameterNormal)
         break if _tmp
         self.pos = _save1
         break
@@ -653,16 +653,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_parameter unless _tmp
+    set_failed_rule :_Parameter unless _tmp
     return _tmp
   end
 
-  # parameters = parameter:parameter ("," - parameter)*:rest_parameters { [parameter] + rest_parameters }
-  def _parameters
+  # Parameters = Parameter:parameter ("," - Parameter)*:rest_parameters { [parameter] + rest_parameters }
+  def _Parameters
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_parameter)
+      _tmp = apply(:_Parameter)
       parameter = @result
       unless _tmp
         self.pos = _save
@@ -683,7 +683,7 @@ class NoraMark::Parser < KPeg::CompiledParser
             self.pos = _save2
             break
           end
-          _tmp = apply(:_parameter)
+          _tmp = apply(:_Parameter)
           unless _tmp
             self.pos = _save2
           end
@@ -708,16 +708,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_parameters unless _tmp
+    set_failed_rule :_Parameters unless _tmp
     return _tmp
   end
 
-  # command = commandname:cn ("(" - parameters:args - ")")? { args ||= []; cn.merge({ args: args }) }
-  def _command
+  # Command = CommandName:cn ("(" - Parameters:args - ")")? { args ||= []; cn.merge({ args: args }) }
+  def _Command
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_commandname)
+      _tmp = apply(:_CommandName)
       cn = @result
       unless _tmp
         self.pos = _save
@@ -737,7 +737,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save2
           break
         end
-        _tmp = apply(:_parameters)
+        _tmp = apply(:_Parameters)
         args = @result
         unless _tmp
           self.pos = _save2
@@ -771,12 +771,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_command unless _tmp
+    set_failed_rule :_Command unless _tmp
     return _tmp
   end
 
-  # implicit_paragraph = < !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }
-  def _implicit_paragraph
+  # ImplicitParagraph = < !ParagraphDelimiter - DocumentLine:p - > { create_item(:paragraph, nil, p, raw: text) }
+  def _ImplicitParagraph
 
     _save = self.pos
     while true # sequence
@@ -785,7 +785,7 @@ class NoraMark::Parser < KPeg::CompiledParser
       _save1 = self.pos
       while true # sequence
         _save2 = self.pos
-        _tmp = apply(:_paragraph_delimiter)
+        _tmp = apply(:_ParagraphDelimiter)
         _tmp = _tmp ? nil : true
         self.pos = _save2
         unless _tmp
@@ -797,7 +797,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_documentline)
+        _tmp = apply(:_DocumentLine)
         p = @result
         unless _tmp
           self.pos = _save1
@@ -825,30 +825,30 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_implicit_paragraph unless _tmp
+    set_failed_rule :_ImplicitParagraph unless _tmp
     return _tmp
   end
 
-  # paragraph = (explicit_paragraph | implicit_paragraph)
-  def _paragraph
+  # Paragraph = (ExplicitParagraph | ImplicitParagraph)
+  def _Paragraph
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_explicit_paragraph)
+      _tmp = apply(:_ExplicitParagraph)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_implicit_paragraph)
+      _tmp = apply(:_ImplicitParagraph)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_paragraph unless _tmp
+    set_failed_rule :_Paragraph unless _tmp
     return _tmp
   end
 
-  # paragraph_group = < paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }
-  def _paragraph_group
+  # ParagraphGroup = < Paragraph+:p EmptyLine* > { create_item(:paragraph_group, nil, p, raw: text) }
+  def _ParagraphGroup
 
     _save = self.pos
     while true # sequence
@@ -858,11 +858,11 @@ class NoraMark::Parser < KPeg::CompiledParser
       while true # sequence
         _save2 = self.pos
         _ary = []
-        _tmp = apply(:_paragraph)
+        _tmp = apply(:_Paragraph)
         if _tmp
           _ary << @result
           while true
-            _tmp = apply(:_paragraph)
+            _tmp = apply(:_Paragraph)
             _ary << @result if _tmp
             break unless _tmp
           end
@@ -877,7 +877,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         while true
-          _tmp = apply(:_empty_line)
+          _tmp = apply(:_EmptyLine)
           break unless _tmp
         end
         _tmp = true
@@ -902,12 +902,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_paragraph_group unless _tmp
+    set_failed_rule :_ParagraphGroup unless _tmp
     return _tmp
   end
 
-  # blockhead = - command:command - "{" - nl empty_line* { command }
-  def _blockhead
+  # BlockHead = - Command:command - "{" - Nl EmptyLine* { command }
+  def _BlockHead
 
     _save = self.pos
     while true # sequence
@@ -916,7 +916,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_command)
+      _tmp = apply(:_Command)
       command = @result
       unless _tmp
         self.pos = _save
@@ -937,13 +937,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       unless _tmp
         self.pos = _save
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -959,12 +959,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_blockhead unless _tmp
+    set_failed_rule :_BlockHead unless _tmp
     return _tmp
   end
 
-  # blockend = - "}" - le empty_line*
-  def _blockend
+  # BlockEnd = - "}" - Le EmptyLine*
+  def _BlockEnd
 
     _save = self.pos
     while true # sequence
@@ -983,13 +983,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_le)
+      _tmp = apply(:_Le)
       unless _tmp
         self.pos = _save
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -999,12 +999,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_blockend unless _tmp
+    set_failed_rule :_BlockEnd unless _tmp
     return _tmp
   end
 
-  # blockbody = (!blockend block)+:body { body }
-  def _blockbody
+  # BlockBody = (!BlockEnd Block)+:body { body }
+  def _BlockBody
 
     _save = self.pos
     while true # sequence
@@ -1014,14 +1014,14 @@ class NoraMark::Parser < KPeg::CompiledParser
       _save2 = self.pos
       while true # sequence
         _save3 = self.pos
-        _tmp = apply(:_blockend)
+        _tmp = apply(:_BlockEnd)
         _tmp = _tmp ? nil : true
         self.pos = _save3
         unless _tmp
           self.pos = _save2
           break
         end
-        _tmp = apply(:_block)
+        _tmp = apply(:_Block)
         unless _tmp
           self.pos = _save2
         end
@@ -1035,14 +1035,14 @@ class NoraMark::Parser < KPeg::CompiledParser
           _save4 = self.pos
           while true # sequence
             _save5 = self.pos
-            _tmp = apply(:_blockend)
+            _tmp = apply(:_BlockEnd)
             _tmp = _tmp ? nil : true
             self.pos = _save5
             unless _tmp
               self.pos = _save4
               break
             end
-            _tmp = apply(:_block)
+            _tmp = apply(:_Block)
             unless _tmp
               self.pos = _save4
             end
@@ -1070,12 +1070,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_blockbody unless _tmp
+    set_failed_rule :_BlockBody unless _tmp
     return _tmp
   end
 
-  # explicit_block = < blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }
-  def _explicit_block
+  # ExplicitBlock = < BlockHead:head - BlockBody:body - BlockEnd > { create_item(:block, head, body, raw: text) }
+  def _ExplicitBlock
 
     _save = self.pos
     while true # sequence
@@ -1083,7 +1083,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_blockhead)
+        _tmp = apply(:_BlockHead)
         head = @result
         unless _tmp
           self.pos = _save1
@@ -1094,7 +1094,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_blockbody)
+        _tmp = apply(:_BlockBody)
         body = @result
         unless _tmp
           self.pos = _save1
@@ -1105,7 +1105,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_blockend)
+        _tmp = apply(:_BlockEnd)
         unless _tmp
           self.pos = _save1
         end
@@ -1127,16 +1127,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_explicit_block unless _tmp
+    set_failed_rule :_ExplicitBlock unless _tmp
     return _tmp
   end
 
-  # preformatted_command = command:command &{ ['pre', 'code'].include? command[:name] }
-  def _preformatted_command
+  # PreformattedCommand = Command:command &{ ['pre', 'code'].include? command[:name] }
+  def _PreformattedCommand
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_command)
+      _tmp = apply(:_Command)
       command = @result
       unless _tmp
         self.pos = _save
@@ -1151,12 +1151,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformatted_command unless _tmp
+    set_failed_rule :_PreformattedCommand unless _tmp
     return _tmp
   end
 
-  # preformatted_command_head_simple = - preformatted_command:command - "{" nl { command }
-  def _preformatted_command_head_simple
+  # PreformattedCommandHeadSimple = - PreformattedCommand:command - "{" Nl { command }
+  def _PreformattedCommandHeadSimple
 
     _save = self.pos
     while true # sequence
@@ -1165,7 +1165,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_preformatted_command)
+      _tmp = apply(:_PreformattedCommand)
       command = @result
       unless _tmp
         self.pos = _save
@@ -1181,7 +1181,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       unless _tmp
         self.pos = _save
         break
@@ -1194,12 +1194,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformatted_command_head_simple unless _tmp
+    set_failed_rule :_PreformattedCommandHeadSimple unless _tmp
     return _tmp
   end
 
-  # preformatted_command_head_complex = - preformatted_command:command - "{//" word?:codelanguage nl { command.merge({codelanguage: codelanguage}) }
-  def _preformatted_command_head_complex
+  # PreformattedCommandHeadComplex = - PreformattedCommand:command - "{//" Word?:codelanguage Nl { command.merge({codelanguage: codelanguage}) }
+  def _PreformattedCommandHeadComplex
 
     _save = self.pos
     while true # sequence
@@ -1208,7 +1208,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_preformatted_command)
+      _tmp = apply(:_PreformattedCommand)
       command = @result
       unless _tmp
         self.pos = _save
@@ -1225,7 +1225,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save1 = self.pos
-      _tmp = apply(:_word)
+      _tmp = apply(:_Word)
       @result = nil unless _tmp
       unless _tmp
         _tmp = true
@@ -1236,7 +1236,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       unless _tmp
         self.pos = _save
         break
@@ -1249,30 +1249,30 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformatted_command_head_complex unless _tmp
+    set_failed_rule :_PreformattedCommandHeadComplex unless _tmp
     return _tmp
   end
 
-  # preformatted_command_head = (preformatted_command_head_complex | preformatted_command_head_simple)
-  def _preformatted_command_head
+  # PreformattedCommandHead = (PreformattedCommandHeadComplex | PreformattedCommandHeadSimple)
+  def _PreformattedCommandHead
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_preformatted_command_head_complex)
+      _tmp = apply(:_PreformattedCommandHeadComplex)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_preformatted_command_head_simple)
+      _tmp = apply(:_PreformattedCommandHeadSimple)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_preformatted_command_head unless _tmp
+    set_failed_rule :_PreformattedCommandHead unless _tmp
     return _tmp
   end
 
-  # preformat_end_simple = "}" - le empty_line*
-  def _preformat_end_simple
+  # PreformatEndSimple = "}" - Le EmptyLine*
+  def _PreformatEndSimple
 
     _save = self.pos
     while true # sequence
@@ -1286,13 +1286,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_le)
+      _tmp = apply(:_Le)
       unless _tmp
         self.pos = _save
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -1302,12 +1302,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformat_end_simple unless _tmp
+    set_failed_rule :_PreformatEndSimple unless _tmp
     return _tmp
   end
 
-  # preformat_end_complex = "//}" - le empty_line*
-  def _preformat_end_complex
+  # PreformatEndComplex = "//}" - Le EmptyLine*
+  def _PreformatEndComplex
 
     _save = self.pos
     while true # sequence
@@ -1321,13 +1321,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_le)
+      _tmp = apply(:_Le)
       unless _tmp
         self.pos = _save
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -1337,12 +1337,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformat_end_complex unless _tmp
+    set_failed_rule :_PreformatEndComplex unless _tmp
     return _tmp
   end
 
-  # preformatted_block_simple = < preformatted_command_head_simple:command (!preformat_end_simple charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
-  def _preformatted_block_simple
+  # PreformattedBlockSimple = < PreformattedCommandHeadSimple:command (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple > { create_item(:preformatted, command, content, raw: text) }
+  def _PreformattedBlockSimple
 
     _save = self.pos
     while true # sequence
@@ -1350,7 +1350,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_preformatted_command_head_simple)
+        _tmp = apply(:_PreformattedCommandHeadSimple)
         command = @result
         unless _tmp
           self.pos = _save1
@@ -1362,19 +1362,19 @@ class NoraMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_preformat_end_simple)
+          _tmp = apply(:_PreformatEndSimple)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_charstring)
+          _tmp = apply(:_CharString)
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_nl)
+          _tmp = apply(:_Nl)
           unless _tmp
             self.pos = _save3
           end
@@ -1388,19 +1388,19 @@ class NoraMark::Parser < KPeg::CompiledParser
             _save5 = self.pos
             while true # sequence
               _save6 = self.pos
-              _tmp = apply(:_preformat_end_simple)
+              _tmp = apply(:_PreformatEndSimple)
               _tmp = _tmp ? nil : true
               self.pos = _save6
               unless _tmp
                 self.pos = _save5
                 break
               end
-              _tmp = apply(:_charstring)
+              _tmp = apply(:_CharString)
               unless _tmp
                 self.pos = _save5
                 break
               end
-              _tmp = apply(:_nl)
+              _tmp = apply(:_Nl)
               unless _tmp
                 self.pos = _save5
               end
@@ -1420,7 +1420,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_preformat_end_simple)
+        _tmp = apply(:_PreformatEndSimple)
         unless _tmp
           self.pos = _save1
         end
@@ -1442,12 +1442,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformatted_block_simple unless _tmp
+    set_failed_rule :_PreformattedBlockSimple unless _tmp
     return _tmp
   end
 
-  # preformatted_block_complex = < preformatted_command_head_complex:command (!preformat_end_complex charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
-  def _preformatted_block_complex
+  # PreformattedBlockComplex = < PreformattedCommandHeadComplex:command (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex > { create_item(:preformatted, command, content, raw: text) }
+  def _PreformattedBlockComplex
 
     _save = self.pos
     while true # sequence
@@ -1455,7 +1455,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_preformatted_command_head_complex)
+        _tmp = apply(:_PreformattedCommandHeadComplex)
         command = @result
         unless _tmp
           self.pos = _save1
@@ -1467,19 +1467,19 @@ class NoraMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_preformat_end_complex)
+          _tmp = apply(:_PreformatEndComplex)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_charstring)
+          _tmp = apply(:_CharString)
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_nl)
+          _tmp = apply(:_Nl)
           unless _tmp
             self.pos = _save3
           end
@@ -1493,19 +1493,19 @@ class NoraMark::Parser < KPeg::CompiledParser
             _save5 = self.pos
             while true # sequence
               _save6 = self.pos
-              _tmp = apply(:_preformat_end_complex)
+              _tmp = apply(:_PreformatEndComplex)
               _tmp = _tmp ? nil : true
               self.pos = _save6
               unless _tmp
                 self.pos = _save5
                 break
               end
-              _tmp = apply(:_charstring)
+              _tmp = apply(:_CharString)
               unless _tmp
                 self.pos = _save5
                 break
               end
-              _tmp = apply(:_nl)
+              _tmp = apply(:_Nl)
               unless _tmp
                 self.pos = _save5
               end
@@ -1525,7 +1525,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_preformat_end_complex)
+        _tmp = apply(:_PreformatEndComplex)
         unless _tmp
           self.pos = _save1
         end
@@ -1547,48 +1547,48 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_preformatted_block_complex unless _tmp
+    set_failed_rule :_PreformattedBlockComplex unless _tmp
     return _tmp
   end
 
-  # preformatted_block = (preformatted_block_complex | preformatted_block_simple)
-  def _preformatted_block
+  # PreformattedBlock = (PreformattedBlockComplex | PreformattedBlockSimple)
+  def _PreformattedBlock
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_preformatted_block_complex)
+      _tmp = apply(:_PreformattedBlockComplex)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_preformatted_block_simple)
+      _tmp = apply(:_PreformattedBlockSimple)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_preformatted_block unless _tmp
+    set_failed_rule :_PreformattedBlock unless _tmp
     return _tmp
   end
 
-  # inline = (img_inline | common_inline)
-  def _inline
+  # Inline = (ImgInline | CommonInline)
+  def _Inline
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_img_inline)
+      _tmp = apply(:_ImgInline)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_common_inline)
+      _tmp = apply(:_CommonInline)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_inline unless _tmp
+    set_failed_rule :_Inline unless _tmp
     return _tmp
   end
 
-  # common_inline = < "[" command:c "{" documentcontent_except('}'):content "}" "]" > { create_item(:inline, c, content, raw: text) }
-  def _common_inline
+  # CommonInline = < "[" Command:c "{" DocumentContentExcept('}'):content "}" "]" > { create_item(:inline, c, content, raw: text) }
+  def _CommonInline
 
     _save = self.pos
     while true # sequence
@@ -1601,7 +1601,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_command)
+        _tmp = apply(:_Command)
         c = @result
         unless _tmp
           self.pos = _save1
@@ -1612,7 +1612,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply_with_args(:_documentcontent_except, '}')
+        _tmp = apply_with_args(:_DocumentContentExcept, '}')
         content = @result
         unless _tmp
           self.pos = _save1
@@ -1645,16 +1645,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_common_inline unless _tmp
+    set_failed_rule :_CommonInline unless _tmp
     return _tmp
   end
 
-  # img_command = command:c &{ c[:name] == 'img' && c[:args].size == 2}
-  def _img_command
+  # ImgCommand = Command:c &{ c[:name] == 'img' && c[:args].size == 2}
+  def _ImgCommand
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_command)
+      _tmp = apply(:_Command)
       c = @result
       unless _tmp
         self.pos = _save
@@ -1669,12 +1669,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_img_command unless _tmp
+    set_failed_rule :_ImgCommand unless _tmp
     return _tmp
   end
 
-  # img_inline = < "[" img_command:c "]" > { create_item(:inline, c, nil, raw: text) }
-  def _img_inline
+  # ImgInline = < "[" ImgCommand:c "]" > { create_item(:inline, c, nil, raw: text) }
+  def _ImgInline
 
     _save = self.pos
     while true # sequence
@@ -1687,7 +1687,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_img_command)
+        _tmp = apply(:_ImgCommand)
         c = @result
         unless _tmp
           self.pos = _save1
@@ -1715,34 +1715,34 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_img_inline unless _tmp
+    set_failed_rule :_ImgInline unless _tmp
     return _tmp
   end
 
-  # commandname_for_special_line_command = (newpage_command | explicit_paragraph_command)
-  def _commandname_for_special_line_command
+  # CommandNameForSpecialLineCommand = (NewpageCommand | ExplicitParagraphCommand)
+  def _CommandNameForSpecialLineCommand
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_newpage_command)
+      _tmp = apply(:_NewpageCommand)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_explicit_paragraph_command)
+      _tmp = apply(:_ExplicitParagraphCommand)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_commandname_for_special_line_command unless _tmp
+    set_failed_rule :_CommandNameForSpecialLineCommand unless _tmp
     return _tmp
   end
 
-  # newpage_command = command:command &{ command[:name] == 'newpage' }
-  def _newpage_command
+  # NewpageCommand = Command:command &{ command[:name] == 'newpage' }
+  def _NewpageCommand
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_command)
+      _tmp = apply(:_Command)
       command = @result
       unless _tmp
         self.pos = _save
@@ -1757,12 +1757,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_newpage_command unless _tmp
+    set_failed_rule :_NewpageCommand unless _tmp
     return _tmp
   end
 
-  # newpage = < - newpage_command:c ":" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }
-  def _newpage
+  # Newpage = < - NewpageCommand:c ":" DocumentContent?:content - Nl > { create_item(:newpage, c, content, raw:text) }
+  def _Newpage
 
     _save = self.pos
     while true # sequence
@@ -1775,7 +1775,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_newpage_command)
+        _tmp = apply(:_NewpageCommand)
         c = @result
         unless _tmp
           self.pos = _save1
@@ -1787,7 +1787,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         _save2 = self.pos
-        _tmp = apply(:_documentcontent)
+        _tmp = apply(:_DocumentContent)
         @result = nil unless _tmp
         unless _tmp
           _tmp = true
@@ -1803,7 +1803,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_nl)
+        _tmp = apply(:_Nl)
         unless _tmp
           self.pos = _save1
         end
@@ -1825,16 +1825,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_newpage unless _tmp
+    set_failed_rule :_Newpage unless _tmp
     return _tmp
   end
 
-  # explicit_paragraph_command = command:c &{ c[:name] == 'p' }
-  def _explicit_paragraph_command
+  # ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
+  def _ExplicitParagraphCommand
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_command)
+      _tmp = apply(:_Command)
       c = @result
       unless _tmp
         self.pos = _save
@@ -1849,12 +1849,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_explicit_paragraph_command unless _tmp
+    set_failed_rule :_ExplicitParagraphCommand unless _tmp
     return _tmp
   end
 
-  # explicit_paragraph = < - explicit_paragraph_command:c ":" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }
-  def _explicit_paragraph
+  # ExplicitParagraph = < - ExplicitParagraphCommand:c ":" DocumentContent?:content Le EmptyLine* > { create_item(:paragraph, c, content, raw:text) }
+  def _ExplicitParagraph
 
     _save = self.pos
     while true # sequence
@@ -1867,7 +1867,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_explicit_paragraph_command)
+        _tmp = apply(:_ExplicitParagraphCommand)
         c = @result
         unless _tmp
           self.pos = _save1
@@ -1879,7 +1879,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         _save2 = self.pos
-        _tmp = apply(:_documentcontent)
+        _tmp = apply(:_DocumentContent)
         @result = nil unless _tmp
         unless _tmp
           _tmp = true
@@ -1890,13 +1890,13 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_le)
+        _tmp = apply(:_Le)
         unless _tmp
           self.pos = _save1
           break
         end
         while true
-          _tmp = apply(:_empty_line)
+          _tmp = apply(:_EmptyLine)
           break unless _tmp
         end
         _tmp = true
@@ -1921,23 +1921,23 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_explicit_paragraph unless _tmp
+    set_failed_rule :_ExplicitParagraph unless _tmp
     return _tmp
   end
 
-  # unordered_list = < unordered_item+:items > { create_item(:ul, nil, items, raw: text) }
-  def _unordered_list
+  # UnorderedList = < UnorderedItem+:items > { create_item(:ul, nil, items, raw: text) }
+  def _UnorderedList
 
     _save = self.pos
     while true # sequence
       _text_start = self.pos
       _save1 = self.pos
       _ary = []
-      _tmp = apply(:_unordered_item)
+      _tmp = apply(:_UnorderedItem)
       if _tmp
         _ary << @result
         while true
-          _tmp = apply(:_unordered_item)
+          _tmp = apply(:_UnorderedItem)
           _ary << @result if _tmp
           break unless _tmp
         end
@@ -1962,12 +1962,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_unordered_list unless _tmp
+    set_failed_rule :_UnorderedList unless _tmp
     return _tmp
   end
 
-  # unordered_item = < "*:" documentcontent:content le > { create_item(:li, nil, content, raw: text) }
-  def _unordered_item
+  # UnorderedItem = < "*:" DocumentContent:content Le > { create_item(:li, nil, content, raw: text) }
+  def _UnorderedItem
 
     _save = self.pos
     while true # sequence
@@ -1980,13 +1980,13 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_documentcontent)
+        _tmp = apply(:_DocumentContent)
         content = @result
         unless _tmp
           self.pos = _save1
           break
         end
-        _tmp = apply(:_le)
+        _tmp = apply(:_Le)
         unless _tmp
           self.pos = _save1
         end
@@ -2008,23 +2008,23 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_unordered_item unless _tmp
+    set_failed_rule :_UnorderedItem unless _tmp
     return _tmp
   end
 
-  # ordered_list = < ordered_item+:items > { create_item(:ol, nil, items, raw: text) }
-  def _ordered_list
+  # OrderedList = < OrderedItem+:items > { create_item(:ol, nil, items, raw: text) }
+  def _OrderedList
 
     _save = self.pos
     while true # sequence
       _text_start = self.pos
       _save1 = self.pos
       _ary = []
-      _tmp = apply(:_ordered_item)
+      _tmp = apply(:_OrderedItem)
       if _tmp
         _ary << @result
         while true
-          _tmp = apply(:_ordered_item)
+          _tmp = apply(:_OrderedItem)
           _ary << @result if _tmp
           break unless _tmp
         end
@@ -2049,12 +2049,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_ordered_list unless _tmp
+    set_failed_rule :_OrderedList unless _tmp
     return _tmp
   end
 
-  # ordered_item = < num ":" documentcontent:content le > { create_item(:li, nil, content, raw: text) }
-  def _ordered_item
+  # OrderedItem = < Num ":" DocumentContent:content Le > { create_item(:li, nil, content, raw: text) }
+  def _OrderedItem
 
     _save = self.pos
     while true # sequence
@@ -2062,7 +2062,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply(:_num)
+        _tmp = apply(:_Num)
         unless _tmp
           self.pos = _save1
           break
@@ -2072,13 +2072,13 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_documentcontent)
+        _tmp = apply(:_DocumentContent)
         content = @result
         unless _tmp
           self.pos = _save1
           break
         end
-        _tmp = apply(:_le)
+        _tmp = apply(:_Le)
         unless _tmp
           self.pos = _save1
         end
@@ -2100,23 +2100,23 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_ordered_item unless _tmp
+    set_failed_rule :_OrderedItem unless _tmp
     return _tmp
   end
 
-  # definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
-  def _definition_list
+  # DefinitionList = < DefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }
+  def _DefinitionList
 
     _save = self.pos
     while true # sequence
       _text_start = self.pos
       _save1 = self.pos
       _ary = []
-      _tmp = apply(:_definition_item)
+      _tmp = apply(:_DefinitionItem)
       if _tmp
         _ary << @result
         while true
-          _tmp = apply(:_definition_item)
+          _tmp = apply(:_DefinitionItem)
           _ary << @result if _tmp
           break unless _tmp
         end
@@ -2141,12 +2141,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_definition_list unless _tmp
+    set_failed_rule :_DefinitionList unless _tmp
     return _tmp
   end
 
-  # definition_item = < - ";:" - documentcontent_except(':'):term ":" - documentcontent:definition le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
-  def _definition_item
+  # DefinitionItem = < - ";:" - DocumentContentExcept(':'):term ":" - DocumentContent:definition Le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
+  def _DefinitionItem
 
     _save = self.pos
     while true # sequence
@@ -2169,7 +2169,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply_with_args(:_documentcontent_except, ':')
+        _tmp = apply_with_args(:_DocumentContentExcept, ':')
         term = @result
         unless _tmp
           self.pos = _save1
@@ -2185,13 +2185,13 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_documentcontent)
+        _tmp = apply(:_DocumentContent)
         definition = @result
         unless _tmp
           self.pos = _save1
           break
         end
-        _tmp = apply(:_le)
+        _tmp = apply(:_Le)
         unless _tmp
           self.pos = _save1
         end
@@ -2213,23 +2213,23 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_definition_item unless _tmp
+    set_failed_rule :_DefinitionItem unless _tmp
     return _tmp
   end
 
-  # long_definition_list = < long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }
-  def _long_definition_list
+  # LongDefinitionList = < LongDefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }
+  def _LongDefinitionList
 
     _save = self.pos
     while true # sequence
       _text_start = self.pos
       _save1 = self.pos
       _ary = []
-      _tmp = apply(:_long_definition_item)
+      _tmp = apply(:_LongDefinitionItem)
       if _tmp
         _ary << @result
         while true
-          _tmp = apply(:_long_definition_item)
+          _tmp = apply(:_LongDefinitionItem)
           _ary << @result if _tmp
           break unless _tmp
         end
@@ -2254,12 +2254,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_long_definition_list unless _tmp
+    set_failed_rule :_LongDefinitionList unless _tmp
     return _tmp
   end
 
-  # long_definition_item = < - ";:" - documentcontent_except('{'):term "{" - nl - blockbody:definition - blockend > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
-  def _long_definition_item
+  # LongDefinitionItem = < - ";:" - DocumentContentExcept('{'):term "{" - Nl - BlockBody:definition - BlockEnd > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
+  def _LongDefinitionItem
 
     _save = self.pos
     while true # sequence
@@ -2282,7 +2282,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply_with_args(:_documentcontent_except, '{')
+        _tmp = apply_with_args(:_DocumentContentExcept, '{')
         term = @result
         unless _tmp
           self.pos = _save1
@@ -2298,7 +2298,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_nl)
+        _tmp = apply(:_Nl)
         unless _tmp
           self.pos = _save1
           break
@@ -2308,7 +2308,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_blockbody)
+        _tmp = apply(:_BlockBody)
         definition = @result
         unless _tmp
           self.pos = _save1
@@ -2319,7 +2319,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_blockend)
+        _tmp = apply(:_BlockEnd)
         unless _tmp
           self.pos = _save1
         end
@@ -2341,36 +2341,36 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_long_definition_item unless _tmp
+    set_failed_rule :_LongDefinitionItem unless _tmp
     return _tmp
   end
 
-  # items_list = (unordered_list | ordered_list | definition_list | long_definition_list)
-  def _items_list
+  # ItemsList = (UnorderedList | OrderedList | DefinitionList | LongDefinitionList)
+  def _ItemsList
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_unordered_list)
+      _tmp = apply(:_UnorderedList)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_ordered_list)
+      _tmp = apply(:_OrderedList)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_definition_list)
+      _tmp = apply(:_DefinitionList)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_long_definition_list)
+      _tmp = apply(:_LongDefinitionList)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_items_list unless _tmp
+    set_failed_rule :_ItemsList unless _tmp
     return _tmp
   end
 
-  # line_command = < - !commandname_for_special_line_command command:c ":" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }
-  def _line_command
+  # LineCommand = < - !CommandNameForSpecialLineCommand Command:c ":" DocumentContent?:content - Le EmptyLine* > { create_item(:line_command, c, content, raw: text) }
+  def _LineCommand
 
     _save = self.pos
     while true # sequence
@@ -2384,14 +2384,14 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         _save2 = self.pos
-        _tmp = apply(:_commandname_for_special_line_command)
+        _tmp = apply(:_CommandNameForSpecialLineCommand)
         _tmp = _tmp ? nil : true
         self.pos = _save2
         unless _tmp
           self.pos = _save1
           break
         end
-        _tmp = apply(:_command)
+        _tmp = apply(:_Command)
         c = @result
         unless _tmp
           self.pos = _save1
@@ -2403,7 +2403,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         _save3 = self.pos
-        _tmp = apply(:_documentcontent)
+        _tmp = apply(:_DocumentContent)
         @result = nil unless _tmp
         unless _tmp
           _tmp = true
@@ -2419,13 +2419,13 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _tmp = apply(:_le)
+        _tmp = apply(:_Le)
         unless _tmp
           self.pos = _save1
           break
         end
         while true
-          _tmp = apply(:_empty_line)
+          _tmp = apply(:_EmptyLine)
           break unless _tmp
         end
         _tmp = true
@@ -2450,49 +2450,49 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_line_command unless _tmp
+    set_failed_rule :_LineCommand unless _tmp
     return _tmp
   end
 
-  # line_block = (items_list | line_command)
-  def _line_block
+  # LineBlock = (ItemsList | LineCommand)
+  def _LineBlock
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_items_list)
+      _tmp = apply(:_ItemsList)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_line_command)
+      _tmp = apply(:_LineCommand)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_line_block unless _tmp
+    set_failed_rule :_LineBlock unless _tmp
     return _tmp
   end
 
-  # block = (preformatted_block | headed_section | line_block | explicit_block | paragraph_group):block empty_line* {block}
-  def _block
+  # Block = (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}
+  def _Block
 
     _save = self.pos
     while true # sequence
 
       _save1 = self.pos
       while true # choice
-        _tmp = apply(:_preformatted_block)
+        _tmp = apply(:_PreformattedBlock)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_headed_section)
+        _tmp = apply(:_HeadedSection)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_line_block)
+        _tmp = apply(:_LineBlock)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_explicit_block)
+        _tmp = apply(:_ExplicitBlock)
         break if _tmp
         self.pos = _save1
-        _tmp = apply(:_paragraph_group)
+        _tmp = apply(:_ParagraphGroup)
         break if _tmp
         self.pos = _save1
         break
@@ -2504,7 +2504,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -2520,57 +2520,57 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_block unless _tmp
+    set_failed_rule :_Block unless _tmp
     return _tmp
   end
 
-  # block_delimiter = (blockhead | blockend)
-  def _block_delimiter
+  # BlockDelimiter = (BlockHead | BlockEnd)
+  def _BlockDelimiter
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_blockhead)
+      _tmp = apply(:_BlockHead)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_blockend)
+      _tmp = apply(:_BlockEnd)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_block_delimiter unless _tmp
+    set_failed_rule :_BlockDelimiter unless _tmp
     return _tmp
   end
 
-  # paragraph_delimiter = (block_delimiter | preformatted_command_head | line_block | newpage | headed_start)
-  def _paragraph_delimiter
+  # ParagraphDelimiter = (BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)
+  def _ParagraphDelimiter
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_block_delimiter)
+      _tmp = apply(:_BlockDelimiter)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_preformatted_command_head)
+      _tmp = apply(:_PreformattedCommandHead)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_line_block)
+      _tmp = apply(:_LineBlock)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_newpage)
+      _tmp = apply(:_Newpage)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_headed_start)
+      _tmp = apply(:_HeadedStart)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_paragraph_delimiter unless _tmp
+    set_failed_rule :_ParagraphDelimiter unless _tmp
     return _tmp
   end
 
-  # h_start_mark = < "="+ ":" > &{ text.length - 1 == n }
-  def _h_start_mark(n)
+  # HStartMark = < "="+ ":" > &{ text.length - 1 == n }
+  def _HStartMark(n)
 
     _save = self.pos
     while true # sequence
@@ -2616,12 +2616,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_h_start_mark unless _tmp
+    set_failed_rule :_HStartMark unless _tmp
     return _tmp
   end
 
-  # h_markup_terminator = - < "="+ ":" > &{ text.length - 1 <= n }
-  def _h_markup_terminator(n)
+  # HMarkupTerminator = - < "="+ ":" > &{ text.length - 1 <= n }
+  def _HMarkupTerminator(n)
 
     _save = self.pos
     while true # sequence
@@ -2672,12 +2672,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_h_markup_terminator unless _tmp
+    set_failed_rule :_HMarkupTerminator unless _tmp
     return _tmp
   end
 
-  # h_start = - h_start_mark(n) charstring:s le { { level: n, heading: s } }
-  def _h_start(n)
+  # HStart = - HStartMark(n) CharString:s Le { { level: n, heading: s } }
+  def _HStart(n)
 
     _save = self.pos
     while true # sequence
@@ -2686,18 +2686,18 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply_with_args(:_h_start_mark, n)
+      _tmp = apply_with_args(:_HStartMark, n)
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = apply(:_charstring)
+      _tmp = apply(:_CharString)
       s = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = apply(:_le)
+      _tmp = apply(:_Le)
       unless _tmp
         self.pos = _save
         break
@@ -2710,12 +2710,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_h_start unless _tmp
+    set_failed_rule :_HStart unless _tmp
     return _tmp
   end
 
-  # h_section = < h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }
-  def _h_section(n)
+  # HSection = < HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }
+  def _HSection(n)
 
     _save = self.pos
     while true # sequence
@@ -2723,7 +2723,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = apply_with_args(:_h_start, n)
+        _tmp = apply_with_args(:_HStart, n)
         h = @result
         unless _tmp
           self.pos = _save1
@@ -2735,7 +2735,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply_with_args(:_h_markup_terminator, n)
+          _tmp = apply_with_args(:_HMarkupTerminator, n)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
@@ -2743,14 +2743,14 @@ class NoraMark::Parser < KPeg::CompiledParser
             break
           end
           _save5 = self.pos
-          _tmp = apply(:_eof)
+          _tmp = apply(:_Eof)
           _tmp = _tmp ? nil : true
           self.pos = _save5
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_block)
+          _tmp = apply(:_Block)
           unless _tmp
             self.pos = _save3
           end
@@ -2764,7 +2764,7 @@ class NoraMark::Parser < KPeg::CompiledParser
             _save6 = self.pos
             while true # sequence
               _save7 = self.pos
-              _tmp = apply_with_args(:_h_markup_terminator, n)
+              _tmp = apply_with_args(:_HMarkupTerminator, n)
               _tmp = _tmp ? nil : true
               self.pos = _save7
               unless _tmp
@@ -2772,14 +2772,14 @@ class NoraMark::Parser < KPeg::CompiledParser
                 break
               end
               _save8 = self.pos
-              _tmp = apply(:_eof)
+              _tmp = apply(:_Eof)
               _tmp = _tmp ? nil : true
               self.pos = _save8
               unless _tmp
                 self.pos = _save6
                 break
               end
-              _tmp = apply(:_block)
+              _tmp = apply(:_Block)
               unless _tmp
                 self.pos = _save6
               end
@@ -2816,72 +2816,72 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_h_section unless _tmp
+    set_failed_rule :_HSection unless _tmp
     return _tmp
   end
 
-  # headed_start = (h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))
-  def _headed_start
+  # HeadedStart = (HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6))
+  def _HeadedStart
 
     _save = self.pos
     while true # choice
-      _tmp = apply_with_args(:_h_start, 1)
+      _tmp = apply_with_args(:_HStart, 1)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_start, 2)
+      _tmp = apply_with_args(:_HStart, 2)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_start, 3)
+      _tmp = apply_with_args(:_HStart, 3)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_start, 4)
+      _tmp = apply_with_args(:_HStart, 4)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_start, 5)
+      _tmp = apply_with_args(:_HStart, 5)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_start, 6)
+      _tmp = apply_with_args(:_HStart, 6)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_headed_start unless _tmp
+    set_failed_rule :_HeadedStart unless _tmp
     return _tmp
   end
 
-  # headed_section = (h_section(1) | h_section(2) | h_section(3) | h_section(4) | h_section(5) | h_section(6))
-  def _headed_section
+  # HeadedSection = (HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))
+  def _HeadedSection
 
     _save = self.pos
     while true # choice
-      _tmp = apply_with_args(:_h_section, 1)
+      _tmp = apply_with_args(:_HSection, 1)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_section, 2)
+      _tmp = apply_with_args(:_HSection, 2)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_section, 3)
+      _tmp = apply_with_args(:_HSection, 3)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_section, 4)
+      _tmp = apply_with_args(:_HSection, 4)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_section, 5)
+      _tmp = apply_with_args(:_HSection, 5)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_h_section, 6)
+      _tmp = apply_with_args(:_HSection, 6)
       break if _tmp
       self.pos = _save
       break
     end # end choice
 
-    set_failed_rule :_headed_section unless _tmp
+    set_failed_rule :_HeadedSection unless _tmp
     return _tmp
   end
 
-  # frontmatter_separator = - "---" - nl
-  def _frontmatter_separator
+  # FrontmatterSeparator = - "---" - Nl
+  def _FrontmatterSeparator
 
     _save = self.pos
     while true # sequence
@@ -2900,23 +2900,23 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_nl)
+      _tmp = apply(:_Nl)
       unless _tmp
         self.pos = _save
       end
       break
     end # end sequence
 
-    set_failed_rule :_frontmatter_separator unless _tmp
+    set_failed_rule :_FrontmatterSeparator unless _tmp
     return _tmp
   end
 
-  # frontmatter = frontmatter_separator (!frontmatter_separator charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }
-  def _frontmatter
+  # Frontmatter = FrontmatterSeparator (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* { create_frontmatter(yaml) }
+  def _Frontmatter
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_frontmatter_separator)
+      _tmp = apply(:_FrontmatterSeparator)
       unless _tmp
         self.pos = _save
         break
@@ -2927,19 +2927,19 @@ class NoraMark::Parser < KPeg::CompiledParser
       _save2 = self.pos
       while true # sequence
         _save3 = self.pos
-        _tmp = apply(:_frontmatter_separator)
+        _tmp = apply(:_FrontmatterSeparator)
         _tmp = _tmp ? nil : true
         self.pos = _save3
         unless _tmp
           self.pos = _save2
           break
         end
-        _tmp = apply(:_charstring)
+        _tmp = apply(:_CharString)
         unless _tmp
           self.pos = _save2
           break
         end
-        _tmp = apply(:_nl)
+        _tmp = apply(:_Nl)
         unless _tmp
           self.pos = _save2
         end
@@ -2953,19 +2953,19 @@ class NoraMark::Parser < KPeg::CompiledParser
           _save4 = self.pos
           while true # sequence
             _save5 = self.pos
-            _tmp = apply(:_frontmatter_separator)
+            _tmp = apply(:_FrontmatterSeparator)
             _tmp = _tmp ? nil : true
             self.pos = _save5
             unless _tmp
               self.pos = _save4
               break
             end
-            _tmp = apply(:_charstring)
+            _tmp = apply(:_CharString)
             unless _tmp
               self.pos = _save4
               break
             end
-            _tmp = apply(:_nl)
+            _tmp = apply(:_Nl)
             unless _tmp
               self.pos = _save4
             end
@@ -2985,13 +2985,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_frontmatter_separator)
+      _tmp = apply(:_FrontmatterSeparator)
       unless _tmp
         self.pos = _save
         break
       end
       while true
-        _tmp = apply(:_empty_line)
+        _tmp = apply(:_EmptyLine)
         break unless _tmp
       end
       _tmp = true
@@ -3007,12 +3007,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_frontmatter unless _tmp
+    set_failed_rule :_Frontmatter unless _tmp
     return _tmp
   end
 
-  # char = < /[[:print:]]/ > { text }
-  def _char
+  # Char = < /[[:print:]]/ > { text }
+  def _Char
 
     _save = self.pos
     while true # sequence
@@ -3033,18 +3033,18 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_char unless _tmp
+    set_failed_rule :_Char unless _tmp
     return _tmp
   end
 
-  # charstring = < char* > { text }
-  def _charstring
+  # CharString = < Char* > { text }
+  def _CharString
 
     _save = self.pos
     while true # sequence
       _text_start = self.pos
       while true
-        _tmp = apply(:_char)
+        _tmp = apply(:_Char)
         break unless _tmp
       end
       _tmp = true
@@ -3063,16 +3063,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_charstring unless _tmp
+    set_failed_rule :_CharString unless _tmp
     return _tmp
   end
 
-  # char_except = char:c &{ c != e }
-  def _char_except(e)
+  # CharExcept = Char:c &{ c != e }
+  def _CharExcept(e)
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_char)
+      _tmp = apply(:_Char)
       c = @result
       unless _tmp
         self.pos = _save
@@ -3087,12 +3087,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_char_except unless _tmp
+    set_failed_rule :_CharExcept unless _tmp
     return _tmp
   end
 
-  # documentcontent_except = (inline | !inline char_except(e))+:content {parse_text(content)}
-  def _documentcontent_except(e)
+  # DocumentContentExcept = (Inline | !Inline CharExcept(e))+:content {parse_text(content)}
+  def _DocumentContentExcept(e)
 
     _save = self.pos
     while true # sequence
@@ -3101,21 +3101,21 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save2 = self.pos
       while true # choice
-        _tmp = apply(:_inline)
+        _tmp = apply(:_Inline)
         break if _tmp
         self.pos = _save2
 
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_inline)
+          _tmp = apply(:_Inline)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply_with_args(:_char_except, e)
+          _tmp = apply_with_args(:_CharExcept, e)
           unless _tmp
             self.pos = _save3
           end
@@ -3133,21 +3133,21 @@ class NoraMark::Parser < KPeg::CompiledParser
 
           _save5 = self.pos
           while true # choice
-            _tmp = apply(:_inline)
+            _tmp = apply(:_Inline)
             break if _tmp
             self.pos = _save5
 
             _save6 = self.pos
             while true # sequence
               _save7 = self.pos
-              _tmp = apply(:_inline)
+              _tmp = apply(:_Inline)
               _tmp = _tmp ? nil : true
               self.pos = _save7
               unless _tmp
                 self.pos = _save6
                 break
               end
-              _tmp = apply_with_args(:_char_except, e)
+              _tmp = apply_with_args(:_CharExcept, e)
               unless _tmp
                 self.pos = _save6
               end
@@ -3180,12 +3180,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_documentcontent_except unless _tmp
+    set_failed_rule :_DocumentContentExcept unless _tmp
     return _tmp
   end
 
-  # documentcontent = (inline | !inline char)+:content {parse_text(content)}
-  def _documentcontent
+  # DocumentContent = (Inline | !Inline Char)+:content {parse_text(content)}
+  def _DocumentContent
 
     _save = self.pos
     while true # sequence
@@ -3194,21 +3194,21 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save2 = self.pos
       while true # choice
-        _tmp = apply(:_inline)
+        _tmp = apply(:_Inline)
         break if _tmp
         self.pos = _save2
 
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_inline)
+          _tmp = apply(:_Inline)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_char)
+          _tmp = apply(:_Char)
           unless _tmp
             self.pos = _save3
           end
@@ -3226,21 +3226,21 @@ class NoraMark::Parser < KPeg::CompiledParser
 
           _save5 = self.pos
           while true # choice
-            _tmp = apply(:_inline)
+            _tmp = apply(:_Inline)
             break if _tmp
             self.pos = _save5
 
             _save6 = self.pos
             while true # sequence
               _save7 = self.pos
-              _tmp = apply(:_inline)
+              _tmp = apply(:_Inline)
               _tmp = _tmp ? nil : true
               self.pos = _save7
               unless _tmp
                 self.pos = _save6
                 break
               end
-              _tmp = apply(:_char)
+              _tmp = apply(:_Char)
               unless _tmp
                 self.pos = _save6
               end
@@ -3273,22 +3273,22 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_documentcontent unless _tmp
+    set_failed_rule :_DocumentContent unless _tmp
     return _tmp
   end
 
-  # documentline = documentcontent:content le { content }
-  def _documentline
+  # DocumentLine = DocumentContent:content Le { content }
+  def _DocumentLine
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_documentcontent)
+      _tmp = apply(:_DocumentContent)
       content = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = apply(:_le)
+      _tmp = apply(:_Le)
       unless _tmp
         self.pos = _save
         break
@@ -3301,17 +3301,17 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_documentline unless _tmp
+    set_failed_rule :_DocumentLine unless _tmp
     return _tmp
   end
 
-  # page = frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }
-  def _page
+  # Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }
+  def _Page
 
     _save = self.pos
     while true # sequence
       _save1 = self.pos
-      _tmp = apply(:_frontmatter)
+      _tmp = apply(:_Frontmatter)
       @result = nil unless _tmp
       unless _tmp
         _tmp = true
@@ -3333,14 +3333,14 @@ class NoraMark::Parser < KPeg::CompiledParser
         _save3 = self.pos
         while true # sequence
           _save4 = self.pos
-          _tmp = apply(:_newpage)
+          _tmp = apply(:_Newpage)
           _tmp = _tmp ? nil : true
           self.pos = _save4
           unless _tmp
             self.pos = _save3
             break
           end
-          _tmp = apply(:_block)
+          _tmp = apply(:_Block)
           unless _tmp
             self.pos = _save3
           end
@@ -3365,22 +3365,22 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_page unless _tmp
+    set_failed_rule :_Page unless _tmp
     return _tmp
   end
 
-  # newpaged_page = newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }
-  def _newpaged_page
+  # NewpagedPage = Newpage:newpage Page:page { page[:children] = page[:children].unshift newpage; page }
+  def _NewpagedPage
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_newpage)
+      _tmp = apply(:_Newpage)
       newpage = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = apply(:_page)
+      _tmp = apply(:_Page)
       page = @result
       unless _tmp
         self.pos = _save
@@ -3394,16 +3394,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break
     end # end sequence
 
-    set_failed_rule :_newpaged_page unless _tmp
+    set_failed_rule :_NewpagedPage unless _tmp
     return _tmp
   end
 
-  # root = page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {name: @document_name} , [ page ] + pages) }
+  # root = Page:page NewpagedPage*:pages - EofComment? Eof { create_item(:document, {name: @document_name} , [ page ] + pages) }
   def _root
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_page)
+      _tmp = apply(:_Page)
       page = @result
       unless _tmp
         self.pos = _save
@@ -3411,7 +3411,7 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       _ary = []
       while true
-        _tmp = apply(:_newpaged_page)
+        _tmp = apply(:_NewpagedPage)
         _ary << @result if _tmp
         break unless _tmp
       end
@@ -3428,7 +3428,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save2 = self.pos
-      _tmp = apply(:_eof_comment)
+      _tmp = apply(:_EofComment)
       unless _tmp
         _tmp = true
         self.pos = _save2
@@ -3437,7 +3437,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_eof)
+      _tmp = apply(:_Eof)
       unless _tmp
         self.pos = _save
         break
@@ -3455,82 +3455,82 @@ class NoraMark::Parser < KPeg::CompiledParser
   end
 
   Rules = {}
-  Rules[:_eof] = rule_info("eof", "!.")
-  Rules[:_space] = rule_info("space", "(\" \" | \"\\\\t\")")
-  Rules[:_eof_comment] = rule_info("eof_comment", "space* \"\#\" (!eof .)*")
-  Rules[:_comment] = rule_info("comment", "space* \"\#\" (!nl .)* nl empty_line*")
-  Rules[:__hyphen_] = rule_info("-", "(space | comment | eof_comment)*")
-  Rules[:_empty_line] = rule_info("empty_line", "- nl")
-  Rules[:_nl] = rule_info("nl", "/\\r?\\n/")
-  Rules[:_le] = rule_info("le", "(nl | eof)")
-  Rules[:_word] = rule_info("word", "< /[\\w0-9]/ (\"-\" | /[\\w0-9]/)* > { text }")
-  Rules[:_num] = rule_info("num", "< [0-9]+ > { text.to_i }")
-  Rules[:_classname] = rule_info("classname", "\".\" word:classname { classname }")
-  Rules[:_classnames] = rule_info("classnames", "classname*:classnames { classnames }")
-  Rules[:_idname] = rule_info("idname", "\"\#\" word:idname { idname }")
-  Rules[:_idnames] = rule_info("idnames", "idname*:idnames { idnames }")
-  Rules[:_commandname] = rule_info("commandname", "word:name idnames?:idnames classnames?:classes { {name: name, ids: idnames, classes: classes} }")
-  Rules[:_parameter_normal] = rule_info("parameter_normal", "< /[^,)]/* > { text }")
-  Rules[:_parameter_quoted] = rule_info("parameter_quoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
-  Rules[:_parameter_single_quoted] = rule_info("parameter_single_quoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
-  Rules[:_parameter] = rule_info("parameter", "(parameter_quoted | parameter_single_quoted | parameter_normal):value { value }")
-  Rules[:_parameters] = rule_info("parameters", "parameter:parameter (\",\" - parameter)*:rest_parameters { [parameter] + rest_parameters }")
-  Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:args - \")\")? { args ||= []; cn.merge({ args: args }) }")
-  Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")
-  Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
-  Rules[:_paragraph_group] = rule_info("paragraph_group", "< paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }")
-  Rules[:_blockhead] = rule_info("blockhead", "- command:command - \"{\" - nl empty_line* { command }")
-  Rules[:_blockend] = rule_info("blockend", "- \"}\" - le empty_line*")
-  Rules[:_blockbody] = rule_info("blockbody", "(!blockend block)+:body { body }")
-  Rules[:_explicit_block] = rule_info("explicit_block", "< blockhead:head - blockbody:body - blockend > { create_item(:block, head, body, raw: text) }")
-  Rules[:_preformatted_command] = rule_info("preformatted_command", "command:command &{ ['pre', 'code'].include? command[:name] }")
-  Rules[:_preformatted_command_head_simple] = rule_info("preformatted_command_head_simple", "- preformatted_command:command - \"{\" nl { command }")
-  Rules[:_preformatted_command_head_complex] = rule_info("preformatted_command_head_complex", "- preformatted_command:command - \"{//\" word?:codelanguage nl { command.merge({codelanguage: codelanguage}) }")
-  Rules[:_preformatted_command_head] = rule_info("preformatted_command_head", "(preformatted_command_head_complex | preformatted_command_head_simple)")
-  Rules[:_preformat_end_simple] = rule_info("preformat_end_simple", "\"}\" - le empty_line*")
-  Rules[:_preformat_end_complex] = rule_info("preformat_end_complex", "\"//}\" - le empty_line*")
-  Rules[:_preformatted_block_simple] = rule_info("preformatted_block_simple", "< preformatted_command_head_simple:command (!preformat_end_simple charstring nl)+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }")
-  Rules[:_preformatted_block_complex] = rule_info("preformatted_block_complex", "< preformatted_command_head_complex:command (!preformat_end_complex charstring nl)+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }")
-  Rules[:_preformatted_block] = rule_info("preformatted_block", "(preformatted_block_complex | preformatted_block_simple)")
-  Rules[:_inline] = rule_info("inline", "(img_inline | common_inline)")
-  Rules[:_common_inline] = rule_info("common_inline", "< \"[\" command:c \"{\" documentcontent_except('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
-  Rules[:_img_command] = rule_info("img_command", "command:c &{ c[:name] == 'img' && c[:args].size == 2}")
-  Rules[:_img_inline] = rule_info("img_inline", "< \"[\" img_command:c \"]\" > { create_item(:inline, c, nil, raw: text) }")
-  Rules[:_commandname_for_special_line_command] = rule_info("commandname_for_special_line_command", "(newpage_command | explicit_paragraph_command)")
-  Rules[:_newpage_command] = rule_info("newpage_command", "command:command &{ command[:name] == 'newpage' }")
-  Rules[:_newpage] = rule_info("newpage", "< - newpage_command:c \":\" documentcontent?:content - nl > { create_item(:newpage, c, content, raw:text) }")
-  Rules[:_explicit_paragraph_command] = rule_info("explicit_paragraph_command", "command:c &{ c[:name] == 'p' }")
-  Rules[:_explicit_paragraph] = rule_info("explicit_paragraph", "< - explicit_paragraph_command:c \":\" documentcontent?:content le empty_line* > { create_item(:paragraph, c, content, raw:text) }")
-  Rules[:_unordered_list] = rule_info("unordered_list", "< unordered_item+:items > { create_item(:ul, nil, items, raw: text) }")
-  Rules[:_unordered_item] = rule_info("unordered_item", "< \"*:\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
-  Rules[:_ordered_list] = rule_info("ordered_list", "< ordered_item+:items > { create_item(:ol, nil, items, raw: text) }")
-  Rules[:_ordered_item] = rule_info("ordered_item", "< num \":\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
-  Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
-  Rules[:_definition_item] = rule_info("definition_item", "< - \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }")
-  Rules[:_long_definition_list] = rule_info("long_definition_list", "< long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
-  Rules[:_long_definition_item] = rule_info("long_definition_item", "< - \";:\" - documentcontent_except('{'):term \"{\" - nl - blockbody:definition - blockend > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }")
-  Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list | long_definition_list)")
-  Rules[:_line_command] = rule_info("line_command", "< - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
-  Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
-  Rules[:_block] = rule_info("block", "(preformatted_block | headed_section | line_block | explicit_block | paragraph_group):block empty_line* {block}")
-  Rules[:_block_delimiter] = rule_info("block_delimiter", "(blockhead | blockend)")
-  Rules[:_paragraph_delimiter] = rule_info("paragraph_delimiter", "(block_delimiter | preformatted_command_head | line_block | newpage | headed_start)")
-  Rules[:_h_start_mark] = rule_info("h_start_mark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
-  Rules[:_h_markup_terminator] = rule_info("h_markup_terminator", "- < \"=\"+ \":\" > &{ text.length - 1 <= n }")
-  Rules[:_h_start] = rule_info("h_start", "- h_start_mark(n) charstring:s le { { level: n, heading: s } }")
-  Rules[:_h_section] = rule_info("h_section", "< h_start(n):h (!h_markup_terminator(n) !eof block)+:content > { create_item(:h_section, h, content, raw: text) }")
-  Rules[:_headed_start] = rule_info("headed_start", "(h_start(1) | h_start(2) | h_start(3) | h_start(4) | h_start(5) | h_start(6))")
-  Rules[:_headed_section] = rule_info("headed_section", "(h_section(1) | h_section(2) | h_section(3) | h_section(4) | h_section(5) | h_section(6))")
-  Rules[:_frontmatter_separator] = rule_info("frontmatter_separator", "- \"---\" - nl")
-  Rules[:_frontmatter] = rule_info("frontmatter", "frontmatter_separator (!frontmatter_separator charstring nl)+:yaml frontmatter_separator empty_line* { create_frontmatter(yaml) }")
-  Rules[:_char] = rule_info("char", "< /[[:print:]]/ > { text }")
-  Rules[:_charstring] = rule_info("charstring", "< char* > { text }")
-  Rules[:_char_except] = rule_info("char_except", "char:c &{ c != e }")
-  Rules[:_documentcontent_except] = rule_info("documentcontent_except", "(inline | !inline char_except(e))+:content {parse_text(content)}")
-  Rules[:_documentcontent] = rule_info("documentcontent", "(inline | !inline char)+:content {parse_text(content)}")
-  Rules[:_documentline] = rule_info("documentline", "documentcontent:content le { content }")
-  Rules[:_page] = rule_info("page", "frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }")
-  Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }")
-  Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {name: @document_name} , [ page ] + pages) }")
+  Rules[:_Eof] = rule_info("Eof", "!.")
+  Rules[:_Space] = rule_info("Space", "(\" \" | \"\\\\t\")")
+  Rules[:_EofComment] = rule_info("EofComment", "Space* \"\#\" (!Eof .)*")
+  Rules[:_Comment] = rule_info("Comment", "Space* \"\#\" (!Nl .)* Nl EmptyLine*")
+  Rules[:__hyphen_] = rule_info("-", "(Space | Comment | EofComment)*")
+  Rules[:_EmptyLine] = rule_info("EmptyLine", "- Nl")
+  Rules[:_Nl] = rule_info("Nl", "/\\r?\\n/")
+  Rules[:_Le] = rule_info("Le", "(Nl | Eof)")
+  Rules[:_Word] = rule_info("Word", "< /[\\w0-9]/ (\"-\" | /[\\w0-9]/)* > { text }")
+  Rules[:_Num] = rule_info("Num", "< [0-9]+ > { text.to_i }")
+  Rules[:_ClassName] = rule_info("ClassName", "\".\" Word:classname { classname }")
+  Rules[:_ClassNames] = rule_info("ClassNames", "ClassName*:classnames { classnames }")
+  Rules[:_IdName] = rule_info("IdName", "\"\#\" Word:idname { idname }")
+  Rules[:_IdNames] = rule_info("IdNames", "IdName*:idnames { idnames }")
+  Rules[:_CommandName] = rule_info("CommandName", "Word:name IdNames?:idnames ClassNames?:classes { {name: name, ids: idnames, classes: classes} }")
+  Rules[:_ParameterNormal] = rule_info("ParameterNormal", "< /[^,)]/* > { text }")
+  Rules[:_ParameterQuoted] = rule_info("ParameterQuoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
+  Rules[:_ParameterSingleQuoted] = rule_info("ParameterSingleQuoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
+  Rules[:_Parameter] = rule_info("Parameter", "(ParameterQuoted | ParameterSingleQuoted | ParameterNormal):value { value }")
+  Rules[:_Parameters] = rule_info("Parameters", "Parameter:parameter (\",\" - Parameter)*:rest_parameters { [parameter] + rest_parameters }")
+  Rules[:_Command] = rule_info("Command", "CommandName:cn (\"(\" - Parameters:args - \")\")? { args ||= []; cn.merge({ args: args }) }")
+  Rules[:_ImplicitParagraph] = rule_info("ImplicitParagraph", "< !ParagraphDelimiter - DocumentLine:p - > { create_item(:paragraph, nil, p, raw: text) }")
+  Rules[:_Paragraph] = rule_info("Paragraph", "(ExplicitParagraph | ImplicitParagraph)")
+  Rules[:_ParagraphGroup] = rule_info("ParagraphGroup", "< Paragraph+:p EmptyLine* > { create_item(:paragraph_group, nil, p, raw: text) }")
+  Rules[:_BlockHead] = rule_info("BlockHead", "- Command:command - \"{\" - Nl EmptyLine* { command }")
+  Rules[:_BlockEnd] = rule_info("BlockEnd", "- \"}\" - Le EmptyLine*")
+  Rules[:_BlockBody] = rule_info("BlockBody", "(!BlockEnd Block)+:body { body }")
+  Rules[:_ExplicitBlock] = rule_info("ExplicitBlock", "< BlockHead:head - BlockBody:body - BlockEnd > { create_item(:block, head, body, raw: text) }")
+  Rules[:_PreformattedCommand] = rule_info("PreformattedCommand", "Command:command &{ ['pre', 'code'].include? command[:name] }")
+  Rules[:_PreformattedCommandHeadSimple] = rule_info("PreformattedCommandHeadSimple", "- PreformattedCommand:command - \"{\" Nl { command }")
+  Rules[:_PreformattedCommandHeadComplex] = rule_info("PreformattedCommandHeadComplex", "- PreformattedCommand:command - \"{//\" Word?:codelanguage Nl { command.merge({codelanguage: codelanguage}) }")
+  Rules[:_PreformattedCommandHead] = rule_info("PreformattedCommandHead", "(PreformattedCommandHeadComplex | PreformattedCommandHeadSimple)")
+  Rules[:_PreformatEndSimple] = rule_info("PreformatEndSimple", "\"}\" - Le EmptyLine*")
+  Rules[:_PreformatEndComplex] = rule_info("PreformatEndComplex", "\"//}\" - Le EmptyLine*")
+  Rules[:_PreformattedBlockSimple] = rule_info("PreformattedBlockSimple", "< PreformattedCommandHeadSimple:command (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "< PreformattedCommandHeadComplex:command (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex > { create_item(:preformatted, command, content, raw: text) }")
+  Rules[:_PreformattedBlock] = rule_info("PreformattedBlock", "(PreformattedBlockComplex | PreformattedBlockSimple)")
+  Rules[:_Inline] = rule_info("Inline", "(ImgInline | CommonInline)")
+  Rules[:_CommonInline] = rule_info("CommonInline", "< \"[\" Command:c \"{\" DocumentContentExcept('}'):content \"}\" \"]\" > { create_item(:inline, c, content, raw: text) }")
+  Rules[:_ImgCommand] = rule_info("ImgCommand", "Command:c &{ c[:name] == 'img' && c[:args].size == 2}")
+  Rules[:_ImgInline] = rule_info("ImgInline", "< \"[\" ImgCommand:c \"]\" > { create_item(:inline, c, nil, raw: text) }")
+  Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
+  Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
+  Rules[:_Newpage] = rule_info("Newpage", "< - NewpageCommand:c \":\" DocumentContent?:content - Nl > { create_item(:newpage, c, content, raw:text) }")
+  Rules[:_ExplicitParagraphCommand] = rule_info("ExplicitParagraphCommand", "Command:c &{ c[:name] == 'p' }")
+  Rules[:_ExplicitParagraph] = rule_info("ExplicitParagraph", "< - ExplicitParagraphCommand:c \":\" DocumentContent?:content Le EmptyLine* > { create_item(:paragraph, c, content, raw:text) }")
+  Rules[:_UnorderedList] = rule_info("UnorderedList", "< UnorderedItem+:items > { create_item(:ul, nil, items, raw: text) }")
+  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "< \"*:\" DocumentContent:content Le > { create_item(:li, nil, content, raw: text) }")
+  Rules[:_OrderedList] = rule_info("OrderedList", "< OrderedItem+:items > { create_item(:ol, nil, items, raw: text) }")
+  Rules[:_OrderedItem] = rule_info("OrderedItem", "< Num \":\" DocumentContent:content Le > { create_item(:li, nil, content, raw: text) }")
+  Rules[:_DefinitionList] = rule_info("DefinitionList", "< DefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }")
+  Rules[:_DefinitionItem] = rule_info("DefinitionItem", "< - \";:\" - DocumentContentExcept(':'):term \":\" - DocumentContent:definition Le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }")
+  Rules[:_LongDefinitionList] = rule_info("LongDefinitionList", "< LongDefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }")
+  Rules[:_LongDefinitionItem] = rule_info("LongDefinitionItem", "< - \";:\" - DocumentContentExcept('{'):term \"{\" - Nl - BlockBody:definition - BlockEnd > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }")
+  Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
+  Rules[:_LineCommand] = rule_info("LineCommand", "< - !CommandNameForSpecialLineCommand Command:c \":\" DocumentContent?:content - Le EmptyLine* > { create_item(:line_command, c, content, raw: text) }")
+  Rules[:_LineBlock] = rule_info("LineBlock", "(ItemsList | LineCommand)")
+  Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
+  Rules[:_BlockDelimiter] = rule_info("BlockDelimiter", "(BlockHead | BlockEnd)")
+  Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
+  Rules[:_HStartMark] = rule_info("HStartMark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
+  Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "- < \"=\"+ \":\" > &{ text.length - 1 <= n }")
+  Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) CharString:s Le { { level: n, heading: s } }")
+  Rules[:_HSection] = rule_info("HSection", "< HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }")
+  Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6))")
+  Rules[:_HeadedSection] = rule_info("HeadedSection", "(HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))")
+  Rules[:_FrontmatterSeparator] = rule_info("FrontmatterSeparator", "- \"---\" - Nl")
+  Rules[:_Frontmatter] = rule_info("Frontmatter", "FrontmatterSeparator (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* { create_frontmatter(yaml) }")
+  Rules[:_Char] = rule_info("Char", "< /[[:print:]]/ > { text }")
+  Rules[:_CharString] = rule_info("CharString", "< Char* > { text }")
+  Rules[:_CharExcept] = rule_info("CharExcept", "Char:c &{ c != e }")
+  Rules[:_DocumentContentExcept] = rule_info("DocumentContentExcept", "(Inline | !Inline CharExcept(e))+:content {parse_text(content)}")
+  Rules[:_DocumentContent] = rule_info("DocumentContent", "(Inline | !Inline Char)+:content {parse_text(content)}")
+  Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
+  Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }")
+  Rules[:_NewpagedPage] = rule_info("NewpagedPage", "Newpage:newpage Page:page { page[:children] = page[:children].unshift newpage; page }")
+  Rules[:_root] = rule_info("root", "Page:page NewpagedPage*:pages - EofComment? Eof { create_item(:document, {name: @document_name} , [ page ] + pages) }")
   # :startdoc:
 end
