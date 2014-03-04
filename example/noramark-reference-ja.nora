@@ -1,0 +1,186 @@
+---
+lang: ja
+title: NoraMark Manual
+---
+
+= NoraMark Manual
+
+NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。
+
+*: プレーンテキストの原稿を邪魔しない最小限のマークアップ
+*: ブロック・ライン・インラインごとの基本記法を原則として固定した、記憶しやすいマークアップ
+*: 生のHTML記法なしで、多くのタグを記述可能
+*: マークアップに独自コマンドの追加が可能
+*: 文書構造に対する処理を追加可能
+*: パース結果をXMLとして取得可能
+
+== 必要なもの
+
+*: ruby 2.0以上
+
+== インストール方法
+
+Gemfileに次のように書きます
+
+code {
+gem 'nora_mark' 
+}
+
+そして、
+code {
+$ bundle
+}
+
+または
+
+code {
+gem install nora_mark
+}
+
+== 使い方
+
+=== コマンドラインから
+
+code {
+$ nora_mark your_document.nora # => your_document_nora_001.xhtml が生成されます
+}
+
+=== 他のコードから
+
+code {//ruby
+require 'nora_mark'
+
+document = NoraMark::Document.new(lang: 'ja')
+document.convert(string_or_io).each {
+  |page|
+  File.open(page.name, 'w+') {
+    |f| 
+    f << page.content
+  }
+}
+//}
+
+== マークアップ
+
+=== 通常のテキスト
+
+単なるテキストもHTMLに変換されます。
+
+pre(原稿) {//
+吾輩は猫である。名前はまだ無い。
+どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
+この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。
+
+ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。
+//}
+
+code(変換結果) {//html
+<div class='pgroup'>
+<p>吾輩は猫である。名前はまだ無い。</p>
+<p>どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。</p>
+<p>この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。</p>
+</div>
+<div class='pgroup>
+<p>ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</p>
+</div>
+//}
+
+改行ごとに<p>要素がつくられます。空行で区切られると、<div class='pgroup'>がつくられます。
+言語が日本語(ja)以外の場合は、次のようになります。
+
+pre(原稿) {
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, 
+sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+
+Ut enim ad minim veniam, quis nostrud exercitation 
+}
+
+code(変換結果) {//html
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, <br />sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
+<p>Ut enim ad minim veniam, quis nostrud exercitation</p>
+//}
+
+== 明示的なブロック
+
+NoraMarkでは、<コマンド> { ではじまり、} のみの行で終わる範囲を明示的なブロックとみなします。
+
+pre(原稿) {//
+d.column {
+この部分は、divで囲まれます。
+}
+//}
+
+code(変換結果) {//html
+<div class="column">
+<div class="pgroup">
+<p>この部分は、divで囲まれます。</p>
+</div>
+</div>
+//}
+
+定義済みの明示的ブロックのコマンドは、次のものがあります。
+
+:; d : divを生成します
+:; sec, section : sectionを生成します
+:; art, article : articleを生成します
+
+このほかに、後述のpreformatブロックがあります。
+
+未定義のコマンドの場合は、対応する名前のタグを生成します。[s.note{タグのチェックはしたほうがよいかも}]
+
+pre(原稿) {//
+blockquote {
+山路を登りながら、こう考えた。
+智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい
+}
+//}
+
+code(変換結果) {//html
+<blockquote>
+<div class='pgroup'>
+<p>山路を登りながら、こう考えた。</p>
+<p>智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい</p>
+</div>
+</blockquote>
+//}
+
+== インラインコマンド
+
+インラインコマンドは、次の形式をしています
+pre{//
+[<コマンド>{内容}]
+//}
+
+定義済みのインラインコマンドには、次のものがある。
+
+:;l {
+  リンクを定義する。
+  pre {//
+[l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]
+  //}
+}
+:;s {
+  spanを定義する。おもにクラスを設定するときに利用する。
+  pre {//
+[s.note{spanの中にはいる}]
+  //}
+}
+:;img {
+  画像を定義する。このコマンドにはブレースのセクションがない。
+  pre {//
+[img(img/some_image.jpg,alternate text)]
+  //}
+}
+:;tcy {
+  class tcyのspanを定義する。縦書きにおける縦中横のスタイルをあてることを想定している。
+  pre {//
+FM TOWNSが登場してからすでに[tcy{25}]年がたった。
+  //}
+}
+:;ruby {
+  ルビをマークアップする。
+  pre {//
+[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね
+  //}
+}
+;:
