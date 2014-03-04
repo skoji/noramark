@@ -44,12 +44,6 @@ module NoraMark
             end
           end
         end 
-        def write_as_single_file(filename)
-          File.open(filename, 'w+') {
-            |file|
-            file << @result[0][:content]
-          }
-        end
       end
     end
   end
