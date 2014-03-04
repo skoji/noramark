@@ -12,7 +12,6 @@ Le = Nl | Eof
 Word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
 Num = < [0-9]+ > { text.to_i }
 
-
 #common syntax
 ClassName = '.' Word:classname { classname }
 ClassNames = (ClassName)*:classnames { classnames }
@@ -47,6 +46,7 @@ PreformattedCommandHeadComplex = - PreformattedCommand:command - '{//' Word?:cod
 PreformattedCommandHead = PreformattedCommandHeadComplex | PreformattedCommandHeadSimple
 PreformatEndSimple = '}' - Le EmptyLine*
 PreformatEndComplex = '//}' - Le EmptyLine*
+
 PreformattedBlockSimple = < PreformattedCommandHeadSimple:command (!PreformatEndSimple (CharString Nl))+:content PreformatEndSimple > { create_item(:preformatted, command, content, raw: text) }
 PreformattedBlockComplex = < PreformattedCommandHeadComplex:command (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex > { create_item(:preformatted, command, content, raw: text) }
 PreformattedBlock = PreformattedBlockComplex | PreformattedBlockSimple
@@ -85,7 +85,10 @@ DefinitionItem = < - ';:' - DocumentContentExcept(':'):term ':' - DocumentConten
 LongDefinitionList = < LongDefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }
 LongDefinitionItem = < - ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
 
-ItemsList = UnorderedList | OrderedList | DefinitionList | LongDefinitionList
+ItemsList = UnorderedList
+          | OrderedList
+          | DefinitionList
+          | LongDefinitionList
 
 
 # generic line command
@@ -93,7 +96,13 @@ LineCommand = < - !CommandNameForSpecialLineCommand Command:c ':' DocumentConten
 
 # blocks
 LineBlock =  ItemsList | LineCommand 
-Block = (PreformattedBlock | HeadedSection | LineBlock  | ExplicitBlock | ParagraphGroup ):block EmptyLine* {block}
+Block = (PreformattedBlock
+       | HeadedSection
+       | LineBlock 
+       | ExplicitBlock
+       | ParagraphGroup ):block
+         EmptyLine* {block}
+
 BlockDelimiter = BlockHead | BlockEnd 
 ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart
 
@@ -104,8 +113,19 @@ HMarkupTerminator(n) = - < '='+ ':' > &{ text.length - 1 <= n }
 HStart(n) = - HStartMark(n) CharString:s Le { { level: n, heading: s } }
 HSection(n) = < HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }
 
-HeadedStart = HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6)
-HeadedSection = HSection(1) | HSection(2)| HSection(3)| HSection(4)| HSection(5) | HSection(6)
+HeadedStart = HStart(1)
+            | HStart(2)
+            | HStart(3)
+            | HStart(4)
+            | HStart(5)
+            | HStart(6)
+
+HeadedSection = HSection(1)
+              | HSection(2)
+              | HSection(3)
+              | HSection(4)
+              | HSection(5)
+              | HSection(6)
 
 # frontmatter
 FrontmatterSeparator =  - '---' - Nl
