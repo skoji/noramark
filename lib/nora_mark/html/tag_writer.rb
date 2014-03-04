@@ -35,11 +35,11 @@ module NoraMark
       end
 
       def class_string(cls_array)
-        attr_string({'class' => cls_array})
+        attr_string({class: cls_array})
       end
 
       def ids_string(ids_array)
-        attr_string({'id' => ids_array})
+        attr_string({id: ids_array})
       end
 
       def add_class(item, cls)

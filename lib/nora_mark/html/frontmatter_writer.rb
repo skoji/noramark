@@ -6,17 +6,17 @@ module NoraMark
         @generator = generator
         @context = generator.context
         @writers = {
-          :stylesheets => proc do |value|
+          stylesheets: proc do |value|
             value = [value] if value.is_a? String
             @context.stylesheets.concat value
           end,
-          :title => proc do |value|
+          title: proc do |value|
             @context.title = escape_html value
           end,
-          :lang => proc do |value|
+          lang: proc do |value|
             @context.lang = escape_html value.strip
           end,
-          :paragraph_style => proc do |value|
+          paragraph_style: proc do |value|
             @context.paragraph_style = value.strip.to_sym
           end
         }

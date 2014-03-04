@@ -10,12 +10,12 @@ module NoraMark
     end
 
     def create_frontmatter(yaml)
-      item = {:type => :frontmatter, :content => YAML.load(yaml.join("\n")) }
+      item = {type: :frontmatter, content: YAML.load(yaml.join("\n")) }
     end
 
     def create_item(type, command, children = [], raw: nil)
       children[0].sub!(/^[[:space:]]+/, '') if !children.nil? && children[0].is_a?(String)
-      item = {:type => type, :children => children, :raw_text => raw }.merge command || {}
+      item = {type: type, children: children, raw_text: raw }.merge command || {}
       item[:args] ||= []
       item[:named_args] = Hash[*(item[:args].select { |x| x.include?(':') }.map { |x| v = x.split(':', 2); [v[0].strip.to_sym, v[1]]}.flatten)]
       item

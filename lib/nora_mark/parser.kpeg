@@ -19,13 +19,13 @@ classnames = (classname)*:classnames { classnames }
 idname = '#' word:idname { idname }
 idnames = (idname)*:idnames { idnames }
 
-commandname = word:name idnames?:idnames classnames?:classes  { {:name => name, :ids => idnames, :classes => classes} }
+commandname = word:name idnames?:idnames classnames?:classes  { {name: name, ids: idnames, classes: classes} }
 parameter_normal = < /[^,)]/* > { text }
 parameter_quoted = '"' < /[^"]/* > '"' - &/[,)]/  { text }
 parameter_single_quoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
 parameter = (parameter_quoted | parameter_single_quoted | parameter_normal ):value { value }
 parameters = parameter:parameter (',' - parameter)*:rest_parameters { [parameter] + rest_parameters }
-command = commandname:cn ('(' - parameters:args - ')')? { args ||= []; cn.merge({ :args => args }) }
+command = commandname:cn ('(' - parameters:args - ')')? { args ||= []; cn.merge({ args: args }) }
 
 # paragraph
 implicit_paragraph = < (!paragraph_delimiter - documentline:p -) > { create_item(:paragraph, nil, p, raw: text) }
@@ -79,11 +79,11 @@ ordered_item = < num ':' documentcontent:content le > { create_item(:li, nil, co
 
 # definition list
 definition_list = < definition_item+:items > { create_item(:dl, nil, items, raw: text) }
-definition_item = < - ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+definition_item = < - ';:' - documentcontent_except(':'):term ':' - documentcontent:definition le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
 
 # long definition list
 long_definition_list = < long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }
-long_definition_item = < - ';:' - documentcontent_except('{'):term '{' - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+long_definition_item = < - ';:' - documentcontent_except('{'):term '{' - nl - blockbody:definition - blockend > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
 
 items_list = unordered_list | ordered_list | definition_list | long_definition_list
 
@@ -124,7 +124,7 @@ page = frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, 
 newpaged_page = newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }
 
 #root
-root = page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }
+root = page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {name: @document_name} , [ page ] + pages) }
 
 
 

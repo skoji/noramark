@@ -6,14 +6,14 @@ module NoraMark
         @generator = generator
         @context = generator.context
         @writer_set = { use_paragraph_group: {
-          :paragraph =>
+          paragraph:
           TagWriter.create('p', @generator, chop_last_space: true,
                            item_preprocessor: proc do |item|
                              add_class(item, 'noindent') if item[:children][0] =~/^(「|『|（)/  # TODO: should be plaggable}
                              item
                            end
                            ),
-          :paragraph_group =>
+          paragraph_group:
           TagWriter.create("div", @generator,
                            item_preprocessor: proc do |item|
                              add_class item, 'pgroup'
@@ -23,17 +23,17 @@ module NoraMark
                            )
           },
           default: {
-          :paragraph => 
+          paragraph:
           TagWriter.create(nil, @generator, chop_last_space: true,
                            item_preprocessor: proc do |item|
                              item[:no_tag] = true
                              item
                            end),
-          :paragraph_group =>
+          paragraph_group:
           TagWriter.create("p", @generator,
                            item_preprocessor: proc do |item|
                              item[:children] = item[:children].inject([]) do |memo, item|
-                               memo << { :type => :br, :args => [] } if !memo.last.nil? && memo.last[:type] == :paragraph && item[:type] == :paragraph
+                               memo << { type: :br, args: [] } if !memo.last.nil? && memo.last[:type] == :paragraph && item[:type] == :paragraph
                                memo << item
                              end
                              item

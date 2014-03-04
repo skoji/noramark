@@ -439,7 +439,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # commandname = word:name idnames?:idnames classnames?:classes { {:name => name, :ids => idnames, :classes => classes} }
+  # commandname = word:name idnames?:idnames classnames?:classes { {name: name, ids: idnames, classes: classes} }
   def _commandname
 
     _save = self.pos
@@ -474,7 +474,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  {:name => name, :ids => idnames, :classes => classes} ; end
+      @result = begin;  {name: name, ids: idnames, classes: classes} ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -712,7 +712,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # command = commandname:cn ("(" - parameters:args - ")")? { args ||= []; cn.merge({ :args => args }) }
+  # command = commandname:cn ("(" - parameters:args - ")")? { args ||= []; cn.merge({ args: args }) }
   def _command
 
     _save = self.pos
@@ -763,7 +763,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  args ||= []; cn.merge({ :args => args }) ; end
+      @result = begin;  args ||= []; cn.merge({ args: args }) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2120,7 +2120,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # definition_item = < - ";:" - documentcontent_except(':'):term ":" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+  # definition_item = < - ";:" - documentcontent_except(':'):term ":" - documentcontent:definition le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
   def _definition_item
 
     _save = self.pos
@@ -2180,7 +2180,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) ; end
+      @result = begin;  create_item(:dtdd, {args: [term, definition]}, nil, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2233,7 +2233,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # long_definition_item = < - ";:" - documentcontent_except('{'):term "{" - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }
+  # long_definition_item = < - ";:" - documentcontent_except('{'):term "{" - nl - blockbody:definition - blockend > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
   def _long_definition_item
 
     _save = self.pos
@@ -2308,7 +2308,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) ; end
+      @result = begin;  create_item(:dtdd, {args: [term, definition]}, nil, raw: text) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3373,7 +3373,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }
+  # root = page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {name: @document_name} , [ page ] + pages) }
   def _root
 
     _save = self.pos
@@ -3417,7 +3417,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  create_item(:document, {:name => @document_name} , [ page ] + pages) ; end
+      @result = begin;  create_item(:document, {name: @document_name} , [ page ] + pages) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3444,13 +3444,13 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_classnames] = rule_info("classnames", "classname*:classnames { classnames }")
   Rules[:_idname] = rule_info("idname", "\"\#\" word:idname { idname }")
   Rules[:_idnames] = rule_info("idnames", "idname*:idnames { idnames }")
-  Rules[:_commandname] = rule_info("commandname", "word:name idnames?:idnames classnames?:classes { {:name => name, :ids => idnames, :classes => classes} }")
+  Rules[:_commandname] = rule_info("commandname", "word:name idnames?:idnames classnames?:classes { {name: name, ids: idnames, classes: classes} }")
   Rules[:_parameter_normal] = rule_info("parameter_normal", "< /[^,)]/* > { text }")
   Rules[:_parameter_quoted] = rule_info("parameter_quoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
   Rules[:_parameter_single_quoted] = rule_info("parameter_single_quoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
   Rules[:_parameter] = rule_info("parameter", "(parameter_quoted | parameter_single_quoted | parameter_normal):value { value }")
   Rules[:_parameters] = rule_info("parameters", "parameter:parameter (\",\" - parameter)*:rest_parameters { [parameter] + rest_parameters }")
-  Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:args - \")\")? { args ||= []; cn.merge({ :args => args }) }")
+  Rules[:_command] = rule_info("command", "commandname:cn (\"(\" - parameters:args - \")\")? { args ||= []; cn.merge({ args: args }) }")
   Rules[:_implicit_paragraph] = rule_info("implicit_paragraph", "< !paragraph_delimiter - documentline:p - > { create_item(:paragraph, nil, p, raw: text) }")
   Rules[:_paragraph] = rule_info("paragraph", "(explicit_paragraph | implicit_paragraph)")
   Rules[:_paragraph_group] = rule_info("paragraph_group", "< paragraph+:p empty_line* > { create_item(:paragraph_group, nil, p, raw: text) }")
@@ -3481,9 +3481,9 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ordered_list] = rule_info("ordered_list", "< ordered_item+:items > { create_item(:ol, nil, items, raw: text) }")
   Rules[:_ordered_item] = rule_info("ordered_item", "< num \":\" documentcontent:content le > { create_item(:li, nil, content, raw: text) }")
   Rules[:_definition_list] = rule_info("definition_list", "< definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
-  Rules[:_definition_item] = rule_info("definition_item", "< - \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
+  Rules[:_definition_item] = rule_info("definition_item", "< - \";:\" - documentcontent_except(':'):term \":\" - documentcontent:definition le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }")
   Rules[:_long_definition_list] = rule_info("long_definition_list", "< long_definition_item+:items > { create_item(:dl, nil, items, raw: text) }")
-  Rules[:_long_definition_item] = rule_info("long_definition_item", "< - \";:\" - documentcontent_except('{'):term \"{\" - nl - blockbody:definition - blockend > { create_item(:dtdd, {:args => [term, definition]}, nil, raw: text) }")
+  Rules[:_long_definition_item] = rule_info("long_definition_item", "< - \";:\" - documentcontent_except('{'):term \"{\" - nl - blockbody:definition - blockend > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }")
   Rules[:_items_list] = rule_info("items_list", "(unordered_list | ordered_list | definition_list | long_definition_list)")
   Rules[:_line_command] = rule_info("line_command", "< - !commandname_for_special_line_command command:c \":\" documentcontent?:content - le empty_line* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_line_block] = rule_info("line_block", "(items_list | line_command)")
@@ -3506,6 +3506,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_documentline] = rule_info("documentline", "documentcontent:content le { content }")
   Rules[:_page] = rule_info("page", "frontmatter?:frontmatter - (!newpage block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }")
   Rules[:_newpaged_page] = rule_info("newpaged_page", "newpage:newpage page:page { page[:children] = page[:children].unshift newpage; page }")
-  Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {:name => @document_name} , [ page ] + pages) }")
+  Rules[:_root] = rule_info("root", "page:page newpaged_page*:pages - eof_comment? eof { create_item(:document, {name: @document_name} , [ page ] + pages) }")
   # :startdoc:
 end

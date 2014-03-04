@@ -18,7 +18,7 @@ module NoraMark
         section_writer = TagWriter.create('section', self)
         link_writer = TagWriter.create('a', self, trailer: '', 
                                        item_preprocessor: proc do |item|
-                                         (item[:attrs] ||= {}).merge!({:href => [ item[:args][0] ]})
+                                         (item[:attrs] ||= {}).merge!({href: [ item[:args][0] ]})
                                          item
                                        end)
 
@@ -26,12 +26,12 @@ module NoraMark
         paragraph_writer = ParagraphWriter.new self
         abstract_item_writer = AbstractItemWriter.new self
         @writers = {
-          :document => abstract_item_writer,
-          :page => abstract_item_writer,
-          :headers => abstract_item_writer,
-          :paragraph => paragraph_writer,
-          :paragraph_group => paragraph_writer,
-          :block =>
+          document: abstract_item_writer,
+          page: abstract_item_writer,
+          headers: abstract_item_writer,
+          paragraph: paragraph_writer,
+          paragraph_group: paragraph_writer,
+          block:
           WriterSelector.new(self,
                              {
                                'd' => TagWriter.create('div', self),
@@ -42,7 +42,7 @@ module NoraMark
                                'sect' => section_writer,
                                'section' => section_writer,
                              }),
-          :line_command =>
+          line_command:
           WriterSelector.new(self,
                              {
                                'image' =>
@@ -67,7 +67,7 @@ module NoraMark
                                                 ),
 
                                }),
-          :inline =>
+          inline:
           WriterSelector.new(self, 
                              {
                                'link' => link_writer,
@@ -77,8 +77,8 @@ module NoraMark
                                TagWriter.create('img', self,
                                                 item_preprocessor: proc do |item|
                                                   item[:no_body] = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
-                                                  (item[:attrs] ||= {}).merge!({:src => [item[:args][0] ]})
-                                                  item[:attrs].merge!({:alt => [ escape_html(item[:args][1].strip)]}) if (item[:args].size > 1 && item[:args][1].size > 0)
+                                                  (item[:attrs] ||= {}).merge!({src: [item[:args][0] ]})
+                                                  item[:attrs].merge!({alt: [ escape_html(item[:args][1].strip)]}) if (item[:args].size > 1 && item[:args][1].size > 0)
                                                   item
                                                 end)  ,
                                'tcy' =>
@@ -98,18 +98,18 @@ module NoraMark
                              },
                              trailer_default:''
                              ),
-          :ol => TagWriter.create('ol', self),
-          :ul => TagWriter.create('ul', self),
-          :li => TagWriter.create('li', self),
-          :dl => TagWriter.create('dl', self),
-          :dtdd =>
+          ol: TagWriter.create('ol', self),
+          ul: TagWriter.create('ul', self),
+          li: TagWriter.create('li', self),
+          dl: TagWriter.create('dl', self),
+          dtdd:
           TagWriter.create('', self, chop_last_space: true, item_preprocessor: proc do |item| item[:no_tag] = true; item end,
                            write_body_preprocessor: proc do |item|
                              output "<dt>"; write_array item[:args][0]; output "</dt>\n"
                              output "<dd>"; write_array item[:args][1]; output "</dd>\n"
                              :done
                            end),
-          :newpage =>
+          newpage:
           TagWriter.create('div', self,
                            item_preprocessor: proc do |item|
                              item[:no_tag] = true
@@ -126,15 +126,15 @@ module NoraMark
                            end
                            ),
           #headed-section
-          :h_section =>
+          h_section:
           TagWriter.create('section', self, write_body_preprocessor: proc do |item|
                              output "<h#{item[:level]}>#{item[:heading].strip}</h#{item[:level]}>\n"
                              :continue
                            end),
           # frontmatter
-          :frontmatter => frontmatter_writer,
+          frontmatter: frontmatter_writer,
           # pre-formatted
-          :preformatted =>
+          preformatted:
           TagWriter.create('pre', self,write_body_preprocessor: proc do |item|
                              output "<code>" if item[:name] == 'code'
                              output item[:children].join "\n"
@@ -142,7 +142,7 @@ module NoraMark
                              :done
                            end),
           #break
-          :br =>
+          br:
             TagWriter.create('br', self, item_preprocessor: proc do |item|
                                item[:no_body] = true
                                item
