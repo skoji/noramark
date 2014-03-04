@@ -43,12 +43,12 @@ explicit_block = < blockhead:head - blockbody:body - blockend > { create_item(:b
 # preformatted block
 preformatted_command = command:command &{ ['pre', 'code'].include? command[:name] }
 preformatted_command_head_simple = - preformatted_command:command - '{' nl { command }
-preformatted_command_head_complex = - preformatted_command:command - '{//' nl { command }
+preformatted_command_head_complex = - preformatted_command:command - '{//' word?:codelanguage nl { command.merge({codelanguage: codelanguage}) }
 preformatted_command_head = preformatted_command_head_complex | preformatted_command_head_simple
-preformat_end_simple = blockend
-preformat_end_complex = - '//}' - le empty_line*
-preformatted_block_simple = < preformatted_command_head_simple:command - (!preformat_end_simple (charstring nl))+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
-preformatted_block_complex = < preformatted_command_head_complex:command - (!preformat_end_complex (charstring nl))+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
+preformat_end_simple = '}' - le empty_line*
+preformat_end_complex = '//}' - le empty_line*
+preformatted_block_simple = < preformatted_command_head_simple:command (!preformat_end_simple (charstring nl))+:content preformat_end_simple > { create_item(:preformatted, command, content, raw: text) }
+preformatted_block_complex = < preformatted_command_head_complex:command (!preformat_end_complex (charstring nl))+:content preformat_end_complex > { create_item(:preformatted, command, content, raw: text) }
 preformatted_block = preformatted_block_complex | preformatted_block_simple
 
 # inline command

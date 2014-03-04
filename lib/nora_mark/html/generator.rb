@@ -135,9 +135,14 @@ module NoraMark
           frontmatter: frontmatter_writer,
           # pre-formatted
           preformatted:
-          TagWriter.create('pre', self,write_body_preprocessor: proc do |item|
+          TagWriter.create('pre', self,
+                           item_preprocessor: proc do |item|
+                             (item[:attrs] ||= {}).merge!({'data-code-language' => [item[:codelanguage]]}) if item[:codelanguage]
+                             item
+                           end,
+                           write_body_preprocessor: proc do |item|
                              output "<code>" if item[:name] == 'code'
-                             output item[:children].join "\n"
+                             output escape_html(item[:children].join "\n")
                              output "</code>" if item[:name] == 'code'
                              :done
                            end),
