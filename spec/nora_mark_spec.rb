@@ -55,8 +55,47 @@ describe NoraMark do
       )
     end
 
+    it 'should convert simple paragraph in english mode specified in frontmatter' do
+      text = "---\nlang: en\ntitle: the title\n---\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+      noramark = NoraMark::Document.parse(text)
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['p', 
+         'paragraph begins.', ['br', ''],
+         '2nd line.', ['br', ''],
+         '3rd line.'
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['p', 'next paragraph.']
+      )
+    end
+
+
     it 'should convert simple paragraph in japanese mode, but paragraph mode is default' do
       text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+      noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title', :paragraph_style => :default)
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['p', 
+         'paragraph begins.', ['br', ''],
+         '2nd line.', ['br', ''],
+         '3rd line.'
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['p', 'next paragraph.']
+      )
+    end
+
+    it 'should convert simple paragraph in japanese mode, but paragraph mode is default (using frontmatter)' do
+      text = "---\nlang: ja\ntitle: the title\nparagraph_style: default\n---\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the title', :paragraph_style => :default)
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')

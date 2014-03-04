@@ -17,7 +17,7 @@ module NoraMark
             @context.lang = escape_html value.strip
           end,
           :paragraph_style => proc do |value|
-            @context.paragraph_style = value.strip
+            @context.paragraph_style = value.strip.to_sym
           end
         }
       end
