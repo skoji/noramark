@@ -619,7 +619,7 @@ describe NoraMark do
     end
 
     it 'should specify stylesheets' do
-      text = "stylesheets:css/default.css, css/specific.css, css/iphone.css:(only screen and (min-device-width : 320px) and (max-device-width : 480px))\n\ntext."
+      text = "stylesheets:css/default.css, css/specific.css, css/iphone.css:(only screen and (min-device-width : 320px) and (max-device-width : 480px))\n\ntext.\n"
       noramark = NoraMark::Document.parse(text, :lang => 'ja', :title => 'the document title')
       converted = noramark.html
       head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
@@ -761,6 +761,7 @@ EOF
       text = <<EOF
 normal line.
 pre {
+this [l(link){link}] will not be converted.
 line_command: this will be not converted too.
 }
 normal line again.
@@ -769,7 +770,7 @@ EOF
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre", "line_command: this will be not converted too."])
+      expect(body.element_children[1].selector_and_children).to eq(["pre", "this [l(link){link}] will not be converted.\nline_command: this will be not converted too."])
       expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
     end
     it 'should convert preformatted code (simple notation)' do
