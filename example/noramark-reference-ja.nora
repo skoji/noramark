@@ -47,7 +47,7 @@ code {//ruby
 require 'nora_mark'
 
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
-document.write_as_files
+document.html.write_as_files
 //}
 
 ==: マークアップ
