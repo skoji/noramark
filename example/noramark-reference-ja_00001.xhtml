@@ -36,7 +36,7 @@
 <section><h2>使い方</h2>
 <pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
-document.write_as_files</code></pre>
+document.html.write_as_files</code></pre>
 </section>
 <section><h2>マークアップ</h2>
 <section><h3>通常のテキスト</h3>
@@ -142,7 +142,44 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 <dd><div class='pgroup'><p>divでラップされたimgをマークアップする。</p>
 </div>
 <pre>image(./path-to-image/img.jpg, 代替テキスト): イメージのキャプション</pre></dd>
+<dt>newpage</dt>
+<dd><div class='pgroup'><p>新規ページを作成する。通常は、あらたなXHTMLファイルが生成される。</p>
+</div>
+<pre>newpage:</pre></dd>
 </dl>
+</section>
+<section><h3>リスト</h3>
+<section><h4>箇条書き</h4>
+<pre>*: *:ではじまる行は、箇条書きになる。
+*: 空行があくまで、箇条書きがつづく。
+*: 空行があくと、あらたな箇条書きになる。</pre>
+<pre class='code-html' data-code-language='html'><code>&lt;ul&gt;&lt;li&gt;*:ではじまる行は、箇条書きになる。  &lt;/li&gt;
+&lt;li&gt;空行があくまで、箇条書きがつづく。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになる。&lt;/li&gt;
+&lt;/ul&gt;
+}</code></pre>
+</section>
+<section><h4>番号つきリスト</h4>
+<section><h4>定義リスト</h4>
+<section><h3>見出し</h3>
+<section><h4>単独の見出し</h4>
+<section><h4>セクションを生成する見出し</h4>
+<section><h3>Frontmatter</h3>
+<section><h2>カスタマイズ</h2>
+<section><h3>生成ルール追加</h3>
+</section>
+<section><h3>木構造の操作</h3>
+<section><h2>XML生成</h2>
+</section>
+</section>
+</section>
+</section>
+</section>
+</section>
+</section>
+</section>
+</section>
 </section>
 </section>
 </section>

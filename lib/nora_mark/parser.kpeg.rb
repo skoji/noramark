@@ -2771,7 +2771,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HSection = < HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }
+  # HSection = < HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content > { create_item(:h_section, h, content, raw: text) }
   def _HSection(n)
 
     _save = self.pos
@@ -2786,71 +2786,39 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _save2 = self.pos
         _ary = []
+        while true
 
-        _save3 = self.pos
-        while true # sequence
-          _save4 = self.pos
-          _tmp = apply_with_args(:_HMarkupTerminator, n)
-          _tmp = _tmp ? nil : true
-          self.pos = _save4
-          unless _tmp
-            self.pos = _save3
-            break
-          end
-          _save5 = self.pos
-          _tmp = apply(:_Eof)
-          _tmp = _tmp ? nil : true
-          self.pos = _save5
-          unless _tmp
-            self.pos = _save3
-            break
-          end
-          _tmp = apply(:_Block)
-          unless _tmp
-            self.pos = _save3
-          end
-          break
-        end # end sequence
-
-        if _tmp
-          _ary << @result
-          while true
-
-            _save6 = self.pos
-            while true # sequence
-              _save7 = self.pos
-              _tmp = apply_with_args(:_HMarkupTerminator, n)
-              _tmp = _tmp ? nil : true
-              self.pos = _save7
-              unless _tmp
-                self.pos = _save6
-                break
-              end
-              _save8 = self.pos
-              _tmp = apply(:_Eof)
-              _tmp = _tmp ? nil : true
-              self.pos = _save8
-              unless _tmp
-                self.pos = _save6
-                break
-              end
-              _tmp = apply(:_Block)
-              unless _tmp
-                self.pos = _save6
-              end
+          _save3 = self.pos
+          while true # sequence
+            _save4 = self.pos
+            _tmp = apply_with_args(:_HMarkupTerminator, n)
+            _tmp = _tmp ? nil : true
+            self.pos = _save4
+            unless _tmp
+              self.pos = _save3
               break
-            end # end sequence
+            end
+            _save5 = self.pos
+            _tmp = apply(:_Eof)
+            _tmp = _tmp ? nil : true
+            self.pos = _save5
+            unless _tmp
+              self.pos = _save3
+              break
+            end
+            _tmp = apply(:_Block)
+            unless _tmp
+              self.pos = _save3
+            end
+            break
+          end # end sequence
 
-            _ary << @result if _tmp
-            break unless _tmp
-          end
-          _tmp = true
-          @result = _ary
-        else
-          self.pos = _save2
+          _ary << @result if _tmp
+          break unless _tmp
         end
+        _tmp = true
+        @result = _ary
         content = @result
         unless _tmp
           self.pos = _save1
@@ -3575,7 +3543,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_HStartMark] = rule_info("HStartMark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
   Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "- < \"=\"+ \":\" > &{ text.length - 1 <= n }")
   Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }")
-  Rules[:_HSection] = rule_info("HSection", "< HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }")
+  Rules[:_HSection] = rule_info("HSection", "< HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content > { create_item(:h_section, h, content, raw: text) }")
   Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6))")
   Rules[:_HeadedSection] = rule_info("HeadedSection", "(HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))")
   Rules[:_FrontmatterSeparator] = rule_info("FrontmatterSeparator", "- \"---\" - Nl")

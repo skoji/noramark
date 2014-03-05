@@ -871,6 +871,18 @@ EOF
            ['p', 'これは、セクションの中です。']]]
       )
       end
+      it 'should convert markdown style heading with empty body' do
+        text = "=: タイトルです。\n==: 次のタイトルです。これから書きます。"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 1
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+         ['h1', 'タイトルです。'],
+         ['section',
+          ['h2', '次のタイトルです。これから書きます。']]])
+      end
       it 'should markdown style heading interrupted by other headed section' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。\n =: また次のセクションです。\n次のセクションの中です。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
