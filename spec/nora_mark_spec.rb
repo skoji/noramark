@@ -55,6 +55,7 @@ describe NoraMark do
       )
     end
 
+
     it 'should convert simple paragraph in english mode specified in frontmatter' do
       text = "---\nlang: en\ntitle: the title\n---\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
       noramark = NoraMark::Document.parse(text)
@@ -73,7 +74,6 @@ describe NoraMark do
         ['p', 'next paragraph.']
       )
     end
-
 
     it 'should convert simple paragraph in japanese mode, but paragraph mode is default' do
       text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
@@ -147,6 +147,7 @@ describe NoraMark do
         ]
       )
     end
+
 
     it 'should convert div without pgroup' do
       text = "d('wo-pgroup') {\n1st line. \n}"
@@ -330,8 +331,6 @@ describe NoraMark do
      ) 
     end
 
-
-
     it 'should handle block image' do
       text = "this is normal line.\nimage(./image1.jpg, \"alt text\"): caption text"
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
@@ -384,7 +383,7 @@ describe NoraMark do
        ]
       )      
     end
-    
+
     it 'should handle page change article' do
       text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
@@ -947,6 +946,7 @@ EOF
 
       end
     end
+
     describe 'create file' do
       before { @basedir = File.join(File.dirname(__FILE__), 'created_files') }
       after { Dir.glob(File.join(@basedir, '*.xhtml')) { |file| File.delete file } }
@@ -998,3 +998,4 @@ EOF
     end
   end
 end
+

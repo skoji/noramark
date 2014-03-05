@@ -6,46 +6,50 @@ module NoraMark
         @generator = generator
         @context = generator.context
         @writer_set = { use_paragraph_group: {
-          paragraph:
-          TagWriter.create('p', @generator, chop_last_space: true,
-                           item_preprocessor: proc do |item|
-                             add_class(item, 'noindent') if item[:children][0] =~/^(「|『|（)/  # TODO: should be plaggable}
-                             item
+          Paragraph =>
+          TagWriter.create('p', @generator, chop_last_space: true, 
+                           node_preprocessor: proc do |node|
+                             first = node.content[0]
+                             if first.kind_of? Text
+                               first.content.sub!(/^[[:space:]]+/, '')
+                               add_class(node, 'noindent') if first.content =~/^(「|『|（)/  # TODO: should be plaggable
+                             end
+                             node
                            end
                            ),
-          paragraph_group:
+          ParagraphGroup =>
           TagWriter.create("div", @generator,
-                           item_preprocessor: proc do |item|
-                             add_class item, 'pgroup'
-                             item[:no_tag] = true unless @context.enable_pgroup
-                             item
+                           node_preprocessor: proc do |node|
+                             add_class node, 'pgroup'
+                             node.no_tag = true unless @context.enable_pgroup
+                             node
                            end
                            )
           },
           default: {
-          paragraph:
+            Paragraph =>
           TagWriter.create(nil, @generator, chop_last_space: true,
-                           item_preprocessor: proc do |item|
-                             item[:no_tag] = true
-                             item
+                           node_preprocessor: proc do |node|
+                             node.no_tag = true
+                             node
                            end),
-          paragraph_group:
+            ParagraphGroup =>
           TagWriter.create("p", @generator,
-                           item_preprocessor: proc do |item|
-                             item[:children] = item[:children].inject([]) do |memo, item|
-                               memo << { type: :br, args: [] } if !memo.last.nil? && memo.last[:type] == :paragraph && item[:type] == :paragraph
-                               memo << item
+                           node_preprocessor: proc do |node|
+                             node.content = node.content.inject([]) do |memo, node|
+                               memo << Breakline.new if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
+                               memo << node
                              end
-                             item
+                             node
                            end
                            )
           }
         }
       end
-      def write(item)
-        writer_set = @writer_set[@context.paragraph_style]
+      def write(node)
+        writer_set = @writer_set[@context.paragraph_style] 
         writer_set = @writer_set['default'] if writer_set.nil?
-        writer_set[item[:type]].write(item)
+        writer_set[node.class].write(node)
       end
     end
   end

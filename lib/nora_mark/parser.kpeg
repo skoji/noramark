@@ -1,5 +1,25 @@
 %% name = NoraMark::Parser
 
+%% ast-location = ::NoraMark
+%% text = ast Text(content)
+%% paragraph = ast Paragraph(ids, classes, parameters, content)
+%% paragraph_group = ast ParagraphGroup(ids, classes, parameters, content)
+%% br = ast Breakline()
+%% line_command = ast LineCommand(name, ids, classes, parameters, content)
+%% block = ast Block(name, ids, classes, parameters, content)
+%% newpage = ast Newpage(ids, classes, parameters, content)
+%% inline = ast Inline(name, ids, classes, parameters, content)
+%% ul_item = ast UlItem(ids, classes, parameters, content)
+%% unordered_list = ast UnorderedList(ids, classes, parameters, content)
+%% ol_item = ast OlItem(ids, classes, parameters, content)
+%% ordered_list = ast OrderedList(ids, classes, parameters, content)
+%% dl_item = ast DLItem(ids, classes, parameters, content)
+%% definition_list = ast DefinitionList(ids, classes, parameters, content)
+%% preformatted_block = ast PreformattedBlock(name, ids, classes, parameters, codelanguage, content)
+%% frontmatter = ast Frontmatter(content)
+%% h_section = ast HeadedSection(level, heading, content)
+%% page = ast Page(content)
+
 # literals
 Eof = !. 
 Space = ' ' | '\t' 
@@ -27,17 +47,17 @@ Parameters = Parameter:parameter (',' - Parameter)*:rest_parameters { [parameter
 Command = CommandName:cn ('(' - Parameters:args - ')')? { args ||= []; cn.merge({ args: args }) }
 
 # paragraph
-ImplicitParagraph = < !ParagraphDelimiter Comment* DocumentLine:p  Comment* EofComment? > { create_item(:paragraph, nil, p, raw: text) }
+ImplicitParagraph = - !ParagraphDelimiter Comment* DocumentLine:content  Comment* EofComment? ~paragraph([],[], [], content)
 Paragraph = ExplicitParagraph | ImplicitParagraph 
 
 # paragraph_group
-ParagraphGroup = < Paragraph+:p EmptyLine* > { create_item(:paragraph_group, nil, p, raw: text) }
+ParagraphGroup = Paragraph+:p EmptyLine* ~paragraph_group([],[],[],p)
 
 # explicit block 
 BlockHead = - Command:command - '{' - Nl EmptyLine* { command }
 BlockEnd =  - '}' - Le EmptyLine*
 BlockBody = (!BlockEnd Block)+:body { body } 
-ExplicitBlock = < BlockHead:head - BlockBody:body - BlockEnd > { create_item(:block, head, body, raw: text) }
+ExplicitBlock = BlockHead:c - BlockBody:content - BlockEnd ~block(c[:name], c[:ids], c[:classes], c[:args], content)
 
 # preformatted block
 PreformattedCommand = Command:command &{ ['pre', 'code'].include? command[:name] }
@@ -47,43 +67,47 @@ PreformattedCommandHead = PreformattedCommandHeadComplex | PreformattedCommandHe
 PreformatEndSimple = - '}' - Le EmptyLine*
 PreformatEndComplex = - '//}' - Le EmptyLine*
 
-PreformattedBlockSimple = < PreformattedCommandHeadSimple:command (!PreformatEndSimple (CharString Nl))+:content PreformatEndSimple > { create_item(:preformatted, command, content, raw: text) }
-PreformattedBlockComplex = < PreformattedCommandHeadComplex:command (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex > { create_item(:preformatted, command, content, raw: text) }
+PreformattedBlockSimple = PreformattedCommandHeadSimple:c (!PreformatEndSimple (CharString Nl))+:content PreformatEndSimple
+                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content)
+
+PreformattedBlockComplex = PreformattedCommandHeadComplex:c (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex
+                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content)
+
 PreformattedBlock = PreformattedBlockComplex | PreformattedBlockSimple
 
 # inline command
 Inline = ImgInline | CommonInline
-CommonInline = < '[' Command:c '{' DocumentContentExcept('}'):content '}' ']' > { create_item(:inline, c, content, raw: text) }
+CommonInline = '[' Command:c '{' - DocumentContentExcept('}'):content '}' ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], content)
 ImgCommand = Command:c &{ c[:name] == 'img' && c[:args].size == 2}
-ImgInline = < '[' ImgCommand:c  ']' > { create_item(:inline, c, nil, raw: text) } 
+ImgInline = '[' ImgCommand:c  ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], nil)
 
 # special line commands
 CommandNameForSpecialLineCommand = NewpageCommand | ExplicitParagraphCommand
 
 # newpage
 NewpageCommand = Command:command &{ command[:name] == 'newpage' }
-Newpage = < - NewpageCommand:c ':' DocumentContent?:content - Nl > { create_item(:newpage, c, content, raw:text) }
+Newpage = - NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:ids],c[:classes],c[:args], content)
 
 # explicit paragraph
 ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
-ExplicitParagraph = < - ExplicitParagraphCommand:c ':' DocumentContent?:content Le EmptyLine*> { create_item(:paragraph, c, content, raw:text) }
+ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content Le EmptyLine* ~paragraph(c[:ids], c[:classes], c[:args], content)
 
 
 # unordered list
-UnorderedList = < UnorderedItem+:items > { create_item(:ul, nil, items, raw: text) }
-UnorderedItem = < '*:' DocumentContent:content Le > { create_item(:li, nil, content, raw: text) }
+UnorderedList = UnorderedItem+:items ~unordered_list([],[],[], items)
+UnorderedItem = '*:' - DocumentContent:content Le ~ul_item([], [], [], content)
 
 # ordered list
-OrderedList = < OrderedItem+:items > { create_item(:ol, nil, items, raw: text) }
-OrderedItem = < Num ':' DocumentContent:content Le > { create_item(:li, nil, content, raw: text) }
+OrderedList = OrderedItem+:items ~ordered_list([],[],[], items)
+OrderedItem = Num ':' - DocumentContent:content Le ~ol_item([], [], [], content)
 
 # definition list
-DefinitionList = < DefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }
-DefinitionItem = < - ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
+DefinitionList = DefinitionItem+:items ~definition_list([], [], [], items)
+DefinitionItem = - ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], definition)
 
 # long definition list
-LongDefinitionList = < LongDefinitionItem+:items > { create_item(:dl, nil, items, raw: text) }
-LongDefinitionItem = < - ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd > { create_item(:dtdd, {args: [term, definition]}, nil, raw: text) }
+LongDefinitionList = LongDefinitionItem+:items ~definition_list([], [], [], items)
+LongDefinitionItem = - ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], definition)
 
 ItemsList = UnorderedList
           | OrderedList
@@ -92,7 +116,7 @@ ItemsList = UnorderedList
 
 
 # generic line command
-LineCommand = < - !CommandNameForSpecialLineCommand Command:c ':' DocumentContent?:content - Le EmptyLine* > { create_item(:line_command, c, content, raw: text) }
+LineCommand = - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~line_command(c[:name], c[:ids], c[:classes], c[:args], content)
 
 # blocks
 LineBlock =  ItemsList | LineCommand 
@@ -112,7 +136,7 @@ HStartMark(n) = < '='+ ':' > &{ text.length - 1 == n }
 HMarkupTerminator(n) = - < '='+ ':' > &{ text.length - 1 <= n }
 
 HStart(n) = - HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }
-HSection(n) = < HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content > { create_item(:h_section, h, content, raw: text) }
+HSection(n) = HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content ~h_section(h[:level], h[:heading], content)
 
 HeadedStart = HStart(1)
             | HStart(2)
@@ -130,22 +154,24 @@ HeadedSection = HSection(1)
 
 # frontmatter
 FrontmatterSeparator =  - '---' - Nl
-Frontmatter = FrontmatterSeparator (!FrontmatterSeparator ( CharString Nl))+:yaml FrontmatterSeparator EmptyLine* { create_frontmatter(yaml) }
+Frontmatter = FrontmatterSeparator (!FrontmatterSeparator ( CharString Nl))+:yaml FrontmatterSeparator EmptyLine* ~frontmatter(yaml)
 
 # texts
 Char = < /[[:print:]]/ > { text }
 CharString = < Char* > { text }
 CharExcept(e) = Char:c &{ c != e }
-DocumentContentExcept(e) = (Inline | !Inline CharExcept(e))+:content ~parse_text(content)
-DocumentContent = (Inline | !Inline Char)+:content  ~parse_text(content)
-DocumentLine = (DocumentContent):content Le { content }
+DocumentTextExcept(e) = < (!Inline CharExcept(e))+ > ~text(text)
+DocumentContentExcept(e) = (Inline | DocumentTextExcept(e))+:content { content } 
+DocumentText = < (!Inline Char)+ > ~text(text)
+DocumentContent = (Inline | DocumentText)+:content  { content }
+DocumentLine = DocumentContent:content Le { content }
 
 #page
-Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }
-NewpagedPage = Newpage:newpage Page:page { page[:children] = page[:children].unshift newpage; page }
+Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks ~page(([frontmatter] +  blocks).select{ |x| !x.nil?})
+NewpagedPage = Newpage:newpage Page:page { page.content = page.content.unshift newpage; page }
 
 #root
-root = Page:page NewpagedPage*:pages - EofComment? Eof { create_item(:document, {name: @document_name} , [ page ] + pages) }
+root = Page:page NewpagedPage*:pages - EofComment? Eof { [ page ] + pages }
 
 
 

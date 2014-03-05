@@ -1,10 +1,12 @@
 require "nora_mark/version"
 require 'nora_mark/html/generator'
+require 'nora_mark/node'
 require 'nora_mark/parser'
 require 'securerandom'
 
 module NoraMark
-  class Document
+  class Document < Node
+    attr_accessor :document_name
     private_class_method :new 
 
     def self.parse(string_or_io, param = {})
@@ -16,10 +18,11 @@ module NoraMark
           |pr|
           src = pr.call(src)
         end
-        @parser = Parser.new(src, document_name: @document_name)
+        @parser = Parser.new(src)
         if (!@parser.parse)
           raise @parser.raise_error
         end
+        @content = @parser.result
       end
       instance
     end
@@ -30,7 +33,7 @@ module NoraMark
 
     def html
       if @html.nil?
-        @html = @html_generator.convert(@parser.result)
+        @html = @html_generator.convert(self)
       end
       @html
     end
