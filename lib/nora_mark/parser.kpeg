@@ -5,8 +5,8 @@ Eof = !.
 Space = ' ' | '\t' 
 EofComment = Space* "#" (!Eof .)* 
 Comment =   Space* "#" (!Nl .)* Nl EmptyLine*
-- =  ( Space | Comment | EofComment)*
-EmptyLine = - Nl
+- =  ( Space )* 
+EmptyLine = /^/ - (Nl | Comment | EofComment)
 Nl = /\r?\n/
 Le = Nl | Eof
 Word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
@@ -27,7 +27,7 @@ Parameters = Parameter:parameter (',' - Parameter)*:rest_parameters { [parameter
 Command = CommandName:cn ('(' - Parameters:args - ')')? { args ||= []; cn.merge({ args: args }) }
 
 # paragraph
-ImplicitParagraph = < (!ParagraphDelimiter - DocumentLine:p -) > { create_item(:paragraph, nil, p, raw: text) }
+ImplicitParagraph = < !ParagraphDelimiter Comment* DocumentLine:p  Comment* EofComment? > { create_item(:paragraph, nil, p, raw: text) }
 Paragraph = ExplicitParagraph | ImplicitParagraph 
 
 # paragraph_group
@@ -41,11 +41,11 @@ ExplicitBlock = < BlockHead:head - BlockBody:body - BlockEnd > { create_item(:bl
 
 # preformatted block
 PreformattedCommand = Command:command &{ ['pre', 'code'].include? command[:name] }
-PreformattedCommandHeadSimple = - PreformattedCommand:command - '{' Nl { command }
-PreformattedCommandHeadComplex = - PreformattedCommand:command - '{//' Word?:codelanguage Nl { command.merge({codelanguage: codelanguage}) }
+PreformattedCommandHeadSimple = - PreformattedCommand:command - '{' - Nl { command }
+PreformattedCommandHeadComplex = - PreformattedCommand:command - '{//' Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }
 PreformattedCommandHead = PreformattedCommandHeadComplex | PreformattedCommandHeadSimple
-PreformatEndSimple = '}' - Le EmptyLine*
-PreformatEndComplex = '//}' - Le EmptyLine*
+PreformatEndSimple = - '}' - Le EmptyLine*
+PreformatEndComplex = - '//}' - Le EmptyLine*
 
 PreformattedBlockSimple = < PreformattedCommandHeadSimple:command (!PreformatEndSimple (CharString Nl))+:content PreformatEndSimple > { create_item(:preformatted, command, content, raw: text) }
 PreformattedBlockComplex = < PreformattedCommandHeadComplex:command (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex > { create_item(:preformatted, command, content, raw: text) }
@@ -137,7 +137,7 @@ CharString = < Char* > { text }
 CharExcept(e) = Char:c &{ c != e }
 DocumentContentExcept(e) = (Inline | !Inline CharExcept(e))+:content ~parse_text(content)
 DocumentContent = (Inline | !Inline Char)+:content  ~parse_text(content)
-DocumentLine = DocumentContent:content Le { content }
+DocumentLine = (DocumentContent):content Le { content }
 
 #page
 Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks { create_item(:page, nil, ([frontmatter] +  blocks).select{ |x| !x.nil?}) }

@@ -770,12 +770,12 @@ EOF
     it 'should convert preformatted text' do
       text = <<EOF
 normal line.
-pre {//
+  pre {//
 d {
    this will not converted to div or p or pgroup.
 line_command: this will be not converted too.
 }
-//}
+  //}
 EOF
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
       converted = noramark.html
