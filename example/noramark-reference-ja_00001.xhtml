@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+<title>NoraMark Manual</title>
+</head>
+<body>
+<div class='pgroup'><p>= NoraMark Manual</p>
+</div>
+<div class='pgroup'><p>NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。</p>
+</div>
+<ul><li>プレーンテキストの原稿を邪魔しない最小限のマークアップ</li>
+<li>ブロック・ライン・インラインごとの基本記法を原則として固定した、記憶しやすいマークアップ</li>
+<li>生のHTML記法なしで、多くのタグを記述可能</li>
+<li>マークアップに独自コマンドの追加が可能</li>
+<li>文書構造に対する処理を追加可能</li>
+<li>パース結果をXMLとして取得可能</li>
+</ul>
+<div class='pgroup'><p>== 必要なもの</p>
+</div>
+<ul><li>ruby 2.0以上</li>
+</ul>
+<div class='pgroup'><p>== インストール方法</p>
+</div>
+<div class='pgroup'><p>Gemfileに次のように書きます</p>
+</div>
+<pre><code>gem 'nora_mark' </code></pre>
+<div class='pgroup'><p>そして、</p>
+</div>
+<pre><code>$ bundle</code></pre>
+<div class='pgroup'><p>または</p>
+</div>
+<pre><code>gem install nora_mark</code></pre>
+<div class='pgroup'><p>== 使い方</p>
+</div>
+<div class='pgroup'><p>=== コマンドラインから</p>
+</div>
+<pre><code>$ nora_mark your_document.nora # =&gt; your_document_nora_001.xhtml が生成されます</code></pre>
+<div class='pgroup'><p>=== 他のコードから</p>
+</div>
+<pre data-code-language='ruby'><code>require 'nora_mark'
+document = NoraMark::Document.new(lang: 'ja')
+document.convert(string_or_io).each {
+  |page|
+  File.open(page.name, 'w+') {
+    |f|
+    f &lt;&lt; page.content
+  }
+}</code></pre>
+<div class='pgroup'><p>== マークアップ</p>
+</div>
+<div class='pgroup'><p>=== 通常のテキスト</p>
+</div>
+<div class='pgroup'><p>単なるテキストもHTMLに変換されます。</p>
+</div>
+<pre>吾輩は猫である。名前はまだ無い。
+どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
+この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。
+ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</pre>
+<pre data-code-language='html'><code>&lt;div class='pgroup'&gt;
+&lt;p&gt;吾輩は猫である。名前はまだ無い。&lt;/p&gt;
+&lt;p&gt;どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。&lt;/p&gt;
+&lt;p&gt;この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='pgroup&gt;
+&lt;p&gt;ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+<div class='pgroup'><p>改行ごとに&lt;p&gt;要素がつくられます。空行で区切られると、&lt;div class='pgroup'&gt;がつくられます。</p>
+<p>言語が日本語(ja)以外の場合は、次のようになります。</p>
+</div>
+<pre>Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation </pre>
+<pre data-code-language='html'><code>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, &lt;br /&gt;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. &lt;/p&gt;
+&lt;p&gt;Ut enim ad minim veniam, quis nostrud exercitation&lt;/p&gt;</code></pre>
+<div class='pgroup'><p>== 明示的なブロック</p>
+</div>
+<div class='pgroup'><p>NoraMarkでは、&lt;コマンド&gt; { ではじまり、} のみの行で終わる範囲を明示的なブロックとみなします。</p>
+</div>
+<pre>d.column {
+この部分は、divで囲まれます。
+}</pre>
+<pre data-code-language='html'><code>&lt;div class=&quot;column&quot;&gt;
+&lt;div class=&quot;pgroup&quot;&gt;
+&lt;p&gt;この部分は、divで囲まれます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<div class='pgroup'><p>定義済みの明示的ブロックのコマンドは、次のものがあります。</p>
+</div>
+<dl><dt>d</dt>
+<dd>divを生成します</dd>
+<dt>sec, section</dt>
+<dd>sectionを生成します</dd>
+<dt>art, article</dt>
+<dd>articleを生成します</dd>
+</dl>
+<div class='pgroup'><p>このほかに、後述のpreformatブロックがあります。</p>
+</div>
+<div class='pgroup'><p>未定義のコマンドの場合は、対応する名前のタグを生成します。<span class='note'>タグのチェックはしたほうがよいかも</span></p>
+</div>
+<pre>blockquote {
+山路を登りながら、こう考えた。
+智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい
+}</pre>
+<pre data-code-language='html'><code>&lt;blockquote&gt;
+&lt;div class='pgroup'&gt;
+&lt;p&gt;山路を登りながら、こう考えた。&lt;/p&gt;
+&lt;p&gt;智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;</code></pre>
+<div class='pgroup'><p>== インラインコマンド</p>
+</div>
+<div class='pgroup'><p>インラインコマンドは、次の形式をしています</p>
+</div>
+<pre>[&lt;コマンド&gt;{内容}]</pre>
+<div class='pgroup'><p>定義済みのインラインコマンドには、次のものがある。</p>
+</div>
+<dl><dt>l</dt>
+<dd><div class='pgroup'><p>リンクを定義する。</p>
+</div>
+<pre>[l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]</pre></dd>
+<dt>s</dt>
+<dd><div class='pgroup'><p>spanを定義する。おもにクラスを設定するときに利用する。</p>
+</div>
+<pre>[s.note{spanの中にはいる}]</pre></dd>
+<dt>img</dt>
+<dd><div class='pgroup'><p>画像を定義する。このコマンドにはブレースのセクションがない。</p>
+</div>
+<pre>[img(img/some_image.jpg,alternate text)]</pre></dd>
+<dt>tcy</dt>
+<dd><div class='pgroup'><p>class tcyのspanを定義する。縦書きにおける縦中横のスタイルをあてることを想定している。</p>
+</div>
+<pre>FM TOWNSが登場してからすでに[tcy{25}]年がたった。</pre></dd>
+<dt>ruby</dt>
+<dd><div class='pgroup'><p>ルビをマークアップする。</p>
+</div>
+<pre>[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね</pre></dd>
+</dl>
+</body>
+</html>
