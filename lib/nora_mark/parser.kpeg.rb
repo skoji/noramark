@@ -2719,7 +2719,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HStart = - HStartMark(n) CharString:s Le { { level: n, heading: s } }
+  # HStart = - HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }
   def _HStart(n)
 
     _save = self.pos
@@ -2734,7 +2734,12 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply(:_CharString)
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_DocumentContent)
       s = @result
       unless _tmp
         self.pos = _save
@@ -3560,7 +3565,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
   Rules[:_HStartMark] = rule_info("HStartMark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
   Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "- < \"=\"+ \":\" > &{ text.length - 1 <= n }")
-  Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) CharString:s Le { { level: n, heading: s } }")
+  Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }")
   Rules[:_HSection] = rule_info("HSection", "< HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }")
   Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6))")
   Rules[:_HeadedSection] = rule_info("HeadedSection", "(HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))")

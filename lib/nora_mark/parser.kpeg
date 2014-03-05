@@ -110,7 +110,7 @@ ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newp
 HStartMark(n) = < '='+ ':' > &{ text.length - 1 == n }
 HMarkupTerminator(n) = - < '='+ ':' > &{ text.length - 1 <= n }
 
-HStart(n) = - HStartMark(n) CharString:s Le { { level: n, heading: s } }
+HStart(n) = - HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }
 HSection(n) = < HStart(n):h (!HMarkupTerminator(n) !Eof Block)+:content > { create_item(:h_section, h, content, raw: text) }
 
 HeadedStart = HStart(1)

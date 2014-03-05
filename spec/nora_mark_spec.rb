@@ -859,14 +859,14 @@ EOF
 
     describe 'markdown style' do
       it 'should convert markdown style heading' do
-        text = "=: タイトルです。\r\nこれは、セクションの中です。"
+        text = "---\nlang: ja\n---\n\n=: タイトル です。\r\nこれは、セクションの中です。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 1
         expect(body.element_children[0].selector_and_children).to eq(
         ['section',
-          ['h1', 'タイトルです。'],
+          ['h1', 'タイトル です。'],
           ['div.pgroup', 
            ['p', 'これは、セクションの中です。']]]
       )

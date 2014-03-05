@@ -128,7 +128,10 @@ module NoraMark
           #headed-section
           h_section:
           TagWriter.create('section', self, write_body_preprocessor: proc do |item|
-                             output "<h#{item[:level]}>#{item[:heading].strip}</h#{item[:level]}>\n"
+                             output "<h#{item[:level]}>"
+                             write_array item[:heading]
+                             @generator.context.chop_last_space
+                             output "</h#{item[:level]}>\n"
                              :continue
                            end),
           # frontmatter
