@@ -8,6 +8,7 @@
 <div class='pgroup'><p>NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。</p>
 </div>
 <ul><li>プレーンテキストの原稿を邪魔しない最小限のマークアップ</li>
+<li>しかしマークアップ部分は、通常のテキストと「違って」見える</li>
 <li>ブロック・ライン・インラインごとの基本記法を原則として固定した、記憶しやすいマークアップ</li>
 <li>生のHTML記法なしで、多くのタグを記述可能</li>
 <li>マークアップに独自コマンドの追加が可能</li>
@@ -30,20 +31,9 @@
 <pre><code>gem install nora_mark</code></pre>
 </section>
 <section><h2>使い方</h2>
-<section><h3>コマンドラインから</h3>
-<pre><code>$ nora_mark your_document.nora # =&gt; your_document_nora_001.xhtml が生成されます</code></pre>
-</section>
-<section><h3>他のコードから</h3>
 <pre data-code-language='ruby'><code>require 'nora_mark'
-document = NoraMark::Document.new(lang: 'ja')
-document.convert(string_or_io).each {
-  |page|
-  File.open(page.name, 'w+') {
-    |f|
-    f &lt;&lt; page.content
-  }
-}</code></pre>
-</section>
+document = NoraMark::Document.parse(string_or_io, lang: 'ja')
+document.write_as_files</code></pre>
 </section>
 <section><h2>マークアップ</h2>
 <section><h3>通常のテキスト</h3>

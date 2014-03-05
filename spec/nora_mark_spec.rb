@@ -953,5 +953,36 @@ EOF
         expect(File.basename(files[1])).to eq 'nora-test-file_002.xhtml'
       end
     end
+    describe 'parse and create manual' do
+      before {
+        @here = File.dirname(__FILE__)
+        @basedir = File.join(File.dirname(__FILE__), 'created_files') 
+        @exampledir = File.join(@here, '..', 'example')
+      }
+      after { Dir.glob(File.join(@basedir, '*.xhtml')) { |file| File.delete file } }
+      it 'should create valid html5' do
+        noramark = NoraMark::Document.parse(File.open(File.join(@exampledir, 'noramark-reference-ja.nora')).read, document_name: 'noramark-reference-ja')
+        noramark.html.write_as_files(directory: @exampledir)
+        jar = File.join(@here, 'jing-20091111/bin/jing.jar')
+        schema = File.join(@here, 'epub30-schemas/epub-xhtml-30.rnc')
+        original_file = File.join(@exampledir, 'noramark-reference-ja_00001.xhtml')
+        file_to_validate = File.join(@basedir, 'noramark-reference-ja_00001.xhtml')
+        File.open(original_file) do
+          |original|
+          nokogiri_doc = Nokogiri::XML::Document.parse(original)
+          set = nokogiri_doc.xpath('//xmlns:pre[@data-code-language]')
+          set.remove_attr('data-code-language')
+          File.open(file_to_validate, 'w+') do
+            |to_validate|
+            to_validate << nokogiri_doc.to_s
+          end
+        end
+
+        @stdout = capture(:stdout) do 
+          puts %x(java -jar #{jar} -c #{schema} #{file_to_validate})
+        end
+        expect(@stdout.strip).to eq ""
+      end
+    end
   end
 end
