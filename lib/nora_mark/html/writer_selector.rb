@@ -15,9 +15,9 @@ module NoraMark
 
       end
 
-      def write(item)
-        writer = @tag_writers[item[:name]] || @common_tag_writer
-        writer.write(item)
+      def write(node)
+        writer = @tag_writers[node.name] || @common_tag_writer
+        writer.write(node)
       end
     end
   end

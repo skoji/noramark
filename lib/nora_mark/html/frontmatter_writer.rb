@@ -21,8 +21,8 @@ module NoraMark
           end
         }
       end
-      def write(item)
-        item[:content].each {
+      def write(node)
+        node.yaml.each {
           |k,v|
           writer = @writers[k.to_sym]
           writer.call(v) unless writer.nil?

@@ -1,11 +1,11 @@
 module NoraMark
   module Html
-    class AbstractItemWriter
+    class AbstractNodeWriter
       def initialize(generator)
         @generator = generator
       end
-      def write(item)
-        item[:children].each do |child|
+      def write(node)
+        node.content.each do |child|
           @generator.to_html child
         end
       end

@@ -6,7 +6,7 @@ require 'nora_mark/html/tag_writer'
 require 'nora_mark/html/frontmatter_writer'
 require 'nora_mark/html/paragraph_writer'
 require 'nora_mark/html/writer_selector'
-require 'nora_mark/html/abstract_item_writer'
+require 'nora_mark/html/abstract_node_writer'
 module NoraMark
   module Html
     class Generator
@@ -17,21 +17,48 @@ module NoraMark
         article_writer = TagWriter.create('article', self)
         section_writer = TagWriter.create('section', self)
         link_writer = TagWriter.create('a', self, trailer: '', 
-                                       item_preprocessor: proc do |item|
-                                         (item[:attrs] ||= {}).merge!({href: [ item[:args][0] ]})
-                                         item
+                                       node_preprocessor: proc do |node|
+                                         (node.attrs ||= {}).merge!({href: [node.parameters[0]]})
+                                         node
                                        end)
 
         frontmatter_writer = FrontmatterWriter.new self
         paragraph_writer = ParagraphWriter.new self
-        abstract_item_writer = AbstractItemWriter.new self
+        abstract_node_writer = AbstractNodeWriter.new self
         @writers = {
-          document: abstract_item_writer,
-          page: abstract_item_writer,
-          headers: abstract_item_writer,
-          paragraph: paragraph_writer,
-          paragraph_group: paragraph_writer,
-          block:
+          Paragraph => paragraph_writer,
+          ParagraphGroup => paragraph_writer,
+          Breakline => 
+          TagWriter.create('br', self, node_preprocessor: proc do |node|
+                             node.body_empty = true
+                             node
+                           end),
+          LineCommand =>
+          WriterSelector.new(self,
+                             {
+                               'image' =>
+                               TagWriter.create('div', self,
+                                                node_preprocessor: proc do |node|
+                                                  add_class_if_empty node, 'img-wrap'
+                                                  node
+                                                end,
+                                                write_body_preprocessor: proc do |node|
+                                                  src = node.parameters[0].strip
+                                                  alt = (node.parameters[1] || '').strip
+                                                  caption_before = node.named_parameters[:caption_before]
+                                                  if caption_before && children_not_empty(node)
+                                                    output "<p>"; write_children node; output "</p>"
+                                                  end
+                                                  output "<img src='#{src}' alt='#{escape_html alt}' />"
+                                                  if !caption_before && children_not_empty(node)
+                                                    output "<p>"; write_children node; output "</p>"
+                                                  end
+                                                  :done
+                                                end
+                                                ),
+
+                               }),
+          Block =>
           WriterSelector.new(self,
                              {
                                'd' => TagWriter.create('div', self),
@@ -42,32 +69,23 @@ module NoraMark
                                'sect' => section_writer,
                                'section' => section_writer,
                              }),
-          line_command:
-          WriterSelector.new(self,
-                             {
-                               'image' =>
-                               TagWriter.create('div', self,
-                                                item_preprocessor: proc do |item|
-                                                  add_class_if_empty item, 'img-wrap'
-                                                  item
-                                                end,
-                                                write_body_preprocessor: proc do |item|
-                                                  src = item[:args][0].strip
-                                                  alt = (item[:args][1] || '').strip
-                                                  caption_before = item[:named_args][:caption_before]
-                                                  if caption_before && children_not_empty(item)
-                                                    output "<p>"; write_children item; output "</p>"
-                                                  end
-                                                  output "<img src='#{src}' alt='#{escape_html alt}' />"
-                                                  if !caption_before && children_not_empty(item)
-                                                    output "<p>"; write_children item; output "</p>"
-                                                  end
-                                                  :done
-                                                end
-                                                ),
-
-                               }),
-          inline:
+          Newpage =>
+          TagWriter.create('div', self,
+                           node_preprocessor: proc do |node|
+                             node.no_tag = true
+                             node
+                           end,
+                           write_body_preprocessor: proc do |node|
+                             title = nil
+                             if node.parameters.size > 0 && node.parameters[0].size > 0
+                               title = escape_html node.parameters.first
+                             end
+                             @context.title = title unless title.nil?
+                             @context.end_html
+                             :done
+                           end
+                           ),
+          Inline =>
           WriterSelector.new(self, 
                              {
                                'link' => link_writer,
@@ -75,111 +93,104 @@ module NoraMark
                                's' => TagWriter.create('span', self),
                                'img' =>
                                TagWriter.create('img', self,
-                                                item_preprocessor: proc do |item|
-                                                  item[:no_body] = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
-                                                  (item[:attrs] ||= {}).merge!({src: [item[:args][0] ]})
-                                                  item[:attrs].merge!({alt: [ escape_html(item[:args][1].strip)]}) if (item[:args].size > 1 && item[:args][1].size > 0)
-                                                  item
+                                                node_preprocessor: proc do |node|
+                                                  node.body_empty = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
+                                                  (node.attrs ||= {}).merge!({src: [node.parameters[0] ]})
+                                                  node.attrs.merge!({alt: [ escape_html(node.parameters[1].strip)]}) if (node.parameters.size > 1 && node.parameters[1].size > 0)
+                                                  node
                                                 end)  ,
                                'tcy' =>
                                TagWriter.create('span', self,
-                                                item_preprocessor: proc do |item|
-                                                  add_class item, 'tcy'
-                                                  item
+                                                node_preprocessor: proc do |node|
+                                                  add_class node, 'tcy'
+                                                  node
                                                 end),
                                'ruby' =>
                                TagWriter.create('ruby', self,
-                                                write_body_preprocessor: proc do |item|
-                                                  write_children item
-                                                  output "<rp>(</rp><rt>#{escape_html item[:args][0].strip}</rt><rp>)</rp>"
+                                                write_body_preprocessor: proc do |node|
+                                                  write_children node
+                                                  output "<rp>(</rp><rt>#{escape_html node.parameters[0].strip}</rt><rp>)</rp>"
                                                   :done
                                                 end),
                                
                              },
                              trailer_default:''
                              ),
-          ol: TagWriter.create('ol', self),
-          ul: TagWriter.create('ul', self),
-          li: TagWriter.create('li', self),
-          dl: TagWriter.create('dl', self),
-          dtdd:
-          TagWriter.create('', self, chop_last_space: true, item_preprocessor: proc do |item| item[:no_tag] = true; item end,
-                           write_body_preprocessor: proc do |item|
-                             output "<dt>"; write_array item[:args][0]; output "</dt>\n"
-                             output "<dd>"; write_array item[:args][1]; output "</dd>\n"
+          OrderedList => TagWriter.create('ol', self),
+          UnorderedList => TagWriter.create('ul', self),
+          UlItem => TagWriter.create('li', self),
+          OlItem => TagWriter.create('li', self),
+          DefinitionList => TagWriter.create('dl', self),
+          DLItem => 
+          TagWriter.create('', self, chop_last_space: true, node_preprocessor: proc do |node| node.no_tag = true; node end,
+                           write_body_preprocessor: proc do |node|
+                             output "<dt>"; write_array node.parameters[0]; output "</dt>\n"
+                             output "<dd>"; write_children node; output "</dd>\n"
                              :done
                            end),
-          newpage:
-          TagWriter.create('div', self,
-                           item_preprocessor: proc do |item|
-                             item[:no_tag] = true
-                             item
-                           end,
-                           write_body_preprocessor: proc do |item|
-                             title = nil
-                             if item[:args].size > 0 && item[:args][0].size > 0
-                               title = escape_html item[:args].first
-                             end
-                             @context.title = title unless title.nil?
-                             @context.end_html
-                             :done
-                           end
-                           ),
+
+          Document =>  abstract_node_writer,
+          Page =>  abstract_node_writer,
+
           #headed-section
-          h_section:
-          TagWriter.create('section', self, write_body_preprocessor: proc do |item|
-                             output "<h#{item[:level]}>"
-                             write_array item[:heading]
+          HeadedSection => 
+          TagWriter.create('section', self, write_body_preprocessor: proc do |node|
+                             output "<h#{node.level}>"
+                             write_array node.heading
                              @generator.context.chop_last_space
-                             output "</h#{item[:level]}>\n"
+                             output "</h#{node.level}>\n"
                              :continue
                            end),
           # frontmatter
-          frontmatter: frontmatter_writer,
+          Frontmatter =>  frontmatter_writer,
           # pre-formatted
-          preformatted:
+          PreformattedBlock => 
           TagWriter.create('pre', self,
-                           item_preprocessor: proc do |item|
-                             if item[:codelanguage]
-                               (item[:attrs] ||= {}).merge!({'data-code-language' => [item[:codelanguage]]})
-                               add_class item, "code-#{item[:codelanguage]}"
+                           node_preprocessor: proc do |node|
+                             if node.codelanguage
+                               (node.attrs ||= {}).merge!({'data-code-language' => [node.codelanguage]})
+                               add_class node, "code-#{node.codelanguage}"
                              end
-                             item
+                             node
                            end,
-                           write_body_preprocessor: proc do |item|
-                             output "<code>" if item[:name] == 'code'
-                             output escape_html(item[:children].join "\n")
-                             output "</code>" if item[:name] == 'code'
+                           write_body_preprocessor: proc do |node|
+                             output "<code>" if node.name == 'code'
+                             output escape_html(node.content.join "\n")
+                             output "</code>" if node.name == 'code'
                              :done
                            end),
-          #break
-          br:
-            TagWriter.create('br', self, item_preprocessor: proc do |item|
-                               item[:no_body] = true
-                               item
-                             end),
           }
       end
 
       def convert(parsed_result)
-        children = parsed_result[:children]
-        @context.file_basename = parsed_result[:name]
+        children = parsed_result.content
+        @context.file_basename = parsed_result.document_name
         children.each {
-          |item|
-          to_html(item)
+          |node|
+          to_html(node)
         }
         @context.result
       end
-      def to_html(item)
-        if item.is_a? String
-          @context << escape_html(item)
-        else
-          writer = @writers[item[:type]]
+
+      def to_html(node)
+        if node.is_a? String
+          @context << escape_html(node)
+        elsif node.is_a? Hash
+          writer = @writers[node[:type]]
           if writer.nil?
-            warn "can't find html generator for \"#{item}\""
-            @context << escape_html(item[:raw_text])
+            warn "can't find html generator for \"#{node}\""
+            @context << escape_html(node[:raw_text])
           else
-            writer.write(item)
+            writer.write(node)
+          end
+        elsif node.kind_of? Text
+          @context << escape_html(node.content)
+        else
+          writer = @writers[node.class]
+          if writer.nil?
+            warn "can't find html generator for \"#{node.class}\""
+          else
+            writer.write(node)
           end
         end
       end
