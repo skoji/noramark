@@ -31,7 +31,7 @@
 <pre><code>gem install nora_mark</code></pre>
 </section>
 <section><h2>使い方</h2>
-<pre data-code-language='ruby'><code>require 'nora_mark'
+<pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
 document.write_as_files</code></pre>
 </section>
@@ -43,7 +43,7 @@ document.write_as_files</code></pre>
 どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
 この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。
 ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</pre>
-<pre data-code-language='html'><code>&lt;div class='pgroup'&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;div class='pgroup'&gt;
 &lt;p&gt;吾輩は猫である。名前はまだ無い。&lt;/p&gt;
 &lt;p&gt;どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。&lt;/p&gt;
 &lt;p&gt;この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。&lt;/p&gt;
@@ -57,17 +57,16 @@ document.write_as_files</code></pre>
 <pre>Lorem ipsum dolor sit amet, consectetur adipisicing elit,
 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 Ut enim ad minim veniam, quis nostrud exercitation </pre>
-<pre data-code-language='html'><code>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, &lt;br /&gt;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. &lt;/p&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, &lt;br /&gt;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. &lt;/p&gt;
 &lt;p&gt;Ut enim ad minim veniam, quis nostrud exercitation&lt;/p&gt;</code></pre>
 </section>
-</section>
-<section><h2>明示的なブロック</h2>
+<section><h3>明示的なブロック</h3>
 <div class='pgroup'><p>NoraMarkでは、&lt;コマンド&gt; { ではじまり、} のみの行で終わる範囲を明示的なブロックとみなします。</p>
 </div>
 <pre>d.column {
 この部分は、divで囲まれます。
 }</pre>
-<pre data-code-language='html'><code>&lt;div class=&quot;column&quot;&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;div class=&quot;column&quot;&gt;
 &lt;div class=&quot;pgroup&quot;&gt;
 &lt;p&gt;この部分は、divで囲まれます。&lt;/p&gt;
 &lt;/div&gt;
@@ -89,18 +88,18 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 山路を登りながら、こう考えた。
 智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい
 }</pre>
-<pre data-code-language='html'><code>&lt;blockquote&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;blockquote&gt;
 &lt;div class='pgroup'&gt;
 &lt;p&gt;山路を登りながら、こう考えた。&lt;/p&gt;
 &lt;p&gt;智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい&lt;/p&gt;
 &lt;/div&gt;
 &lt;/blockquote&gt;</code></pre>
 </section>
-<section><h2>インラインコマンド</h2>
-<div class='pgroup'><p>インラインコマンドは、次の形式をしています</p>
+<section><h3>インラインコマンド</h3>
+<div class='pgroup'><p>インラインコマンドは、次の形式をしています。</p>
 </div>
 <pre>[&lt;コマンド&gt;{内容}]</pre>
-<div class='pgroup'><p>定義済みのインラインコマンドには、次のものがある。</p>
+<div class='pgroup'><p>定義済みのインラインコマンドには、次のものがあります。</p>
 </div>
 <dl><dt>l</dt>
 <dd><div class='pgroup'><p>リンクを定義する。</p>
@@ -123,6 +122,23 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </div>
 <pre>[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね</pre></dd>
 </dl>
+</section>
+<section><h3>行コマンド</h3>
+<div class='pgroup'><p>行コマンドは1行を占有し、次の形式をしています。</p>
+</div>
+<pre>&lt;コマンド&gt;:内容</pre>
+<div class='pgroup'><p>定義済みの行コマンドには、次のものがあります。</p>
+</div>
+<dl><dt>p</dt>
+<dd><div class='pgroup'><p>パラグラフをマークアップする。主に、クラスやIDを付加する目的で使う。</p>
+</div>
+<pre>p.caution: 用量に注意してご利用ください。</pre></dd>
+<dt>image</dt>
+<dd><div class='pgroup'><p>divでラップされたimgをマークアップする。</p>
+</div>
+<pre>image(./path-to-image/img.jpg, 代替テキスト): イメージのキャプション</pre></dd>
+</dl>
+</section>
 </section>
 </section>
 </body>

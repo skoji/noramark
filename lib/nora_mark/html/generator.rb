@@ -140,7 +140,10 @@ module NoraMark
           preformatted:
           TagWriter.create('pre', self,
                            item_preprocessor: proc do |item|
-                             (item[:attrs] ||= {}).merge!({'data-code-language' => [item[:codelanguage]]}) if item[:codelanguage]
+                             if item[:codelanguage]
+                               (item[:attrs] ||= {}).merge!({'data-code-language' => [item[:codelanguage]]})
+                               add_class item, "code-#{item[:codelanguage]}"
+                             end
                              item
                            end,
                            write_body_preprocessor: proc do |item|

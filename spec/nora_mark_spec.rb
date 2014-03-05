@@ -816,7 +816,7 @@ EOF
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre[data-code-language='ruby']", ["code", "# ruby code example.\n\"Hello, World\".split(',').map(&:strip).map(&:to_sym) # => [:Hello, :World]"]])
+      expect(body.element_children[1].selector_and_children).to eq(["pre.code-ruby[data-code-language='ruby']", ["code", "# ruby code example.\n\"Hello, World\".split(',').map(&:strip).map(&:to_sym) # => [:Hello, :World]"]])
       expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
     end
 
