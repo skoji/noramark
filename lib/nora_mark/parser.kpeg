@@ -96,7 +96,8 @@ LineCommand = < - !CommandNameForSpecialLineCommand Command:c ':' DocumentConten
 
 # blocks
 LineBlock =  ItemsList | LineCommand 
-Block = (PreformattedBlock
+Block = EmptyLine*
+       (PreformattedBlock
        | HeadedSection
        | LineBlock 
        | ExplicitBlock

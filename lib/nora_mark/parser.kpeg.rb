@@ -2515,29 +2515,38 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Block = (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}
+  # Block = EmptyLine* (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}
   def _Block
 
     _save = self.pos
     while true # sequence
+      while true
+        _tmp = apply(:_EmptyLine)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
 
-      _save1 = self.pos
+      _save2 = self.pos
       while true # choice
         _tmp = apply(:_PreformattedBlock)
         break if _tmp
-        self.pos = _save1
+        self.pos = _save2
         _tmp = apply(:_HeadedSection)
         break if _tmp
-        self.pos = _save1
+        self.pos = _save2
         _tmp = apply(:_LineBlock)
         break if _tmp
-        self.pos = _save1
+        self.pos = _save2
         _tmp = apply(:_ExplicitBlock)
         break if _tmp
-        self.pos = _save1
+        self.pos = _save2
         _tmp = apply(:_ParagraphGroup)
         break if _tmp
-        self.pos = _save1
+        self.pos = _save2
         break
       end # end choice
 
@@ -3560,7 +3569,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
   Rules[:_LineCommand] = rule_info("LineCommand", "< - !CommandNameForSpecialLineCommand Command:c \":\" DocumentContent?:content - Le EmptyLine* > { create_item(:line_command, c, content, raw: text) }")
   Rules[:_LineBlock] = rule_info("LineBlock", "(ItemsList | LineCommand)")
-  Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
+  Rules[:_Block] = rule_info("Block", "EmptyLine* (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
   Rules[:_BlockDelimiter] = rule_info("BlockDelimiter", "(BlockHead | BlockEnd)")
   Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
   Rules[:_HStartMark] = rule_info("HStartMark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
