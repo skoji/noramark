@@ -1,0 +1,47 @@
+body {
+    font-family: serif, sans-serif;
+    line-height: 1.75;
+    text-align: justify;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: sans-serif;
+  color: #884444;
+}
+
+dt {
+  font-family: sans-serif;
+  color: #404040;
+}
+
+.noindent {
+  text-indent: 0;
+}
+
+.pgroup {
+    margin-top 1em;
+}
+
+pre {
+    padding: 0.5em;
+    background: #dddddd;
+    width: 95%;
+    margin: 1em auto;
+    border: 1px solid #aaaaaa;
+    border-radius: 0.5em;
+}
+pre.code-html {
+    background: #efefef;
+}
+
+h1 {
+    border-bottom: 1px solid #444444;
+}
+
+h2 {
+    border-bottom: 1px solid #888888;
+}
+
+h3 {
+    border-bottom: 1px solid #aaaaaa;
+}

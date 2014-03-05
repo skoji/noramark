@@ -2,18 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
 <head>
 <title>NoraMark Manual</title>
+<link rel="stylesheet" type="text/css" href="nora-simple.css" />
 </head>
 <body>
 <section><h1>NoraMark Manual</h1>
 <div class='pgroup'><p>NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。</p>
 </div>
-<ul><li>プレーンテキストの原稿を邪魔しない最小限のマークアップ</li>
-<li>しかしマークアップ部分は、通常のテキストと「違って」見える</li>
-<li>ブロック・ライン・インラインごとの基本記法を原則として固定した、記憶しやすいマークアップ</li>
-<li>生のHTML記法なしで、多くのタグを記述可能</li>
-<li>マークアップに独自コマンドの追加が可能</li>
-<li>文書構造に対する処理を追加可能</li>
-<li>パース結果をXMLとして取得可能</li>
+<ul><li>プレーンテキストの原稿を邪魔しない最小限の記述</li>
+<li>しかしマークアップ部分は、通常のテキストと「違って」見える。</li>
+<li>ブロック・ライン・インラインごとの基本記法を原則として固定。憶える記法は少なくてすむはず。</li>
+<li>生のHTML記法なしで、多くのタグを記述できる</li>
+<li>マークアップに独自コマンドの追加ができる</li>
+<li>文書構造に対する処理を追加できる</li>
+<li>パース結果をXMLとして取得できる</li>
 </ul>
 <section><h2>必要なもの</h2>
 <ul><li>ruby 2.0以上</li>
@@ -41,14 +42,16 @@ document.write_as_files</code></pre>
 </div>
 <pre>吾輩は猫である。名前はまだ無い。
 どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
+＜中略＞
 この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。
 ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</pre>
 <pre class='code-html' data-code-language='html'><code>&lt;div class='pgroup'&gt;
 &lt;p&gt;吾輩は猫である。名前はまだ無い。&lt;/p&gt;
 &lt;p&gt;どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。&lt;/p&gt;
+&lt;p&gt;＜中略＞&lt;/p&gt;
 &lt;p&gt;この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class='pgroup&gt;
+&lt;div class='pgroup'&gt;
 &lt;p&gt;ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。&lt;/p&gt;
 &lt;/div&gt;</code></pre>
 <div class='pgroup'><p>改行ごとに&lt;p&gt;要素がつくられます。空行で区切られると、&lt;div class='pgroup'&gt;がつくられます。</p>
