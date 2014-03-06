@@ -33,9 +33,14 @@ module NoraMark
 
     def html
       if @html.nil?
-        @html = @html_generator.convert(self)
+        @html = @html_generator.convert(self, @render_parameter)
       end
       @html
+    end
+
+    def render_parameter(param = {})
+      @render_parameter.merge! param
+      self
     end
     
     def initialize(param = {})
@@ -44,6 +49,7 @@ module NoraMark
                        ]
       @html_generator = Html::Generator.new(param)
       @document_name = param[:document_name] || "noramark_#{SecureRandom.uuid}"
+      @render_parameter = {}
     end 
 
 

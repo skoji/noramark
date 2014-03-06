@@ -25,6 +25,28 @@ module NoraMark
         frontmatter_writer = FrontmatterWriter.new self
         paragraph_writer = ParagraphWriter.new self
         abstract_node_writer = AbstractNodeWriter.new self
+          
+        newpage_writer = TagWriter.create('div', self,
+                           node_preprocessor: proc do |node|
+                             node.no_tag = true
+                             node
+                           end,
+                           write_body_preprocessor: proc do |node|
+                             title = nil
+                             if node.parameters.size > 0 && node.parameters[0].size > 0
+                               title = escape_html node.parameters.first
+                             end
+                             @context.title = title unless title.nil?
+                             @context.end_html
+                             :done
+                           end
+                           )
+        @hr_writer = TagWriter.create('hr', self, node_preprocessor: proc do |node|
+                           node.body_empty = true
+                           add_class node, 'page-break'
+                           node
+                         end)
+
         @writers = {
           Paragraph => paragraph_writer,
           ParagraphGroup => paragraph_writer,
@@ -69,22 +91,7 @@ module NoraMark
                                'sect' => section_writer,
                                'section' => section_writer,
                              }),
-          Newpage =>
-          TagWriter.create('div', self,
-                           node_preprocessor: proc do |node|
-                             node.no_tag = true
-                             node
-                           end,
-                           write_body_preprocessor: proc do |node|
-                             title = nil
-                             if node.parameters.size > 0 && node.parameters[0].size > 0
-                               title = escape_html node.parameters.first
-                             end
-                             @context.title = title unless title.nil?
-                             @context.end_html
-                             :done
-                           end
-                           ),
+          Newpage => newpage_writer,
           Inline =>
           WriterSelector.new(self, 
                              {
@@ -162,9 +169,13 @@ module NoraMark
           }
       end
 
-      def convert(parsed_result)
+      def convert(parsed_result, render_parameter = {})
         children = parsed_result.content
         @context.file_basename = parsed_result.document_name
+        @context.render_parameter = render_parameter
+        if render_parameter[:nonpaged]
+          @writers[Newpage] = @hr_writer
+        end
         children.each {
           |node|
           to_html(node)

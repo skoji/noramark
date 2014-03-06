@@ -946,7 +946,23 @@ EOF
 
       end
     end
-
+    describe 'nonpaged mode' do
+      it 'should create single html' do
+        text = "some text\nnewpage:\nnext page"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title:'the document title')
+        converted = noramark.render_parameter(nonpaged: true).html
+        expect(converted.size).to eq 1
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup',
+         ['p', 'some text']])
+        expect(body.element_children[1].selector_and_children).to eq(
+        ['hr.page-break'])
+        expect(body.element_children[2].selector_and_children).to eq(
+        ['div.pgroup',
+         ['p', 'next page']])
+      end
+    end
     describe 'create file' do
       before { @basedir = File.join(File.dirname(__FILE__), 'created_files') }
       after { Dir.glob(File.join(@basedir, '*.xhtml')) { |file| File.delete file } }

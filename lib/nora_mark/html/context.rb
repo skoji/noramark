@@ -1,7 +1,7 @@
 module NoraMark
   module Html
     class Context
-      attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup
+      attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup, :render_parameter
       def initialize(param = {})
         @head_inserters = []
         @toc = []
@@ -12,6 +12,7 @@ module NoraMark
         self.paragraph_style= param[:paragraph_style]
         @pages = Pages.new(param[:sequence_format])
         @block_delimiter_stack = []
+        @render_parameter = {}
         head_inserter do
           ret = ""
           @stylesheets.each { |s|
