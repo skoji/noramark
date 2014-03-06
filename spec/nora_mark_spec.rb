@@ -1045,11 +1045,54 @@ EOF
             to_validate << nokogiri_doc.to_s
           end
         end
-
         @stdout = capture(:stdout) do 
           puts %x(java -jar #{jar} -c #{schema} #{file_to_validate})
         end
         expect(@stdout.strip).to eq ""
+      end
+    end
+    describe 'table of contents' do
+      before {
+        @the_text = <<EOF
+---
+lang: ja
+title: the book of nora
+---
+=: chapter 1 nora
+
+foo bar
+
+==: section 1-1
+
+bar bar
+
+newpage:
+=: chapter 2 nora
+
+chapter 2
+
+==: 2-1
+
+in section
+
+===: 2-1-1
+
+in subsection
+
+d.column {
+h4.column: column
+some column
+}
+EOF
+      }
+    it 'should add id to headers' do
+      noramark = NoraMark::Document.parse(@the_text)
+      noramark.nodes.each {
+        |node|
+        if node.is_a? LineCommand and node.name =~ /h[1-6]/
+          expect(node[:ids].size).to be > 0
+        end
+      }
       end
     end
     describe 'node manipulation' do
