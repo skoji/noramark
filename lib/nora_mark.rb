@@ -11,7 +11,7 @@ module NoraMark
 
     def self.parse(string_or_io, param = {})
       instance = new param
-      src = string_or_io.respond_to?(:read) ? string_or_io.read : string_or_io
+      src = (string_or_io.respond_to?(:read) ? string_or_io.read : string_or_io).encode 'utf-8'
       yield instance if block_given?
       instance.instance_eval do 
         @preprocessors.each do

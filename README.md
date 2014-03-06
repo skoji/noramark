@@ -32,12 +32,16 @@ Or install it yourself as:
     document = NoraMark::Document.parse(string_or_io)
     put document.html[0] # outputs 1st page of converted XHTML file
 
-In command line:
+From commandline:
 
     $ nora2html < text.nora > result.xhtml
     
 Note: nora2html replace ``newpage:`` command to ``<hr class="page-break" />`` and output all pages in one xhtml.
-nora2html's main puruose is to validate your markup.
+Main purpose of ``nora2html`` is to validate your markup.
+
+I am planning to release nora2epub and other external tools.
+
+## Markup
 
 An example of markup text (text is in english, but the paragraph style is japanese)
 
