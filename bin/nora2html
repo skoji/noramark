@@ -1,2 +1,15 @@
 require 'nora_mark'
-puts NoraMark::Document::parse(STDIN.read).render_parameter(nonpaged: true).html[0]
+require 'optparse'
+require 'kconv'
+
+auto_convert_encode = false
+opt = OptionParser.new
+opt.on('--kconv') {
+  auto_convert_encode = true
+}
+
+args = opt.parse(ARGV)
+input = args.length > 0 ? File.open(args[0]).read : STDIN.read
+input = Kconv.toutf8(input) if auto_convert_encode
+
+puts NoraMark::Document::parse(input).render_parameter(nonpaged: true).html[0]
