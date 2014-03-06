@@ -36,6 +36,26 @@ describe NoraMark do
           ['p', 'ここから、次のパラグラフです。']]
       )
     end
+    it 'should convert simple paragraph with BOM' do
+      text = "\uFEFFここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
+      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children.size).to eq 2
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div.pgroup', 
+         ['p', 'ここから、パラグラフがはじまります。'],
+         ['p.noindent', '「二行目です。」'],
+         ['p', '三行目です。']
+        ]
+      )
+
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['div.pgroup',
+          ['p', 'ここから、次のパラグラフです。']]
+      )
+    end
+
     it 'should convert simple paragraph in english mode' do
       text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
       noramark = NoraMark::Document.parse(text, lang: 'en', title: 'the title')

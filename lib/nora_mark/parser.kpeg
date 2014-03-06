@@ -21,6 +21,7 @@
 %% page = ast Page(content)
 
 # literals
+BOM = /\uFEFF/
 Eof = !. 
 Space = ' ' | '\t' 
 EofComment = Space* "#" (!Eof .)* 
@@ -178,7 +179,7 @@ Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages }
       | Page:page { [ page ] }  
 
 #root
-root = Pages:pages - EofComment? Eof { pages }
+root = BOM? Pages:pages - EofComment? Eof { pages }
 
 
 

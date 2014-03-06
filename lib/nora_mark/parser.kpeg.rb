@@ -262,6 +262,13 @@ class NoraMark::Parser < KPeg::CompiledParser
   end
   include ::NoraMarkConstruction
 
+  # BOM = /\uFEFF/
+  def _BOM
+    _tmp = scan(/\A(?-mix:\uFEFF)/)
+    set_failed_rule :_BOM unless _tmp
+    return _tmp
+  end
+
   # Eof = !.
   def _Eof
     _save = self.pos
@@ -3622,11 +3629,21 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = Pages:pages - EofComment? Eof { pages }
+  # root = BOM? Pages:pages - EofComment? Eof { pages }
   def _root
 
     _save = self.pos
     while true # sequence
+      _save1 = self.pos
+      _tmp = apply(:_BOM)
+      unless _tmp
+        _tmp = true
+        self.pos = _save1
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_Pages)
       pages = @result
       unless _tmp
@@ -3638,11 +3655,11 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _save1 = self.pos
+      _save2 = self.pos
       _tmp = apply(:_EofComment)
       unless _tmp
         _tmp = true
-        self.pos = _save1
+        self.pos = _save2
       end
       unless _tmp
         self.pos = _save
@@ -3666,6 +3683,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   end
 
   Rules = {}
+  Rules[:_BOM] = rule_info("BOM", "/\\uFEFF/")
   Rules[:_Eof] = rule_info("Eof", "!.")
   Rules[:_Space] = rule_info("Space", "(\" \" | \"\\\\t\")")
   Rules[:_EofComment] = rule_info("EofComment", "Space* \"\#\" (!Eof .)*")
@@ -3744,6 +3762,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
   Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?})}")
   Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
-  Rules[:_root] = rule_info("root", "Pages:pages - EofComment? Eof { pages }")
+  Rules[:_root] = rule_info("root", "BOM? Pages:pages - EofComment? Eof { pages }")
   # :startdoc:
 end

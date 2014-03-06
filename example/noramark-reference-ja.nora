@@ -43,6 +43,20 @@ gem install nora_mark
 
 ==: 使い方
 
+===: コマンドラインから
+
+code {
+$ nora2html < source.nora > output.xhtml
+}
+
+入力はutf-8のみ受け付けます。日本語のテキストであれば、kconvオプションでうまくうごくかもしれません。
+
+code {
+$ nora2html --kconv < source.nora > output.xhtml
+}
+
+[s.strong{nora2htmlは、newpageコマンドを<hr />タグに置き換え、すべてのページをひとつのxhtmlとして出力します}]
+===: コードから
 code {//ruby
 require 'nora_mark'
 

@@ -34,9 +34,19 @@
 <pre><code>gem install nora_mark</code></pre>
 </section>
 <section><h2>使い方</h2>
+<section><h3>コマンドラインから</h3>
+<pre><code>$ nora2html &lt; source.nora &gt; output.xhtml</code></pre>
+<div class='pgroup'><p>入力はutf-8のみ受け付けます。日本語のテキストであれば、kconvオプションでうまくうごくかもしれません。</p>
+</div>
+<pre><code>$ nora2html --kconv &lt; source.nora &gt; output.xhtml</code></pre>
+<div class='pgroup'><p><span class='strong'>nora2htmlは、newpageコマンドを&lt;hr /&gt;タグに置き換え、すべてのページをひとつのxhtmlとして出力します</span></p>
+</div>
+</section>
+<section><h3>コードから</h3>
 <pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
 document.html.write_as_files</code></pre>
+</section>
 </section>
 <section><h2>マークアップ</h2>
 <section><h3>通常のテキスト</h3>
