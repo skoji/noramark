@@ -960,9 +960,9 @@ EOF
         text = "some text\nnewpage:\nnext page"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title:'the document title', document_name: 'nora-test-file', sequence_format: '%03d' )
         noramark.html.write_as_files(directory: @basedir)
-        files = Dir.glob(File.join(@basedir, '*.xhtml'))
-        expect(File.basename(files[0])).to eq 'nora-test-file_001.xhtml'
-        expect(File.basename(files[1])).to eq 'nora-test-file_002.xhtml'
+        files = Dir.glob(File.join(@basedir, '*.xhtml')).map { |file| File.basename(file) }
+        expect(files).to include 'nora-test-file_001.xhtml'
+        expect(files).to include 'nora-test-file_002.xhtml'
       end
     end
     describe 'parse and create manual' do
