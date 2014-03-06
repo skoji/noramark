@@ -42,12 +42,22 @@ CommandName = Word:name IdNames?:idnames ClassNames?:classes  { {name: name, ids
 ParameterNormal = < /[^,)]/* > { text }
 ParameterQuoted = '"' < /[^"]/* > '"' - &/[,)]/  { text }
 ParameterSingleQuoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
-Parameter = (ParameterQuoted | ParameterSingleQuoted | ParameterNormal ):value { value }
-Parameters = Parameter:parameter (',' - Parameter)*:rest_parameters { [parameter] + rest_parameters }
+Parameter = (ParameterQuoted
+           | ParameterSingleQuoted
+           | ParameterNormal ):value { value }
+
+Parameters = Parameter:parameter ',' - Parameters:parameters { [ parameter ] + parameters }
+           | Parameter:parameter { [ parameter ] }
+
 Command = CommandName:cn ('(' - Parameters:args - ')')? { args ||= []; cn.merge({ args: args }) }
 
 # paragraph
 ImplicitParagraph = - !ParagraphDelimiter Comment* DocumentLine:content  Comment* EofComment? ~paragraph([],[], [], content)
+
+# explicit paragraph
+ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
+ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content Le EmptyLine* ~paragraph(c[:ids], c[:classes], c[:args], content)
+
 Paragraph = ExplicitParagraph | ImplicitParagraph 
 
 # paragraph_group
@@ -87,10 +97,6 @@ CommandNameForSpecialLineCommand = NewpageCommand | ExplicitParagraphCommand
 # newpage
 NewpageCommand = Command:command &{ command[:name] == 'newpage' }
 Newpage = - NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:ids],c[:classes],c[:args], content)
-
-# explicit paragraph
-ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
-ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content Le EmptyLine* ~paragraph(c[:ids], c[:classes], c[:args], content)
 
 
 # unordered list
@@ -168,7 +174,8 @@ DocumentLine = DocumentContent:content Le { content }
 
 #page
 Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks ~page(([frontmatter] +  blocks).select{ |x| !x.nil?})
-Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] }  
+Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages }
+      | Page:page { [ page ] }  
 
 #root
 root = Pages:pages - EofComment? Eof { pages }

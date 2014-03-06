@@ -921,56 +921,67 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Parameters = Parameter:parameter ("," - Parameter)*:rest_parameters { [parameter] + rest_parameters }
+  # Parameters = (Parameter:parameter "," - Parameters:parameters { [ parameter ] + parameters } | Parameter:parameter { [ parameter ] })
   def _Parameters
 
     _save = self.pos
-    while true # sequence
-      _tmp = apply(:_Parameter)
-      parameter = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _ary = []
-      while true
+    while true # choice
 
-        _save2 = self.pos
-        while true # sequence
-          _tmp = match_string(",")
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = apply(:__hyphen_)
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = apply(:_Parameter)
-          unless _tmp
-            self.pos = _save2
-          end
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_Parameter)
+        parameter = @result
+        unless _tmp
+          self.pos = _save1
           break
-        end # end sequence
-
-        _ary << @result if _tmp
-        break unless _tmp
-      end
-      _tmp = true
-      @result = _ary
-      rest_parameters = @result
-      unless _tmp
-        self.pos = _save
+        end
+        _tmp = match_string(",")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_Parameters)
+        parameters = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        @result = begin;  [ parameter ] + parameters ; end
+        _tmp = true
+        unless _tmp
+          self.pos = _save1
+        end
         break
-      end
-      @result = begin;  [parameter] + rest_parameters ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
+      end # end sequence
+
+      break if _tmp
+      self.pos = _save
+
+      _save2 = self.pos
+      while true # sequence
+        _tmp = apply(:_Parameter)
+        parameter = @result
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        @result = begin;  [ parameter ] ; end
+        _tmp = true
+        unless _tmp
+          self.pos = _save2
+        end
+        break
+      end # end sequence
+
+      break if _tmp
+      self.pos = _save
       break
-    end # end sequence
+    end # end choice
 
     set_failed_rule :_Parameters unless _tmp
     return _tmp
@@ -1100,6 +1111,94 @@ class NoraMark::Parser < KPeg::CompiledParser
     end # end sequence
 
     set_failed_rule :_ImplicitParagraph unless _tmp
+    return _tmp
+  end
+
+  # ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
+  def _ExplicitParagraphCommand
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_Command)
+      c = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  c[:name] == 'p' ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_ExplicitParagraphCommand unless _tmp
+    return _tmp
+  end
+
+  # ExplicitParagraph = - ExplicitParagraphCommand:c ":" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content)}
+  def _ExplicitParagraph
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ExplicitParagraphCommand)
+      c = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string(":")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = apply(:_DocumentContent)
+      @result = nil unless _tmp
+      unless _tmp
+        _tmp = true
+        self.pos = _save1
+      end
+      content = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_Le)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_EmptyLine)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; paragraph(c[:ids], c[:classes], c[:args], content); end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_ExplicitParagraph unless _tmp
     return _tmp
   end
 
@@ -2039,94 +2138,6 @@ class NoraMark::Parser < KPeg::CompiledParser
     end # end sequence
 
     set_failed_rule :_Newpage unless _tmp
-    return _tmp
-  end
-
-  # ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
-  def _ExplicitParagraphCommand
-
-    _save = self.pos
-    while true # sequence
-      _tmp = apply(:_Command)
-      c = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _save1 = self.pos
-      _tmp = begin;  c[:name] == 'p' ; end
-      self.pos = _save1
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_ExplicitParagraphCommand unless _tmp
-    return _tmp
-  end
-
-  # ExplicitParagraph = - ExplicitParagraphCommand:c ":" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content)}
-  def _ExplicitParagraph
-
-    _save = self.pos
-    while true # sequence
-      _tmp = apply(:__hyphen_)
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:_ExplicitParagraphCommand)
-      c = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = match_string(":")
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:__hyphen_)
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _save1 = self.pos
-      _tmp = apply(:_DocumentContent)
-      @result = nil unless _tmp
-      unless _tmp
-        _tmp = true
-        self.pos = _save1
-      end
-      content = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:_Le)
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      while true
-        _tmp = apply(:_EmptyLine)
-        break unless _tmp
-      end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin; paragraph(c[:ids], c[:classes], c[:args], content); end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_ExplicitParagraph unless _tmp
     return _tmp
   end
 
@@ -3674,9 +3685,11 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ParameterQuoted] = rule_info("ParameterQuoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
   Rules[:_ParameterSingleQuoted] = rule_info("ParameterSingleQuoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
   Rules[:_Parameter] = rule_info("Parameter", "(ParameterQuoted | ParameterSingleQuoted | ParameterNormal):value { value }")
-  Rules[:_Parameters] = rule_info("Parameters", "Parameter:parameter (\",\" - Parameter)*:rest_parameters { [parameter] + rest_parameters }")
+  Rules[:_Parameters] = rule_info("Parameters", "(Parameter:parameter \",\" - Parameters:parameters { [ parameter ] + parameters } | Parameter:parameter { [ parameter ] })")
   Rules[:_Command] = rule_info("Command", "CommandName:cn (\"(\" - Parameters:args - \")\")? { args ||= []; cn.merge({ args: args }) }")
   Rules[:_ImplicitParagraph] = rule_info("ImplicitParagraph", "- !ParagraphDelimiter Comment* DocumentLine:content Comment* EofComment? {paragraph([],[], [], content)}")
+  Rules[:_ExplicitParagraphCommand] = rule_info("ExplicitParagraphCommand", "Command:c &{ c[:name] == 'p' }")
+  Rules[:_ExplicitParagraph] = rule_info("ExplicitParagraph", "- ExplicitParagraphCommand:c \":\" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content)}")
   Rules[:_Paragraph] = rule_info("Paragraph", "(ExplicitParagraph | ImplicitParagraph)")
   Rules[:_ParagraphGroup] = rule_info("ParagraphGroup", "Paragraph+:p EmptyLine* {paragraph_group([],[],[],p)}")
   Rules[:_BlockHead] = rule_info("BlockHead", "- Command:command - \"{\" - Nl EmptyLine* { command }")
@@ -3699,8 +3712,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
   Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], content)}")
-  Rules[:_ExplicitParagraphCommand] = rule_info("ExplicitParagraphCommand", "Command:c &{ c[:name] == 'p' }")
-  Rules[:_ExplicitParagraph] = rule_info("ExplicitParagraph", "- ExplicitParagraphCommand:c \":\" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content)}")
   Rules[:_UnorderedList] = rule_info("UnorderedList", "UnorderedItem+:items {unordered_list([],[],[], items)}")
   Rules[:_UnorderedItem] = rule_info("UnorderedItem", "\"*:\" - DocumentContent:content Le {ul_item([], [], [], content)}")
   Rules[:_OrderedList] = rule_info("OrderedList", "OrderedItem+:items {ordered_list([],[],[], items)}")
