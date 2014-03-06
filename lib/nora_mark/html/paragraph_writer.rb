@@ -37,7 +37,7 @@ module NoraMark
           TagWriter.create("p", @generator,
                            node_preprocessor: proc do |node|
                              node.content = node.content.inject([]) do |memo, node|
-                               memo << Breakline.new if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
+                               memo << Breakline.new(memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
                                memo << node
                              end
                              node

@@ -1032,6 +1032,24 @@ EOF
         expect(@stdout.strip).to eq ""
       end
     end
+    describe 'node manipulation' do
+      it 'should access line number' do
+        text = <<EOF
+1st line.
+d {
+3rd line.
+}
+5th line.
+EOF
+        noramark = NoraMark::Document.parse(text)
+        page = noramark.content[0]
+        expect(page.content.size).to eq 3
+        expect(page.line_no).to eq 1
+        expect(page.content[0].line_no).to eq 1
+        expect(page.content[1].line_no).to eq 2
+        expect(page.content[2].content[0].line_no).to eq 5
+      end
+    end
   end
 end
 

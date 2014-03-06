@@ -6,165 +6,194 @@ class NoraMark::Parser < KPeg::CompiledParser
   module ::NoraMark
     class Node; end
     class Block < Node
-      def initialize(name, ids, classes, parameters, content)
+      def initialize(name, ids, classes, parameters, content, line_no)
         @name = name
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :name
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class Breakline < Node
-      def initialize()
+      def initialize(line_no)
+        @line_no = line_no
       end
+      attr_reader :line_no
     end
     class DefinitionList < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class DLItem < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class Frontmatter < Node
-      def initialize(content)
+      def initialize(content, line_no)
         @content = content
+        @line_no = line_no
       end
       attr_reader :content
+      attr_reader :line_no
     end
     class HeadedSection < Node
-      def initialize(level, heading, content)
+      def initialize(level, heading, content, line_no)
         @level = level
         @heading = heading
         @content = content
+        @line_no = line_no
       end
       attr_reader :level
       attr_reader :heading
       attr_reader :content
+      attr_reader :line_no
     end
     class Inline < Node
-      def initialize(name, ids, classes, parameters, content)
+      def initialize(name, ids, classes, parameters, content, line_no)
         @name = name
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :name
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class LineCommand < Node
-      def initialize(name, ids, classes, parameters, content)
+      def initialize(name, ids, classes, parameters, content, line_no)
         @name = name
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :name
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class Newpage < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class OlItem < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class OrderedList < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class Page < Node
-      def initialize(content)
+      def initialize(content, line_no)
         @content = content
+        @line_no = line_no
       end
       attr_reader :content
+      attr_reader :line_no
     end
     class Paragraph < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class ParagraphGroup < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class PreformattedBlock < Node
-      def initialize(name, ids, classes, parameters, codelanguage, content)
+      def initialize(name, ids, classes, parameters, codelanguage, content, line_no)
         @name = name
         @ids = ids
         @classes = classes
         @parameters = parameters
         @codelanguage = codelanguage
         @content = content
+        @line_no = line_no
       end
       attr_reader :name
       attr_reader :ids
@@ -172,95 +201,110 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :parameters
       attr_reader :codelanguage
       attr_reader :content
+      attr_reader :line_no
     end
     class Text < Node
-      def initialize(content)
+      def initialize(content, line_no)
         @content = content
+        @line_no = line_no
       end
       attr_reader :content
+      attr_reader :line_no
     end
     class UlItem < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
     class UnorderedList < Node
-      def initialize(ids, classes, parameters, content)
+      def initialize(ids, classes, parameters, content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @content = content
+        @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :content
+      attr_reader :line_no
     end
   end
   module ::NoraMarkConstruction
-    def block(name, ids, classes, parameters, content)
-      ::NoraMark::Block.new(name, ids, classes, parameters, content)
+    def block(name, ids, classes, parameters, content, line_no)
+      ::NoraMark::Block.new(name, ids, classes, parameters, content, line_no)
     end
-    def br()
-      ::NoraMark::Breakline.new()
+    def br(line_no)
+      ::NoraMark::Breakline.new(line_no)
     end
-    def definition_list(ids, classes, parameters, content)
-      ::NoraMark::DefinitionList.new(ids, classes, parameters, content)
+    def definition_list(ids, classes, parameters, content, line_no)
+      ::NoraMark::DefinitionList.new(ids, classes, parameters, content, line_no)
     end
-    def dl_item(ids, classes, parameters, content)
-      ::NoraMark::DLItem.new(ids, classes, parameters, content)
+    def dl_item(ids, classes, parameters, content, line_no)
+      ::NoraMark::DLItem.new(ids, classes, parameters, content, line_no)
     end
-    def frontmatter(content)
-      ::NoraMark::Frontmatter.new(content)
+    def frontmatter(content, line_no)
+      ::NoraMark::Frontmatter.new(content, line_no)
     end
-    def h_section(level, heading, content)
-      ::NoraMark::HeadedSection.new(level, heading, content)
+    def h_section(level, heading, content, line_no)
+      ::NoraMark::HeadedSection.new(level, heading, content, line_no)
     end
-    def inline(name, ids, classes, parameters, content)
-      ::NoraMark::Inline.new(name, ids, classes, parameters, content)
+    def inline(name, ids, classes, parameters, content, line_no)
+      ::NoraMark::Inline.new(name, ids, classes, parameters, content, line_no)
     end
-    def line_command(name, ids, classes, parameters, content)
-      ::NoraMark::LineCommand.new(name, ids, classes, parameters, content)
+    def line_command(name, ids, classes, parameters, content, line_no)
+      ::NoraMark::LineCommand.new(name, ids, classes, parameters, content, line_no)
     end
-    def newpage(ids, classes, parameters, content)
-      ::NoraMark::Newpage.new(ids, classes, parameters, content)
+    def newpage(ids, classes, parameters, content, line_no)
+      ::NoraMark::Newpage.new(ids, classes, parameters, content, line_no)
     end
-    def ol_item(ids, classes, parameters, content)
-      ::NoraMark::OlItem.new(ids, classes, parameters, content)
+    def ol_item(ids, classes, parameters, content, line_no)
+      ::NoraMark::OlItem.new(ids, classes, parameters, content, line_no)
     end
-    def ordered_list(ids, classes, parameters, content)
-      ::NoraMark::OrderedList.new(ids, classes, parameters, content)
+    def ordered_list(ids, classes, parameters, content, line_no)
+      ::NoraMark::OrderedList.new(ids, classes, parameters, content, line_no)
     end
-    def page(content)
-      ::NoraMark::Page.new(content)
+    def page(content, line_no)
+      ::NoraMark::Page.new(content, line_no)
     end
-    def paragraph(ids, classes, parameters, content)
-      ::NoraMark::Paragraph.new(ids, classes, parameters, content)
+    def paragraph(ids, classes, parameters, content, line_no)
+      ::NoraMark::Paragraph.new(ids, classes, parameters, content, line_no)
     end
-    def paragraph_group(ids, classes, parameters, content)
-      ::NoraMark::ParagraphGroup.new(ids, classes, parameters, content)
+    def paragraph_group(ids, classes, parameters, content, line_no)
+      ::NoraMark::ParagraphGroup.new(ids, classes, parameters, content, line_no)
     end
-    def preformatted_block(name, ids, classes, parameters, codelanguage, content)
-      ::NoraMark::PreformattedBlock.new(name, ids, classes, parameters, codelanguage, content)
+    def preformatted_block(name, ids, classes, parameters, codelanguage, content, line_no)
+      ::NoraMark::PreformattedBlock.new(name, ids, classes, parameters, codelanguage, content, line_no)
     end
-    def text(content)
-      ::NoraMark::Text.new(content)
+    def text(content, line_no)
+      ::NoraMark::Text.new(content, line_no)
     end
-    def ul_item(ids, classes, parameters, content)
-      ::NoraMark::UlItem.new(ids, classes, parameters, content)
+    def ul_item(ids, classes, parameters, content, line_no)
+      ::NoraMark::UlItem.new(ids, classes, parameters, content, line_no)
     end
-    def unordered_list(ids, classes, parameters, content)
-      ::NoraMark::UnorderedList.new(ids, classes, parameters, content)
+    def unordered_list(ids, classes, parameters, content, line_no)
+      ::NoraMark::UnorderedList.new(ids, classes, parameters, content, line_no)
     end
   end
   include ::NoraMarkConstruction
+
+  # ln = { current_line }
+  def _ln
+    @result = begin;  current_line ; end
+    _tmp = true
+    set_failed_rule :_ln unless _tmp
+    return _tmp
+  end
 
   # BOM = /\uFEFF/
   def _BOM
@@ -710,7 +754,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # CommandName = Word:name IdNames?:idnames ClassNames?:classes { {name: name, ids: idnames, classes: classes} }
+  # CommandName = Word:name IdNames?:idnames ClassNames?:classes ln:ln { {name: name, ids: idnames, classes: classes, ln:ln } }
   def _CommandName
 
     _save = self.pos
@@ -745,7 +789,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  {name: name, ids: idnames, classes: classes} ; end
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  {name: name, ids: idnames, classes: classes, ln:ln } ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1057,7 +1107,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ImplicitParagraph = - !ParagraphDelimiter Comment* DocumentLine:content Comment* EofComment? {paragraph([],[], [], content)}
+  # ImplicitParagraph = - !ParagraphDelimiter Comment* DocumentLine:content ln:ln Comment* EofComment? {paragraph([],[], [], content, ln)}
   def _ImplicitParagraph
 
     _save = self.pos
@@ -1090,6 +1140,12 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       while true
         _tmp = apply(:_Comment)
         break unless _tmp
@@ -1109,7 +1165,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; paragraph([],[], [], content); end
+      @result = begin; paragraph([],[], [], content, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1145,7 +1201,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ExplicitParagraph = - ExplicitParagraphCommand:c ":" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content)}
+  # ExplicitParagraph = - ExplicitParagraphCommand:c ":" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content, c[:ln])}
   def _ExplicitParagraph
 
     _save = self.pos
@@ -1197,7 +1253,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; paragraph(c[:ids], c[:classes], c[:args], content); end
+      @result = begin; paragraph(c[:ids], c[:classes], c[:args], content, c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1227,11 +1283,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ParagraphGroup = Paragraph+:p EmptyLine* {paragraph_group([],[],[],p)}
+  # ParagraphGroup = ln:ln Paragraph+:p EmptyLine* {paragraph_group([],[],[],p, ln)}
   def _ParagraphGroup
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _save1 = self.pos
       _ary = []
       _tmp = apply(:_Paragraph)
@@ -1261,7 +1323,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; paragraph_group([],[],[],p); end
+      @result = begin; paragraph_group([],[],[],p, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1273,16 +1335,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # BlockHead = - Command:command - "{" - Nl EmptyLine* { command }
+  # BlockHead = Command:command - "{" - Nl EmptyLine* { command }
   def _BlockHead
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:__hyphen_)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:_Command)
       command = @result
       unless _tmp
@@ -1441,11 +1498,16 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ExplicitBlock = BlockHead:c - BlockBody:content - BlockEnd {block(c[:name], c[:ids], c[:classes], c[:args], content)}
+  # ExplicitBlock = - BlockHead:c - BlockBody:content - BlockEnd {block(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}
   def _ExplicitBlock
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_BlockHead)
       c = @result
       unless _tmp
@@ -1473,7 +1535,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; block(c[:name], c[:ids], c[:classes], c[:args], content); end
+      @result = begin; block(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1509,16 +1571,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # PreformattedCommandHeadSimple = - PreformattedCommand:command - "{" - Nl { command }
+  # PreformattedCommandHeadSimple = PreformattedCommand:command - "{" - Nl { command }
   def _PreformattedCommandHeadSimple
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:__hyphen_)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:_PreformattedCommand)
       command = @result
       unless _tmp
@@ -1557,16 +1614,11 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # PreformattedCommandHeadComplex = - PreformattedCommand:command - "{//" Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }
+  # PreformattedCommandHeadComplex = PreformattedCommand:command - "{//" Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }
   def _PreformattedCommandHeadComplex
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:__hyphen_)
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:_PreformattedCommand)
       command = @result
       unless _tmp
@@ -1715,11 +1767,16 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # PreformattedBlockSimple = PreformattedCommandHeadSimple:c (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content)}
+  # PreformattedBlockSimple = - PreformattedCommandHeadSimple:c (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln])}
   def _PreformattedBlockSimple
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_PreformattedCommandHeadSimple)
       c = @result
       unless _tmp
@@ -1795,7 +1852,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content); end
+      @result = begin; preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1807,11 +1864,16 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # PreformattedBlockComplex = PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content)}
+  # PreformattedBlockComplex = - PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln])}
   def _PreformattedBlockComplex
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_PreformattedCommandHeadComplex)
       c = @result
       unless _tmp
@@ -1887,7 +1949,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content); end
+      @result = begin; preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -1935,7 +1997,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # CommonInline = "[" Command:c "{" - DocumentContentExcept('}'):content "}" "]" {inline(c[:name], c[:ids], c[:classes], c[:args], content)}
+  # CommonInline = "[" Command:c "{" - DocumentContentExcept('}'):content "}" "]" {inline(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}
   def _CommonInline
 
     _save = self.pos
@@ -1977,7 +2039,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; inline(c[:name], c[:ids], c[:classes], c[:args], content); end
+      @result = begin; inline(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2013,7 +2075,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ImgInline = "[" ImgCommand:c "]" {inline(c[:name], c[:ids], c[:classes], c[:args], nil)}
+  # ImgInline = "[" ImgCommand:c "]" {inline(c[:name], c[:ids], c[:classes], c[:args], nil,  c[:ln])}
   def _ImgInline
 
     _save = self.pos
@@ -2034,7 +2096,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; inline(c[:name], c[:ids], c[:classes], c[:args], nil); end
+      @result = begin; inline(c[:name], c[:ids], c[:classes], c[:args], nil,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2088,7 +2150,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Newpage = - NewpageCommand:c ":" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], content)}
+  # Newpage = - NewpageCommand:c ":" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], content,  c[:ln])}
   def _Newpage
 
     _save = self.pos
@@ -2136,7 +2198,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; newpage(c[:ids],c[:classes],c[:args], content); end
+      @result = begin; newpage(c[:ids],c[:classes],c[:args], content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2148,11 +2210,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # UnorderedList = UnorderedItem+:items {unordered_list([],[],[], items)}
+  # UnorderedList = ln:ln UnorderedItem+:items {unordered_list([],[],[], items, ln)}
   def _UnorderedList
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _save1 = self.pos
       _ary = []
       _tmp = apply(:_UnorderedItem)
@@ -2173,7 +2241,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; unordered_list([],[],[], items); end
+      @result = begin; unordered_list([],[],[], items, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2185,11 +2253,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # UnorderedItem = "*:" - DocumentContent:content Le {ul_item([], [], [], content)}
+  # UnorderedItem = ln:ln "*:" - DocumentContent:content Le {ul_item([], [], [], content, ln)}
   def _UnorderedItem
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = match_string("*:")
       unless _tmp
         self.pos = _save
@@ -2211,7 +2285,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; ul_item([], [], [], content); end
+      @result = begin; ul_item([], [], [], content, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2223,11 +2297,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # OrderedList = OrderedItem+:items {ordered_list([],[],[], items)}
+  # OrderedList = ln:ln OrderedItem+:items {ordered_list([],[],[], items, ln)}
   def _OrderedList
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _save1 = self.pos
       _ary = []
       _tmp = apply(:_OrderedItem)
@@ -2248,7 +2328,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; ordered_list([],[],[], items); end
+      @result = begin; ordered_list([],[],[], items, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2260,11 +2340,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # OrderedItem = Num ":" - DocumentContent:content Le {ol_item([], [], [], content)}
+  # OrderedItem = ln:ln Num ":" - DocumentContent:content Le {ol_item([], [], [], content, ln)}
   def _OrderedItem
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_Num)
       unless _tmp
         self.pos = _save
@@ -2291,7 +2377,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; ol_item([], [], [], content); end
+      @result = begin; ol_item([], [], [], content, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2303,11 +2389,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # DefinitionList = DefinitionItem+:items {definition_list([], [], [], items)}
+  # DefinitionList = ln:ln DefinitionItem+:items {definition_list([], [], [], items, ln)}
   def _DefinitionList
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _save1 = self.pos
       _ary = []
       _tmp = apply(:_DefinitionItem)
@@ -2328,7 +2420,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; definition_list([], [], [], items); end
+      @result = begin; definition_list([], [], [], items, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2340,12 +2432,18 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # DefinitionItem = - ";:" - DocumentContentExcept(':'):term ":" - DocumentContent:definition Le {dl_item([], [], [term], definition)}
+  # DefinitionItem = - ln:ln ";:" - DocumentContentExcept(':'):term ":" - DocumentContent:definition Le {dl_item([], [], [term], definition, ln)}
   def _DefinitionItem
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ln)
+      ln = @result
       unless _tmp
         self.pos = _save
         break
@@ -2387,7 +2485,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; dl_item([], [], [term], definition); end
+      @result = begin; dl_item([], [], [term], definition, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2399,11 +2497,17 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # LongDefinitionList = LongDefinitionItem+:items {definition_list([], [], [], items)}
+  # LongDefinitionList = ln:ln LongDefinitionItem+:items {definition_list([], [], [], items, ln)}
   def _LongDefinitionList
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _save1 = self.pos
       _ary = []
       _tmp = apply(:_LongDefinitionItem)
@@ -2424,7 +2528,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; definition_list([], [], [], items); end
+      @result = begin; definition_list([], [], [], items, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2436,12 +2540,18 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # LongDefinitionItem = - ";:" - DocumentContentExcept('{'):term "{" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], definition)}
+  # LongDefinitionItem = - ln:ln ";:" - DocumentContentExcept('{'):term "{" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], definition, ln)}
   def _LongDefinitionItem
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ln)
+      ln = @result
       unless _tmp
         self.pos = _save
         break
@@ -2498,7 +2608,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; dl_item([], [], [term], definition); end
+      @result = begin; dl_item([], [], [term], definition, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2534,7 +2644,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # LineCommand = - !CommandNameForSpecialLineCommand Command:c ":" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], content)}
+  # LineCommand = - !CommandNameForSpecialLineCommand Command:c ":" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}
   def _LineCommand
 
     _save = self.pos
@@ -2599,7 +2709,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; line_command(c[:name], c[:ids], c[:classes], c[:args], content); end
+      @result = begin; line_command(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2842,7 +2952,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HStart = - HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }
+  # HStart = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
   def _HStart(n)
 
     _save = self.pos
@@ -2853,6 +2963,12 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _tmp = apply_with_args(:_HStartMark, n)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ln)
+      ln = @result
       unless _tmp
         self.pos = _save
         break
@@ -2873,7 +2989,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  { level: n, heading: s } ; end
+      @result = begin;  { level: n, heading: s, ln: ln} ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2885,7 +3001,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HSection = HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content {h_section(h[:level], h[:heading], content)}
+  # HSection = HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content {h_section(h[:level], h[:heading], content, h[:ln])}
   def _HSection(n)
 
     _save = self.pos
@@ -2934,7 +3050,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; h_section(h[:level], h[:heading], content); end
+      @result = begin; h_section(h[:level], h[:heading], content, h[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3037,12 +3153,18 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Frontmatter = FrontmatterSeparator (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* {frontmatter(yaml)}
+  # Frontmatter = FrontmatterSeparator ln:ln (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* {frontmatter(yaml, ln)}
   def _Frontmatter
 
     _save = self.pos
     while true # sequence
       _tmp = apply(:_FrontmatterSeparator)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ln)
+      ln = @result
       unless _tmp
         self.pos = _save
         break
@@ -3125,7 +3247,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; frontmatter(yaml); end
+      @result = begin; frontmatter(yaml, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3217,7 +3339,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # DocumentTextExcept = < (!Inline CharExcept(e))+ > {text(text)}
+  # DocumentTextExcept = < (!Inline CharExcept(e))+ > ln:ln {text(text, ln)}
   def _DocumentTextExcept(e)
 
     _save = self.pos
@@ -3275,7 +3397,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; text(text); end
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; text(text, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3346,7 +3474,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # DocumentText = < (!Inline Char)+ > {text(text)}
+  # DocumentText = < (!Inline Char)+ > ln:ln {text(text, ln)}
   def _DocumentText
 
     _save = self.pos
@@ -3404,7 +3532,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; text(text); end
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; text(text, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3503,7 +3637,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?})}
+  # Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}
   def _Page
 
     _save = self.pos
@@ -3555,7 +3689,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; page(([frontmatter] +  blocks).select{ |x| !x.nil?}); end
+      @result = begin; page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3683,6 +3817,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   end
 
   Rules = {}
+  Rules[:_ln] = rule_info("ln", "{ current_line }")
   Rules[:_BOM] = rule_info("BOM", "/\\uFEFF/")
   Rules[:_Eof] = rule_info("Eof", "!.")
   Rules[:_Space] = rule_info("Space", "(\" \" | \"\\\\t\")")
@@ -3698,69 +3833,69 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ClassNames] = rule_info("ClassNames", "ClassName*:classnames { classnames }")
   Rules[:_IdName] = rule_info("IdName", "\"\#\" Word:idname { idname }")
   Rules[:_IdNames] = rule_info("IdNames", "IdName*:idnames { idnames }")
-  Rules[:_CommandName] = rule_info("CommandName", "Word:name IdNames?:idnames ClassNames?:classes { {name: name, ids: idnames, classes: classes} }")
+  Rules[:_CommandName] = rule_info("CommandName", "Word:name IdNames?:idnames ClassNames?:classes ln:ln { {name: name, ids: idnames, classes: classes, ln:ln } }")
   Rules[:_ParameterNormal] = rule_info("ParameterNormal", "< /[^,)]/* > { text }")
   Rules[:_ParameterQuoted] = rule_info("ParameterQuoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
   Rules[:_ParameterSingleQuoted] = rule_info("ParameterSingleQuoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
   Rules[:_Parameter] = rule_info("Parameter", "(ParameterQuoted | ParameterSingleQuoted | ParameterNormal):value { value }")
   Rules[:_Parameters] = rule_info("Parameters", "(Parameter:parameter \",\" - Parameters:parameters { [ parameter ] + parameters } | Parameter:parameter { [ parameter ] })")
   Rules[:_Command] = rule_info("Command", "CommandName:cn (\"(\" - Parameters:args - \")\")? { args ||= []; cn.merge({ args: args }) }")
-  Rules[:_ImplicitParagraph] = rule_info("ImplicitParagraph", "- !ParagraphDelimiter Comment* DocumentLine:content Comment* EofComment? {paragraph([],[], [], content)}")
+  Rules[:_ImplicitParagraph] = rule_info("ImplicitParagraph", "- !ParagraphDelimiter Comment* DocumentLine:content ln:ln Comment* EofComment? {paragraph([],[], [], content, ln)}")
   Rules[:_ExplicitParagraphCommand] = rule_info("ExplicitParagraphCommand", "Command:c &{ c[:name] == 'p' }")
-  Rules[:_ExplicitParagraph] = rule_info("ExplicitParagraph", "- ExplicitParagraphCommand:c \":\" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content)}")
+  Rules[:_ExplicitParagraph] = rule_info("ExplicitParagraph", "- ExplicitParagraphCommand:c \":\" - DocumentContent?:content Le EmptyLine* {paragraph(c[:ids], c[:classes], c[:args], content, c[:ln])}")
   Rules[:_Paragraph] = rule_info("Paragraph", "(ExplicitParagraph | ImplicitParagraph)")
-  Rules[:_ParagraphGroup] = rule_info("ParagraphGroup", "Paragraph+:p EmptyLine* {paragraph_group([],[],[],p)}")
-  Rules[:_BlockHead] = rule_info("BlockHead", "- Command:command - \"{\" - Nl EmptyLine* { command }")
+  Rules[:_ParagraphGroup] = rule_info("ParagraphGroup", "ln:ln Paragraph+:p EmptyLine* {paragraph_group([],[],[],p, ln)}")
+  Rules[:_BlockHead] = rule_info("BlockHead", "Command:command - \"{\" - Nl EmptyLine* { command }")
   Rules[:_BlockEnd] = rule_info("BlockEnd", "- \"}\" - Le EmptyLine*")
   Rules[:_BlockBody] = rule_info("BlockBody", "(!BlockEnd Block)+:body { body }")
-  Rules[:_ExplicitBlock] = rule_info("ExplicitBlock", "BlockHead:c - BlockBody:content - BlockEnd {block(c[:name], c[:ids], c[:classes], c[:args], content)}")
+  Rules[:_ExplicitBlock] = rule_info("ExplicitBlock", "- BlockHead:c - BlockBody:content - BlockEnd {block(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}")
   Rules[:_PreformattedCommand] = rule_info("PreformattedCommand", "Command:command &{ ['pre', 'code'].include? command[:name] }")
-  Rules[:_PreformattedCommandHeadSimple] = rule_info("PreformattedCommandHeadSimple", "- PreformattedCommand:command - \"{\" - Nl { command }")
-  Rules[:_PreformattedCommandHeadComplex] = rule_info("PreformattedCommandHeadComplex", "- PreformattedCommand:command - \"{//\" Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }")
+  Rules[:_PreformattedCommandHeadSimple] = rule_info("PreformattedCommandHeadSimple", "PreformattedCommand:command - \"{\" - Nl { command }")
+  Rules[:_PreformattedCommandHeadComplex] = rule_info("PreformattedCommandHeadComplex", "PreformattedCommand:command - \"{//\" Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }")
   Rules[:_PreformattedCommandHead] = rule_info("PreformattedCommandHead", "(PreformattedCommandHeadComplex | PreformattedCommandHeadSimple)")
   Rules[:_PreformatEndSimple] = rule_info("PreformatEndSimple", "- \"}\" - Le EmptyLine*")
   Rules[:_PreformatEndComplex] = rule_info("PreformatEndComplex", "- \"//}\" - Le EmptyLine*")
-  Rules[:_PreformattedBlockSimple] = rule_info("PreformattedBlockSimple", "PreformattedCommandHeadSimple:c (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content)}")
-  Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content)}")
+  Rules[:_PreformattedBlockSimple] = rule_info("PreformattedBlockSimple", "- PreformattedCommandHeadSimple:c (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln])}")
+  Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "- PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln])}")
   Rules[:_PreformattedBlock] = rule_info("PreformattedBlock", "(PreformattedBlockComplex | PreformattedBlockSimple)")
   Rules[:_Inline] = rule_info("Inline", "(ImgInline | CommonInline)")
-  Rules[:_CommonInline] = rule_info("CommonInline", "\"[\" Command:c \"{\" - DocumentContentExcept('}'):content \"}\" \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], content)}")
+  Rules[:_CommonInline] = rule_info("CommonInline", "\"[\" Command:c \"{\" - DocumentContentExcept('}'):content \"}\" \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}")
   Rules[:_ImgCommand] = rule_info("ImgCommand", "Command:c &{ c[:name] == 'img' && c[:args].size == 2}")
-  Rules[:_ImgInline] = rule_info("ImgInline", "\"[\" ImgCommand:c \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], nil)}")
+  Rules[:_ImgInline] = rule_info("ImgInline", "\"[\" ImgCommand:c \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], nil,  c[:ln])}")
   Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
-  Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], content)}")
-  Rules[:_UnorderedList] = rule_info("UnorderedList", "UnorderedItem+:items {unordered_list([],[],[], items)}")
-  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "\"*:\" - DocumentContent:content Le {ul_item([], [], [], content)}")
-  Rules[:_OrderedList] = rule_info("OrderedList", "OrderedItem+:items {ordered_list([],[],[], items)}")
-  Rules[:_OrderedItem] = rule_info("OrderedItem", "Num \":\" - DocumentContent:content Le {ol_item([], [], [], content)}")
-  Rules[:_DefinitionList] = rule_info("DefinitionList", "DefinitionItem+:items {definition_list([], [], [], items)}")
-  Rules[:_DefinitionItem] = rule_info("DefinitionItem", "- \";:\" - DocumentContentExcept(':'):term \":\" - DocumentContent:definition Le {dl_item([], [], [term], definition)}")
-  Rules[:_LongDefinitionList] = rule_info("LongDefinitionList", "LongDefinitionItem+:items {definition_list([], [], [], items)}")
-  Rules[:_LongDefinitionItem] = rule_info("LongDefinitionItem", "- \";:\" - DocumentContentExcept('{'):term \"{\" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], definition)}")
+  Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], content,  c[:ln])}")
+  Rules[:_UnorderedList] = rule_info("UnorderedList", "ln:ln UnorderedItem+:items {unordered_list([],[],[], items, ln)}")
+  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "ln:ln \"*:\" - DocumentContent:content Le {ul_item([], [], [], content, ln)}")
+  Rules[:_OrderedList] = rule_info("OrderedList", "ln:ln OrderedItem+:items {ordered_list([],[],[], items, ln)}")
+  Rules[:_OrderedItem] = rule_info("OrderedItem", "ln:ln Num \":\" - DocumentContent:content Le {ol_item([], [], [], content, ln)}")
+  Rules[:_DefinitionList] = rule_info("DefinitionList", "ln:ln DefinitionItem+:items {definition_list([], [], [], items, ln)}")
+  Rules[:_DefinitionItem] = rule_info("DefinitionItem", "- ln:ln \";:\" - DocumentContentExcept(':'):term \":\" - DocumentContent:definition Le {dl_item([], [], [term], definition, ln)}")
+  Rules[:_LongDefinitionList] = rule_info("LongDefinitionList", "ln:ln LongDefinitionItem+:items {definition_list([], [], [], items, ln)}")
+  Rules[:_LongDefinitionItem] = rule_info("LongDefinitionItem", "- ln:ln \";:\" - DocumentContentExcept('{'):term \"{\" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], definition, ln)}")
   Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
-  Rules[:_LineCommand] = rule_info("LineCommand", "- !CommandNameForSpecialLineCommand Command:c \":\" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], content)}")
+  Rules[:_LineCommand] = rule_info("LineCommand", "- !CommandNameForSpecialLineCommand Command:c \":\" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}")
   Rules[:_LineBlock] = rule_info("LineBlock", "(ItemsList | LineCommand)")
   Rules[:_Block] = rule_info("Block", "EmptyLine* (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
   Rules[:_BlockDelimiter] = rule_info("BlockDelimiter", "(BlockHead | BlockEnd)")
   Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
   Rules[:_HStartMark] = rule_info("HStartMark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
   Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "- < \"=\"+ \":\" > &{ text.length - 1 <= n }")
-  Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) - DocumentContent:s Le { { level: n, heading: s } }")
-  Rules[:_HSection] = rule_info("HSection", "HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content {h_section(h[:level], h[:heading], content)}")
+  Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }")
+  Rules[:_HSection] = rule_info("HSection", "HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content {h_section(h[:level], h[:heading], content, h[:ln])}")
   Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6))")
   Rules[:_HeadedSection] = rule_info("HeadedSection", "(HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))")
   Rules[:_FrontmatterSeparator] = rule_info("FrontmatterSeparator", "- \"---\" - Nl")
-  Rules[:_Frontmatter] = rule_info("Frontmatter", "FrontmatterSeparator (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* {frontmatter(yaml)}")
+  Rules[:_Frontmatter] = rule_info("Frontmatter", "FrontmatterSeparator ln:ln (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* {frontmatter(yaml, ln)}")
   Rules[:_Char] = rule_info("Char", "< /[[:print:]]/ > { text }")
   Rules[:_CharString] = rule_info("CharString", "< Char* > { text }")
   Rules[:_CharExcept] = rule_info("CharExcept", "Char:c &{ c != e }")
-  Rules[:_DocumentTextExcept] = rule_info("DocumentTextExcept", "< (!Inline CharExcept(e))+ > {text(text)}")
+  Rules[:_DocumentTextExcept] = rule_info("DocumentTextExcept", "< (!Inline CharExcept(e))+ > ln:ln {text(text, ln)}")
   Rules[:_DocumentContentExcept] = rule_info("DocumentContentExcept", "(Inline | DocumentTextExcept(e))+:content { content }")
-  Rules[:_DocumentText] = rule_info("DocumentText", "< (!Inline Char)+ > {text(text)}")
+  Rules[:_DocumentText] = rule_info("DocumentText", "< (!Inline Char)+ > ln:ln {text(text, ln)}")
   Rules[:_DocumentContent] = rule_info("DocumentContent", "(Inline | DocumentText)+:content { content }")
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
-  Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?})}")
+  Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}")
   Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
   Rules[:_root] = rule_info("root", "BOM? Pages:pages - EofComment? Eof { pages }")
   # :startdoc:

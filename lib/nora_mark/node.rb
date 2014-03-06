@@ -2,7 +2,7 @@ require 'yaml'
 
 module NoraMark
   class Node
-    attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty
+    attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no
 
     def named_parameters=(named_parameters)
       @named_parameters = named_parameters
