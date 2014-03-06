@@ -3578,25 +3578,74 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = Page:page NewpagedPage*:pages - EofComment? Eof { [ page ] + pages }
+  # Pages = (Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })
+  def _Pages
+
+    _save = self.pos
+    while true # choice
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_Page)
+        page = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_Newpage)
+        newpage = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_Pages)
+        pages = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        @result = begin;  [ page, newpage ] + pages ; end
+        _tmp = true
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      break if _tmp
+      self.pos = _save
+
+      _save2 = self.pos
+      while true # sequence
+        _tmp = apply(:_Page)
+        page = @result
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        @result = begin;  [ page ] ; end
+        _tmp = true
+        unless _tmp
+          self.pos = _save2
+        end
+        break
+      end # end sequence
+
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_Pages unless _tmp
+    return _tmp
+  end
+
+  # root = Pages:pages - EofComment? Eof { pages }
   def _root
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:_Page)
-      page = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _ary = []
-      while true
-        _tmp = apply(:_NewpagedPage)
-        _ary << @result if _tmp
-        break unless _tmp
-      end
-      _tmp = true
-      @result = _ary
+      _tmp = apply(:_Pages)
       pages = @result
       unless _tmp
         self.pos = _save
@@ -3607,11 +3656,11 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _save2 = self.pos
+      _save1 = self.pos
       _tmp = apply(:_EofComment)
       unless _tmp
         _tmp = true
-        self.pos = _save2
+        self.pos = _save1
       end
       unless _tmp
         self.pos = _save
@@ -3622,7 +3671,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  [ page ] + pages ; end
+      @result = begin;  pages ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3713,6 +3762,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
   Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?})}")
   Rules[:_NewpagedPage] = rule_info("NewpagedPage", "Newpage:newpage Page:page { page.content = page.content.unshift newpage; page }")
-  Rules[:_root] = rule_info("root", "Page:page NewpagedPage*:pages - EofComment? Eof { [ page ] + pages }")
+  Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
+  Rules[:_root] = rule_info("root", "Pages:pages - EofComment? Eof { pages }")
   # :startdoc:
 end
