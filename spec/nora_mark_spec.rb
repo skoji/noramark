@@ -1085,14 +1085,23 @@ some column
 }
 EOF
       }
-    it 'should add id to headers' do
-      noramark = NoraMark::Document.parse(@the_text)
-      noramark.nodes.each {
-        |node|
-        if node.is_a? LineCommand and node.name =~ /h[1-6]/
-          expect(node[:ids].size).to be > 0
-        end
-      }
+    end
+    describe 'node manipulation' do
+      it 'should access line number' do
+        text = <<EOF
+1st line.
+d {
+3rd line.
+}
+5th line.
+EOF
+        noramark = NoraMark::Document.parse(text)
+        page = noramark.content[0]
+        expect(page.content.size).to eq 3
+        expect(page.line_no).to eq 1
+        expect(page.content[0].line_no).to eq 1
+        expect(page.content[1].line_no).to eq 2
+        expect(page.content[2].content[0].line_no).to eq 5
       end
     end
     describe 'node manipulation' do
