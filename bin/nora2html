@@ -1,0 +1,2 @@
+require 'nora_mark'
+puts NoraMark::Document::parse(STDIN.read).render_parameter(nonpaged: true).html[0]
