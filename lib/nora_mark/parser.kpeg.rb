@@ -3549,35 +3549,6 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # NewpagedPage = Newpage:newpage Page:page { page.content = page.content.unshift newpage; page }
-  def _NewpagedPage
-
-    _save = self.pos
-    while true # sequence
-      _tmp = apply(:_Newpage)
-      newpage = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:_Page)
-      page = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      @result = begin;  page.content = page.content.unshift newpage; page ; end
-      _tmp = true
-      unless _tmp
-        self.pos = _save
-      end
-      break
-    end # end sequence
-
-    set_failed_rule :_NewpagedPage unless _tmp
-    return _tmp
-  end
-
   # Pages = (Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })
   def _Pages
 
@@ -3761,7 +3732,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_DocumentContent] = rule_info("DocumentContent", "(Inline | DocumentText)+:content { content }")
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
   Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?})}")
-  Rules[:_NewpagedPage] = rule_info("NewpagedPage", "Newpage:newpage Page:page { page.content = page.content.unshift newpage; page }")
   Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
   Rules[:_root] = rule_info("root", "Pages:pages - EofComment? Eof { pages }")
   # :startdoc:

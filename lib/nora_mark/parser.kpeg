@@ -168,7 +168,6 @@ DocumentLine = DocumentContent:content Le { content }
 
 #page
 Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks ~page(([frontmatter] +  blocks).select{ |x| !x.nil?})
-NewpagedPage = Newpage:newpage Page:page { page.content = page.content.unshift newpage; page }
 Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] }  
 
 #root
