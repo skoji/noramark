@@ -1051,59 +1051,6 @@ EOF
         expect(@stdout.strip).to eq ""
       end
     end
-    describe 'table of contents' do
-      before {
-        @the_text = <<EOF
----
-lang: ja
-title: the book of nora
----
-=: chapter 1 nora
-
-foo bar
-
-==: section 1-1
-
-bar bar
-
-newpage:
-=: chapter 2 nora
-
-chapter 2
-
-==: 2-1
-
-in section
-
-===: 2-1-1
-
-in subsection
-
-d.column {
-h4.column: column
-some column
-}
-EOF
-      }
-    end
-    describe 'node manipulation' do
-      it 'should access line number' do
-        text = <<EOF
-1st line.
-d {
-3rd line.
-}
-5th line.
-EOF
-        noramark = NoraMark::Document.parse(text)
-        page = noramark.content[0]
-        expect(page.content.size).to eq 3
-        expect(page.line_no).to eq 1
-        expect(page.content[0].line_no).to eq 1
-        expect(page.content[1].line_no).to eq 2
-        expect(page.content[2].content[0].line_no).to eq 5
-      end
-    end
     describe 'node manipulation' do
       it 'should access line number' do
         text = <<EOF
