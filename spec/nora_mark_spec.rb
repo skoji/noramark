@@ -1061,13 +1061,38 @@ d {
 5th line.
 EOF
         noramark = NoraMark::Document.parse(text)
-        page = noramark.content[0]
-        expect(page.content.size).to eq 3
+        page = noramark.children[0]
+        expect(page.children.size).to eq 3
         expect(page.line_no).to eq 1
-        expect(page.content[0].line_no).to eq 1
-        expect(page.content[1].line_no).to eq 2
-        expect(page.content[2].content[0].line_no).to eq 5
+        expect(page.children[0].line_no).to eq 1
+        expect(page.children[1].line_no).to eq 2
+        expect(page.children[2].children[0].line_no).to eq 5
       end
+      it 'should organize tree' do
+        text = <<EOF
+1st line.
+d {
+in the div
+}
+*: ul item
+text [s{with inline}] within
+EOF
+        noramark = NoraMark::Document.parse(text)
+        expect(noramark.parent).to be nil
+        expect(noramark.prev).to be nil
+        expect(noramark.next).to be nil
+        expect(noramark.content).to be nil
+
+        page = noramark.first_child
+        expect(noramark.last_child).to eq page
+        expect(page.parent).to eq noramark
+        expect(page.prev).to be nil
+        expect(page.next).to be nil
+        expect(noramark.children.size).to eq 1
+        expect(noramark.children[0]).to eq page
+
+      end
+
     end
   end
 end

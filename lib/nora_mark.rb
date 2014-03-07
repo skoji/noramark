@@ -1,6 +1,7 @@
 require "nora_mark/version"
 require 'nora_mark/html/generator'
 require 'nora_mark/node'
+require 'nora_mark/node_set'
 require 'nora_mark/parser'
 require 'securerandom'
 
@@ -23,6 +24,7 @@ module NoraMark
           raise @parser.raise_error
         end
         @content = @parser.result
+        self.organize
       end
       instance
     end

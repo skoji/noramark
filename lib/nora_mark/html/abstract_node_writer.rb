@@ -5,7 +5,7 @@ module NoraMark
         @generator = generator
       end
       def write(node)
-        node.content.each do |child|
+        node.children.each do |child|
           @generator.to_html child
         end
       end

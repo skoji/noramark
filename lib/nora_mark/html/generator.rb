@@ -131,7 +131,8 @@ module NoraMark
           DLItem => 
           TagWriter.create('', self, chop_last_space: true, node_preprocessor: proc do |node| node.no_tag = true; node end,
                            write_body_preprocessor: proc do |node|
-                             output "<dt>"; write_array node.parameters[0]; output "</dt>\n"
+                             ### TODO 'this implementation should chnage'
+                             output "<dt>"; write_nodeset node.parameters[0]; output "</dt>\n"
                              output "<dd>"; write_children node; output "</dd>\n"
                              :done
                            end),
@@ -143,7 +144,8 @@ module NoraMark
           HeadedSection => 
           TagWriter.create('section', self, write_body_preprocessor: proc do |node|
                              output "<h#{node.level}>"
-                             write_array node.heading
+                             ###TODO 'this implementation should chnage'
+                             write_nodeset node.heading
                              @generator.context.chop_last_space
                              output "</h#{node.level}>\n"
                              :continue
@@ -170,7 +172,7 @@ module NoraMark
       end
 
       def convert(parsed_result, render_parameter = {})
-        children = parsed_result.content
+        children = parsed_result.children
         @context.file_basename = parsed_result.document_name
         @context.render_parameter = render_parameter
         if render_parameter[:nonpaged]
