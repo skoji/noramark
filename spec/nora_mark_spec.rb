@@ -77,7 +77,7 @@ describe NoraMark do
 
 
     it 'should convert simple paragraph in english mode specified in frontmatter' do
-      text = "---\nlang: en\ntitle: the title\n---\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+      text = "---\nlang: en\ntitle: the title\n---\n\n\n\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
       noramark = NoraMark::Document.parse(text)
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -195,8 +195,26 @@ describe NoraMark do
       )
     end
 
+    it 'should handle divs with empty lines' do
+      text = "\n\n\nd('wo-pgroup') {\n\n\n1st line. \n\n\n}\n\n\nd {\n 2nd div.\n}"
+      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+      converted = noramark.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children).to eq(
+        ['div',
+           ['p', '1st line.']
+        ])
+      expect(body.element_children[1].selector_and_children).to eq(
+        ['div',
+          ['div.pgroup',
+           ['p', '2nd div.']]
+        ]
+
+      )
+    end
+
     it 'should nest div without pgroup and with pgroup' do
-      text = "d(wo-pgroup) {\nd {\nnested.\n} \n}\nd {\nin pgroup\n}"
+      text = "d(wo-pgroup) {\nd {\nnested.\n} \n}\n\nd {\nin pgroup\n}"
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')

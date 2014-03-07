@@ -3663,7 +3663,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}
+  # Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks EmptyLine* {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}
   def _Page
 
     _save = self.pos
@@ -3711,6 +3711,15 @@ class NoraMark::Parser < KPeg::CompiledParser
       _tmp = true
       @result = _ary
       blocks = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_EmptyLine)
+        break unless _tmp
+      end
+      _tmp = true
       unless _tmp
         self.pos = _save
         break
@@ -3789,7 +3798,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = BOM? Pages:pages - EofComment? Eof { pages }
+  # root = BOM? EmptyLine* Pages:pages EofComment? Eof { pages }
   def _root
 
     _save = self.pos
@@ -3804,22 +3813,26 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      while true
+        _tmp = apply(:_EmptyLine)
+        break unless _tmp
+      end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_Pages)
       pages = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = apply(:__hyphen_)
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _save2 = self.pos
+      _save3 = self.pos
       _tmp = apply(:_EofComment)
       unless _tmp
         _tmp = true
-        self.pos = _save2
+        self.pos = _save3
       end
       unless _tmp
         self.pos = _save
@@ -3921,8 +3934,8 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_DocumentText] = rule_info("DocumentText", "< (!Inline Char)+ > ln:ln {text(text, ln)}")
   Rules[:_DocumentContent] = rule_info("DocumentContent", "(Inline | DocumentText)+:content { content }")
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
-  Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}")
+  Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks EmptyLine* {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}")
   Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
-  Rules[:_root] = rule_info("root", "BOM? Pages:pages - EofComment? Eof { pages }")
+  Rules[:_root] = rule_info("root", "BOM? EmptyLine* Pages:pages EofComment? Eof { pages }")
   # :startdoc:
 end

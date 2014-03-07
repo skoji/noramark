@@ -29,8 +29,9 @@ Eof = !.
 Space = ' ' | '\t' 
 EofComment = Space* "#" (!Eof .)* 
 Comment =   Space* "#" (!Nl .)* Nl EmptyLine*
-- =  ( Space )* 
+- =  Space* 
 EmptyLine = /^/ - (Nl | Comment | EofComment)
+
 Nl = /\r?\n/
 Le = Nl | Eof
 Word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
@@ -177,12 +178,12 @@ DocumentContent = (Inline | DocumentText)+:content  { content }
 DocumentLine = DocumentContent:content Le { content }
 
 #page
-Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks ~page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)
+Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks EmptyLine* ~page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)
 Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages }
       | Page:page { [ page ] }  
 
 #root
-root = BOM? Pages:pages - EofComment? Eof { pages }
+root = BOM? EmptyLine* Pages:pages EofComment? Eof { pages }
 
 
 
