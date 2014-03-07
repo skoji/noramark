@@ -130,23 +130,23 @@ LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentConte
 
 # blocks
 LineBlock =  ItemsList | LineCommand 
-Block = EmptyLine*
+Block = 
        (PreformattedBlock
        | HeadedSection
        | LineBlock 
        | ExplicitBlock
        | ParagraphGroup ):block
-         EmptyLine* {block}
+         {block} 
 
 BlockDelimiter = BlockHead | BlockEnd 
 ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart
 
 # markdown-style headings
 HStartMark(n) = < '='+ ':' > &{ text.length - 1 == n }
-HMarkupTerminator(n) = - < '='+ ':' > &{ text.length - 1 <= n }
+HMarkupTerminator(n) = - < '='+ ':' > &{ text.length - 1 <= n } | - Eof
 
 HStart(n) = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
-HSection(n) = HStart(n):h (!HMarkupTerminator(n) !Eof Block)*:content ~h_section(h[:level], h[:heading], content, h[:ln])
+HSection(n) = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* ~h_section(h[:level], h[:heading], content, h[:ln])
 
 HeadedStart = HStart(1)
             | HStart(2)

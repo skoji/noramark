@@ -891,7 +891,7 @@ EOF
       )
       end
       it 'should convert markdown style heading with empty body' do
-        text = "=: タイトルです。\n==: 次のタイトルです。これから書きます。"
+        text = "=: タイトルです。\n==: 次のタイトルです。これから書きます。\n\n==:ここもこれから。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -900,7 +900,9 @@ EOF
         ['section',
          ['h1', 'タイトルです。'],
          ['section',
-          ['h2', '次のタイトルです。これから書きます。']]])
+          ['h2', '次のタイトルです。これから書きます。']],
+         ['section',
+          ['h2', 'ここもこれから。']]])
       end
       it 'should markdown style heading interrupted by other headed section' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。\n =: また次のセクションです。\n次のセクションの中です。"
