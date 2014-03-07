@@ -119,11 +119,10 @@ DefinitionItem = -  ln:ln ';:' - DocumentContentExcept(':'):term ':' - DocumentC
 LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], items, ln)
 LongDefinitionItem = -  ln:ln ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], definition, ln)
 
-ItemsList = UnorderedList
+ItemsList = (UnorderedList
           | OrderedList
           | DefinitionList
-          | LongDefinitionList
-
+          | LongDefinitionList) 
 
 # generic line command
 LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~line_command(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])
@@ -136,7 +135,8 @@ Block =
        | LineBlock 
        | ExplicitBlock
        | ParagraphGroup ):block
-         {block} 
+       EmptyLine*
+       {block} 
 
 BlockDelimiter = BlockHead | BlockEnd 
 ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart

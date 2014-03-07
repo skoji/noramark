@@ -891,14 +891,14 @@ EOF
       )
       end
       it 'should convert markdown style heading with empty body' do
-        text = "=: タイトルです。\n==: 次のタイトルです。これから書きます。\n\n==:ここもこれから。"
+        text = "=: タイトルです。\n*:中身です。\n\n==: 次のタイトルです。これから書きます。\n\n==:ここもこれから。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children.size).to eq 1
         expect(body.element_children[0].selector_and_children).to eq(
         ['section',
          ['h1', 'タイトルです。'],
+         ['ul', ['li', '中身です。']],
          ['section',
           ['h2', '次のタイトルです。これから書きます。']],
          ['section',

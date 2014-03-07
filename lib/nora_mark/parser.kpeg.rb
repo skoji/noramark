@@ -2739,7 +2739,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Block = (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block {block}
+  # Block = (PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}
   def _Block
 
     _save = self.pos
@@ -2766,6 +2766,15 @@ class NoraMark::Parser < KPeg::CompiledParser
       end # end choice
 
       block = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      while true
+        _tmp = apply(:_EmptyLine)
+        break unless _tmp
+      end
+      _tmp = true
       unless _tmp
         self.pos = _save
         break
@@ -3893,7 +3902,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
   Rules[:_LineCommand] = rule_info("LineCommand", "- !CommandNameForSpecialLineCommand Command:c \":\" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])}")
   Rules[:_LineBlock] = rule_info("LineBlock", "(ItemsList | LineCommand)")
-  Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block {block}")
+  Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
   Rules[:_BlockDelimiter] = rule_info("BlockDelimiter", "(BlockHead | BlockEnd)")
   Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
   Rules[:_HStartMark] = rule_info("HStartMark", "< \"=\"+ \":\" > &{ text.length - 1 == n }")
