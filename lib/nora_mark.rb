@@ -36,7 +36,7 @@ module NoraMark
 
     def html
       if @html.nil?
-        @html = Html::Generator.new(@param).convert(@root, @render_parameter)
+        @html = Html::Generator.new(@param).convert(@root.clone, @render_parameter)
       end
       @html
     end

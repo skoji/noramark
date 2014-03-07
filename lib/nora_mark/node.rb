@@ -50,15 +50,31 @@ module NoraMark
     end
 
     def children=(x)
-      warn 'this should be removed'
+      warn 'this should be removed or not'
       @content = x
       organize
+    end
+
+    def all_nodes
+      return [] if @first_child.nil?
+      @first_child.inject([]) do
+        |result, node|
+        result << node
+        result + node.all_nodes
+      end
+    end
+    
+    def clone
+      @content = nil
+      all_nodes.each { |node| @content = nil }
+      Marshal.restore Marshal.dump self
     end
   end
 
   class Root < Node
     attr_accessor :document_name
   end
+
   class Text < Node
     def organize
       # do nothing.
