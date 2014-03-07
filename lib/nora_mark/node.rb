@@ -30,7 +30,7 @@ module NoraMark
       end
     end
     
-    def organize
+    def reparent
       return if @content.nil?
       @first_child = @content.first
       @last_child = @content.last
@@ -38,7 +38,7 @@ module NoraMark
         child_node.prev = prev
         prev.next = child_node if !prev.nil?
         child_node.parent = self
-        child_node.organize 
+        child_node.reparent 
         child_node
       end
       @content = nil
@@ -52,7 +52,7 @@ module NoraMark
     def children=(x)
       warn 'this should be removed or not'
       @content = x
-      organize
+      reparent
     end
 
     def all_nodes
@@ -76,19 +76,19 @@ module NoraMark
   end
 
   class Text < Node
-    def organize
+    def reparent
       # do nothing.
     end
   end
 
   class PreformattedBlock < Node
-    def organize
+    def reparent
       # do nothing.
     end
   end
   
   class Frontmatter < Node
-    def organize
+    def reparent
       # do nothing.
     end
     def yaml

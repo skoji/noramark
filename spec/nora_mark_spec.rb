@@ -1068,7 +1068,7 @@ EOF
         expect(page.children[1].line_no).to eq 2
         expect(page.children[2].children[0].line_no).to eq 5
       end
-      it 'should organize tree' do
+      it 'should reparent tree' do
         text = <<EOF
 1st line.
 d {

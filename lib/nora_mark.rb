@@ -25,7 +25,7 @@ module NoraMark
         end
         @root = parser.result
         @root.document_name ||= @document_name
-        @root.organize
+        @root.reparent
       end
       instance
     end
