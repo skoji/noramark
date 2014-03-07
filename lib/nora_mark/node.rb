@@ -56,6 +56,9 @@ module NoraMark
     end
   end
 
+  class Root < Node
+    attr_accessor :document_name
+  end
   class Text < Node
     def organize
       # do nothing.

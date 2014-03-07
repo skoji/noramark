@@ -203,6 +203,12 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :content
       attr_reader :line_no
     end
+    class Root < Node
+      def initialize(content)
+        @content = content
+      end
+      attr_reader :content
+    end
     class Text < Node
       def initialize(content, line_no)
         @content = content
@@ -285,6 +291,9 @@ class NoraMark::Parser < KPeg::CompiledParser
     end
     def preformatted_block(name, ids, classes, parameters, codelanguage, content, line_no)
       ::NoraMark::PreformattedBlock.new(name, ids, classes, parameters, codelanguage, content, line_no)
+    end
+    def root(content)
+      ::NoraMark::Root.new(content)
     end
     def text(content, line_no)
       ::NoraMark::Text.new(content, line_no)
@@ -3798,7 +3807,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # root = BOM? EmptyLine* Pages:pages EofComment? Eof { pages }
+  # root = BOM? EmptyLine* Pages:pages EofComment? Eof {root(pages)}
   def _root
 
     _save = self.pos
@@ -3843,7 +3852,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  pages ; end
+      @result = begin; root(pages); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3936,6 +3945,6 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
   Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks EmptyLine* {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}")
   Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
-  Rules[:_root] = rule_info("root", "BOM? EmptyLine* Pages:pages EofComment? Eof { pages }")
+  Rules[:_root] = rule_info("root", "BOM? EmptyLine* Pages:pages EofComment? Eof {root(pages)}")
   # :startdoc:
 end

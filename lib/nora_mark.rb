@@ -6,8 +6,8 @@ require 'nora_mark/parser'
 require 'securerandom'
 
 module NoraMark
-  class Document < Node
-    attr_accessor :document_name
+  class Document 
+    attr_accessor :document_name, :root
     private_class_method :new 
 
     def self.parse(string_or_io, param = {})
@@ -19,12 +19,13 @@ module NoraMark
           |pr|
           src = pr.call(src)
         end
-        @parser = Parser.new(src)
-        if (!@parser.parse)
-          raise @parser.raise_error
+        parser = Parser.new(src)
+        if (!parser.parse)
+          raise parser.raise_error
         end
-        @content = @parser.result
-        self.organize
+        @root = parser.result
+        @root.document_name ||= @document_name
+        @root.organize
       end
       instance
     end
@@ -35,7 +36,7 @@ module NoraMark
 
     def html
       if @html.nil?
-        @html = @html_generator.convert(self, @render_parameter)
+        @html = Html::Generator.new(@param).convert(@root, @render_parameter)
       end
       @html
     end
@@ -46,14 +47,12 @@ module NoraMark
     end
     
     def initialize(param = {})
+      @param = param
       @preprocessors = [
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                        ]
-      @html_generator = Html::Generator.new(param)
       @document_name = param[:document_name] || "noramark_#{SecureRandom.uuid}"
       @render_parameter = {}
     end 
-
-
   end
 end

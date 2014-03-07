@@ -1061,7 +1061,7 @@ d {
 5th line.
 EOF
         noramark = NoraMark::Document.parse(text)
-        page = noramark.children[0]
+        page = noramark.root.children[0]
         expect(page.children.size).to eq 3
         expect(page.line_no).to eq 1
         expect(page.children[0].line_no).to eq 1
@@ -1077,19 +1077,21 @@ in the div
 *: ul item
 text [s{with inline}] within
 EOF
-        noramark = NoraMark::Document.parse(text)
-        expect(noramark.parent).to be nil
-        expect(noramark.prev).to be nil
-        expect(noramark.next).to be nil
-        expect(noramark.content).to be nil
+        root = NoraMark::Document.parse(text).root
+        expect(root.parent).to be nil
+        expect(root.prev).to be nil
+        expect(root.next).to be nil
+        expect(root.content).to be nil
 
-        page = noramark.first_child
-        expect(noramark.last_child).to eq page
-        expect(page.parent).to eq noramark
+        page = root.first_child
+        expect(root.last_child).to eq page
+
+        expect(root.children.size).to eq 1
+        expect(root.children[0]).to eq page
+
+        expect(page.parent).to eq root
         expect(page.prev).to be nil
         expect(page.next).to be nil
-        expect(noramark.children.size).to eq 1
-        expect(noramark.children[0]).to eq page
 
       end
 
