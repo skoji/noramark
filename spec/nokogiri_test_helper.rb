@@ -1,9 +1,9 @@
 module Nokogiri
   module XML
     class Element
-      def selector
+      def selector remove_id: true
         sel = name
-        if !self['id'].nil?
+        if !remove_id && !self['id'].nil? 
           sel = sel + '#' + self['id'].split(' ').join('#')
         end
         if !self['class'].nil?
@@ -15,8 +15,8 @@ module Nokogiri
         }
         sel
       end
-      def selector_and_text
-        [selector, text]
+      def selector_and_text remove_id: true
+        [selector(remove_id: remove_id), text]
       end
       alias a selector_and_text
       def child_loop
@@ -25,14 +25,14 @@ module Nokogiri
       def child_a(index)
         element_children[index].selector_and_text
       end 
-      def selector_and_children
-        [selector] + children.select{|c| c.elem? || c.text.strip.size > 0}.map{|c| 
+      def selector_and_children remove_id: true
+        [selector(remove_id: remove_id)] + children.select{|c| c.elem? || c.text.strip.size > 0}.map{|c| 
           if !c.elem? 
             c.text
           elsif c.element_children.size == 0
-            c.selector_and_text
+            c.selector_and_text remove_id: remove_id
           else
-            c.selector_and_children
+            c.selector_and_children remove_id: remove_id
           end 
         }
       end

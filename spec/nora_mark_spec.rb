@@ -250,9 +250,9 @@ describe NoraMark do
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
+      expect(body.element_children[0].selector_and_children(remove_id: false)).to eq(
         ['div#thecontents.preface-one',
-         ['h1', 'title.']
+         ['h1#hd1', 'title.']
         ]
       )
     end
@@ -1078,6 +1078,7 @@ in the div
 text [s{with inline}] within
 EOF
         root = NoraMark::Document.parse(text).root
+
         expect(root.parent).to be nil
         expect(root.prev).to be nil
         expect(root.next).to be nil
@@ -1115,7 +1116,33 @@ EOF
         expect(second_div.class).to be NoraMark::Block
         
       end
-
+    end
+    describe 'table of contents' do
+      it 'should assign ids to headers' do
+        text = <<EOF
+---
+lang: ja
+title: title
+---
+=: chapter1
+text
+==: section 1-1
+text
+section {
+h6: some column
+text
+}
+EOF
+        noramark = NoraMark::Document.parse(text)
+        puts noramark.html[0]
+        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+        h1 = body.at_xpath('//xmlns:h1')
+        expect(h1.parent.selector remove_id: false).to eq "section#hd1"
+        h2 = body.at_xpath('//xmlns:h2')
+        expect(h2.parent.selector remove_id: false).to eq "section#hd2"
+        h6 = body.at_xpath('//xmlns:h6')
+        expect(h6.selector remove_id: false).to eq "h6#hd3"
+      end
     end
   end
 end

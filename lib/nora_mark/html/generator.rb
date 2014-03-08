@@ -171,7 +171,43 @@ module NoraMark
           }
       end
 
+      def collect_id_and_headings parsed_result
+        @id_pool = {}
+        @headings = []
+
+        all_nodes = parsed_result.all_nodes
+        all_nodes.each do
+          |x|
+          x.ids ||= []
+          x.ids.each do
+            |id|
+            if !@id_pool[id].nil?
+              warn "duplicate id #{id}"
+            end
+            @id_pool[id] = x
+          end
+          @headings << x if (x.kind_of?(LineCommand) && x.name =~ /h[1-6]/) || x.kind_of?(HeadedSection)
+        end
+      end
+      def assign_id_to_headings parsed_result
+        collect_id_and_headings parsed_result
+        count = 1
+        @headings.each do
+          |heading|
+          if heading.ids.size == 0
+            begin 
+              id = "hd#{count}"
+              count = count + 1
+            end while @id_pool[id]
+            heading.ids << id
+          end
+        end
+      end
+
       def convert(parsed_result, render_parameter = {})
+
+        assign_id_to_headings parsed_result
+
         children = parsed_result.children
         @context.file_basename = parsed_result.document_name
         @context.render_parameter = render_parameter
