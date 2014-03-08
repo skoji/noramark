@@ -1083,16 +1083,37 @@ EOF
         expect(root.next).to be nil
         expect(root.content).to be nil
 
-        page = root.first_child
-        expect(root.last_child).to eq page
-
         expect(root.children.size).to eq 1
+        page = root.first_child
         expect(root.children[0]).to eq page
-
+        expect(root.last_child).to eq page
         expect(page.parent).to eq root
         expect(page.prev).to be nil
         expect(page.next).to be nil
 
+        first_pgroup = page.first_child
+        expect(first_pgroup.class).to be NoraMark::ParagraphGroup
+        expect(first_pgroup.parent).to eq page
+        expect(first_pgroup.children.size).to eq 1
+        expect(first_pgroup.prev).to be nil
+
+        paragraph = first_pgroup.first_child
+        expect(paragraph.class).to be NoraMark::Paragraph
+        expect(paragraph.parent).to be first_pgroup
+        expect(paragraph.prev).to be nil
+        expect(paragraph.next).to be nil
+        expect(paragraph.children.size).to eq 1
+        text = paragraph.first_child
+        expect(text.class).to be NoraMark::Text
+        expect(text.content).to eq '1st line.'
+        expect(text.children.size).to eq 0
+        expect(text.prev).to be nil
+        expect(text.next).to be nil
+        expect(text.parent).to eq paragraph
+
+        second_div = first_pgroup.next
+        expect(second_div.class).to be NoraMark::Block
+        
       end
 
     end
