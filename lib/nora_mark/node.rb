@@ -68,7 +68,6 @@ module NoraMark
     end
 
     def children=(x)
-      warn 'this should be removed or not'
       @content = x
       reparent
     end
@@ -104,7 +103,7 @@ module NoraMark
     attr_accessor :page_no
   end
 
-  class DlItem < Node
+  class DLItem < Node
     def reparent
       super
       @parameters[0].inject(nil) do
