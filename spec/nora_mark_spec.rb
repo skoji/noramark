@@ -252,7 +252,7 @@ describe NoraMark do
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
       expect(body.element_children[0].selector_and_children(remove_id: false)).to eq(
         ['div#thecontents.preface-one',
-         ['h1#hd1', 'title.']
+         ['h1#heading_index_1', 'title.']
         ]
       )
     end
@@ -1139,19 +1139,19 @@ EOF
       it 'should assign ids to headers' do
         body = Nokogiri::XML::Document.parse(@noramark.html[0]).root.at_xpath('xmlns:body')
         h1 = body.at_xpath('//xmlns:h1')
-        expect(h1.selector remove_id: false).to eq "h1#hd1"
+        expect(h1.selector remove_id: false).to eq "h1#heading_index_1"
         h2 = body.at_xpath('//xmlns:h2')
-        expect(h2.selector remove_id: false).to eq "h2#hd2"
+        expect(h2.selector remove_id: false).to eq "h2#heading_index_2"
         body = Nokogiri::XML::Document.parse(@noramark.html[1]).root.at_xpath('xmlns:body')
         h6 = body.at_xpath('//xmlns:h6')
-        expect(h6.selector remove_id: false).to eq "h6#hd3"
+        expect(h6.selector remove_id: false).to eq "h6#heading_index_3"
       end
       it 'should generate tocs' do
         toc = @noramark.html.toc
         expect(toc.size).to eq 3
-        expect(toc[0]).to eq({link: "nora_00001.xhtml#hd1", level: 1, text: "chapter 1"})
-        expect(toc[1]).to eq({link: "nora_00001.xhtml#hd2", level: 2, text: "section 1-1"})
-        expect(toc[2]).to eq({link: "nora_00002.xhtml#hd3", level: 6, text: "some column"})
+        expect(toc[0]).to eq({link: "nora_00001.xhtml#heading_index_1", level: 1, text: "chapter 1"})
+        expect(toc[1]).to eq({link: "nora_00001.xhtml#heading_index_2", level: 2, text: "section 1-1"})
+        expect(toc[2]).to eq({link: "nora_00002.xhtml#heading_index_3", level: 6, text: "some column"})
       end
     end
   end

@@ -194,7 +194,7 @@ module NoraMark
           |heading|
           if heading.ids.size == 0 || heading.kind_of?(HeadedSection)
             begin 
-              id = "hd#{count}"
+              id = "heading_index_#{count}"
               count = count + 1
             end while @id_pool[id]
             heading.kind_of?(HeadedSection) ? (heading.named_parameters[:heading_id] ||= []) << id : heading.ids << id
