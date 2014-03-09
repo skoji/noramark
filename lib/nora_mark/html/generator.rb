@@ -221,45 +221,10 @@ module NoraMark
         @context.result
       end
 
-      def heading_level(node)
-        case node
-        when LineCommand
-          node.name =~ /h([1-6])/
-          $1.to_i
-        when HeadedSection
-          node.level
-        else
-          nil
-        end
-      end
-
-      def heading_text(node)
-        case node
-        when LineCommand
-          node.get_text
-        when HeadedSection
-          node.heading.map(&:get_text).join ''
-        else
-          nil
-        end
-      end
-
-      def heading_id(node)
-        case node
-        when LineCommand
-          node.ids[0]
-        when HeadedSection
-          node.named_parameters[:heading_id][0]
-        end
-      end
       def generate_toc
         @headings.map do
           |heading|
-          { page: heading.ancestors("kind_of?" => Page)[0].page_no,
-            id: heading_id(heading),
-            level: heading_level(heading),
-            text: heading_text(heading)
-          }
+          { page: heading.ancestors("kind_of?" => Page)[0].page_no }.merge heading.heading_info
         end
       end
 

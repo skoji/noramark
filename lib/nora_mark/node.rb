@@ -122,7 +122,20 @@ module NoraMark
       end << super
     end
   end
+
+  class LineCommand < Node
+    def heading_info
+      @name =~ /h([1-6])/
+      return {} if $1.nil?
+      {level:  $1.to_i, id: @ids[0], text: get_text }
+    end
+  end
+
   class HeadedSection < Node
+    def heading_info
+      {level: @level, id: (named_parameters[:heading_id] || [])[0], text: @heading.map(&:get_text).join('')}
+    end
+
     def reparent
       super
       @heading.inject(nil) do
