@@ -29,6 +29,23 @@ module NoraMark
         node = node.next
       end
     end
+
+    def match(selector)
+      selector.each {
+        |k,v|
+        return false unless send(k, v)
+      }
+    end
+
+    def ancestors(selector = {})
+      result = []
+      node = parent
+      while !node.nil?
+        result << node if node.match(selector)
+        node = node.parent
+      end
+      result
+    end
     
     def reparent
       return if @content.nil?
@@ -42,11 +59,12 @@ module NoraMark
         child_node
       end
       @content = nil
+      @children = nil
     end
 
     def children
       return [] if @first_child.nil?
-      return @content ||= NodeSet.new(@first_child.collect { |node| node })
+      return @children ||= NodeSet.new(@first_child.collect { |node| node })
     end
 
     def children=(x)
@@ -69,21 +87,80 @@ module NoraMark
       all_nodes.each { |node| @content = nil }
       Marshal.restore Marshal.dump self
     end
+
+    def get_text
+      children.inject("") do
+        |result, node|
+        result << node.get_text
+      end
+    end
   end
 
   class Root < Node
     attr_accessor :document_name
   end
 
+  class Page < Node
+    attr_accessor :page_no
+  end
+
+  class DlItem < Node
+    def reparent
+      super
+      @parameters[0].inject(nil) do
+        |prev, child_node|
+        child_node.prev = prev
+        prev.next = child_node if !prev.nil?
+        child_node.parent = self
+        child_node.reparent 
+        child_node
+      end
+    end
+    def get_text
+      @parameters[0].inject('') do
+        |result, node|
+        result << node.get_text
+      end << super
+    end
+  end
+  class HeadedSection < Node
+    def reparent
+      super
+      @heading.inject(nil) do
+        |prev, child_node|
+        child_node.prev = prev
+        prev.next = child_node if !prev.nil?
+        child_node.parent = self
+        child_node.reparent 
+        child_node
+      end
+    end
+
+    def get_text
+      @heading[0].inject('') do
+        |result, node|
+        result << node.get_text
+      end << super
+    end
+
+  end
   class Text < Node
     def reparent
       # do nothing.
     end
+
+    def get_text
+      @content
+    end
   end
+
 
   class PreformattedBlock < Node
     def reparent
       # do nothing.
+    end
+    def get_text
+      @content.join "\n"
     end
   end
   
@@ -91,6 +168,11 @@ module NoraMark
     def reparent
       # do nothing.
     end
+
+    def get_text
+      @content.join "\n"
+    end
+
     def yaml
       @yaml ||= YAML.load(@content.join("\n"))
       @yaml

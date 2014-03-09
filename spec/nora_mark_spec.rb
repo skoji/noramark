@@ -1118,30 +1118,40 @@ EOF
       end
     end
     describe 'table of contents' do
-      it 'should assign ids to headers' do
-        text = <<EOF
+      before do
+        @text = <<EOF
 ---
 lang: ja
 title: title
 ---
-=: chapter1
+=: [strong{chapter 1}]
 text
 ==: section 1-1
 text
+newpage:
 section {
-h6: some column
+h6: [strong{some column}]
 text
 }
 EOF
-        noramark = NoraMark::Document.parse(text)
-        puts noramark.html[0]
-        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+        @noramark = NoraMark::Document.parse(@text, document_name: 'nora')
+      end
+      it 'should assign ids to headers' do
+        body = Nokogiri::XML::Document.parse(@noramark.html[0]).root.at_xpath('xmlns:body')
         h1 = body.at_xpath('//xmlns:h1')
         expect(h1.parent.selector remove_id: false).to eq "section#hd1"
         h2 = body.at_xpath('//xmlns:h2')
         expect(h2.parent.selector remove_id: false).to eq "section#hd2"
+        body = Nokogiri::XML::Document.parse(@noramark.html[1]).root.at_xpath('xmlns:body')
         h6 = body.at_xpath('//xmlns:h6')
         expect(h6.selector remove_id: false).to eq "h6#hd3"
+      end
+      it 'should generate tocs' do
+        toc = @noramark.html.toc
+        expect(toc.size).to eq 3
+        expect(toc[0]).to eq({link: "nora_00001.xhtml#hd1", level: 1, text: "chapter 1"})
+        expect(toc[1]).to eq({link: "nora_00001.xhtml#hd2", level: 2, text: "section 1-1"})
+        expect(toc[2]).to eq({link: "nora_00002.xhtml#hd3", level: 6, text: "some column"})
       end
     end
   end

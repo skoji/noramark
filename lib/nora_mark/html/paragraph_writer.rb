@@ -40,7 +40,6 @@ module NoraMark
                                memo << Breakline.new(memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
                                memo << node
                              end
-                             p node.children.map { |x| x.class }
                              node
                            end
                            )

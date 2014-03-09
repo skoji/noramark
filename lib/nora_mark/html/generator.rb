@@ -171,11 +171,11 @@ module NoraMark
           }
       end
 
-      def collect_id_and_headings parsed_result
+      def collect_id_and_headings 
         @id_pool = {}
         @headings = []
 
-        all_nodes = parsed_result.all_nodes
+        all_nodes = @parsed_result.all_nodes
         all_nodes.each do
           |x|
           x.ids ||= []
@@ -189,8 +189,8 @@ module NoraMark
           @headings << x if (x.kind_of?(LineCommand) && x.name =~ /h[1-6]/) || x.kind_of?(HeadedSection)
         end
       end
-      def assign_id_to_headings parsed_result
-        collect_id_and_headings parsed_result
+      def assign_id_to_headings 
+        collect_id_and_headings
         count = 1
         @headings.each do
           |heading|
@@ -205,8 +205,9 @@ module NoraMark
       end
 
       def convert(parsed_result, render_parameter = {})
+        @parsed_result = parsed_result
 
-        assign_id_to_headings parsed_result
+        assign_id_to_headings 
 
         children = parsed_result.children
         @context.file_basename = parsed_result.document_name
@@ -218,21 +219,45 @@ module NoraMark
           |node|
           to_html(node)
         }
+        @context.set_toc generate_toc
         @context.result
       end
 
+      def heading_level(node)
+        case node
+        when LineCommand
+          node.name =~ /h([1-6])/
+          $1.to_i
+        when HeadedSection
+          node.level
+        else
+          nil
+        end
+      end
+
+      def heading_text(node)
+        case node
+        when LineCommand
+          node.get_text
+        when HeadedSection
+          node.heading.map(&:get_text).join ''
+        else
+          nil
+        end
+      end
+      def generate_toc
+        @headings.map do
+          |heading|
+          { page: heading.ancestors("kind_of?" => Page)[0].page_no,
+            id: heading.ids[0],
+            level: heading_level(heading),
+            text: heading_text(heading)
+          }
+        end
+      end
+
       def to_html(node)
-        if node.is_a? String
-          @context << escape_html(node)
-        elsif node.is_a? Hash
-          writer = @writers[node[:type]]
-          if writer.nil?
-            warn "can't find html generator for \"#{node}\""
-            @context << escape_html(node[:raw_text])
-          else
-            writer.write(node)
-          end
-        elsif node.kind_of? Text
+        if node.kind_of? Text
           @context << escape_html(node.content)
         else
           writer = @writers[node.class]

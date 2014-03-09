@@ -26,6 +26,13 @@ module NoraMark
         @root = parser.result
         @root.document_name ||= @document_name
         @root.reparent
+        @root.first_child.inject(1) do |page_no, node|
+          if node.kind_of? Page
+            node.page_no = page_no
+            page_no = page_no + 1
+          end
+          page_no
+        end
       end
       instance
     end

@@ -1,10 +1,9 @@
 module NoraMark
   module Html
     class Context
-      attr_accessor :title, :head_inserters, :toc, :lang, :stylesheets, :enable_pgroup, :render_parameter
+      attr_accessor :title, :head_inserters, :lang, :stylesheets, :enable_pgroup, :render_parameter
       def initialize(param = {})
         @head_inserters = []
-        @toc = []
         @lang = param[:lang] || 'en'
         @title = param[:title] || 'NoraMark generated document'
         @stylesheets = param[:stylesheets] || []
@@ -71,7 +70,6 @@ module NoraMark
         page << "</head>\n"
         page << "<body>\n"
         @pages << page
-        @toc << title
       end
 
       def end_html
@@ -90,6 +88,9 @@ module NoraMark
         @pages.last << text
       end
 
+      def set_toc toc
+        @pages.set_toc toc
+      end
       def result
         if !@pages.last.frozen?
           end_html
