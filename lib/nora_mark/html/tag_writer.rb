@@ -92,17 +92,17 @@ module NoraMark
       end
 
       def write_children(node)
-        write_array(node.content)
+        write_nodeset(node.children)
       end
 
-      def write_array(array)
-        return if array.nil? || array.size == 0
-        array.each { |x| @generator.to_html x }
+      def write_nodeset(nodeset)
+        return if nodeset.nil? || nodeset.size == 0
+        nodeset.each { |x| @generator.to_html x }
         @generator.context.chop_last_space if (@param[:chop_last_space]) 
       end
       
       def children_not_empty(node)
-        !node.content.nil? && node.content.size > 0 && node.content.reject { |x| x.nil? }.size > 0
+        !node.children.nil? && node.children.size > 0 && node.children.reject { |x| x.nil? }.size > 0
       end
     end
   end

@@ -19,6 +19,7 @@
 %% frontmatter = ast Frontmatter(content, line_no)
 %% h_section = ast HeadedSection(level, heading, content, line_no)
 %% page = ast Page(content, line_no)
+%% root = ast Root(content)
 
 # line number 
 ln = { current_line }
@@ -183,7 +184,7 @@ Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages }
       | Page:page { [ page ] }  
 
 #root
-root = BOM? EmptyLine* Pages:pages EofComment? Eof { pages }
+root = BOM? EmptyLine* Pages:pages EofComment? Eof ~root(pages)
 
 
 

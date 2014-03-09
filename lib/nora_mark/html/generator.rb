@@ -131,7 +131,8 @@ module NoraMark
           DLItem => 
           TagWriter.create('', self, chop_last_space: true, node_preprocessor: proc do |node| node.no_tag = true; node end,
                            write_body_preprocessor: proc do |node|
-                             output "<dt>"; write_array node.parameters[0]; output "</dt>\n"
+                             ### TODO 'this implementation should chnage'
+                             output "<dt>"; write_nodeset node.parameters[0]; output "</dt>\n"
                              output "<dd>"; write_children node; output "</dd>\n"
                              :done
                            end),
@@ -143,7 +144,8 @@ module NoraMark
           HeadedSection => 
           TagWriter.create('section', self, write_body_preprocessor: proc do |node|
                              output "<h#{node.level}>"
-                             write_array node.heading
+                             ###TODO 'this implementation should chnage'
+                             write_nodeset node.heading
                              @generator.context.chop_last_space
                              output "</h#{node.level}>\n"
                              :continue
@@ -169,8 +171,45 @@ module NoraMark
           }
       end
 
+      def collect_id_and_headings 
+        @id_pool = {}
+        @headings = []
+
+        all_nodes = @parsed_result.all_nodes
+        all_nodes.each do
+          |x|
+          x.ids ||= []
+          x.ids.each do
+            |id|
+            if !@id_pool[id].nil?
+              warn "duplicate id #{id}"
+            end
+            @id_pool[id] = x
+          end
+          @headings << x if (x.kind_of?(LineCommand) && x.name =~ /h[1-6]/) || x.kind_of?(HeadedSection)
+        end
+      end
+      def assign_id_to_headings 
+        collect_id_and_headings
+        count = 1
+        @headings.each do
+          |heading|
+          if heading.ids.size == 0
+            begin 
+              id = "hd#{count}"
+              count = count + 1
+            end while @id_pool[id]
+            heading.ids << id
+          end
+        end
+      end
+
       def convert(parsed_result, render_parameter = {})
-        children = parsed_result.content
+        @parsed_result = parsed_result
+
+        assign_id_to_headings 
+
+        children = parsed_result.children
         @context.file_basename = parsed_result.document_name
         @context.render_parameter = render_parameter
         if render_parameter[:nonpaged]
@@ -180,21 +219,45 @@ module NoraMark
           |node|
           to_html(node)
         }
+        @context.set_toc generate_toc
         @context.result
       end
 
+      def heading_level(node)
+        case node
+        when LineCommand
+          node.name =~ /h([1-6])/
+          $1.to_i
+        when HeadedSection
+          node.level
+        else
+          nil
+        end
+      end
+
+      def heading_text(node)
+        case node
+        when LineCommand
+          node.get_text
+        when HeadedSection
+          node.heading.map(&:get_text).join ''
+        else
+          nil
+        end
+      end
+      def generate_toc
+        @headings.map do
+          |heading|
+          { page: heading.ancestors("kind_of?" => Page)[0].page_no,
+            id: heading.ids[0],
+            level: heading_level(heading),
+            text: heading_text(heading)
+          }
+        end
+      end
+
       def to_html(node)
-        if node.is_a? String
-          @context << escape_html(node)
-        elsif node.is_a? Hash
-          writer = @writers[node[:type]]
-          if writer.nil?
-            warn "can't find html generator for \"#{node}\""
-            @context << escape_html(node[:raw_text])
-          else
-            writer.write(node)
-          end
-        elsif node.kind_of? Text
+        if node.kind_of? Text
           @context << escape_html(node.content)
         else
           writer = @writers[node.class]

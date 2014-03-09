@@ -9,7 +9,7 @@ module NoraMark
           Paragraph =>
           TagWriter.create('p', @generator, chop_last_space: true, 
                            node_preprocessor: proc do |node|
-                             first = node.content[0]
+                             first = node.children[0]
                              if first.kind_of? Text
                                first.content.sub!(/^[[:space:]]+/, '')
                                add_class(node, 'noindent') if first.content =~/^(「|『|（)/  # TODO: should be plaggable
@@ -36,7 +36,7 @@ module NoraMark
             ParagraphGroup =>
           TagWriter.create("p", @generator,
                            node_preprocessor: proc do |node|
-                             node.content = node.content.inject([]) do |memo, node|
+                             node.children = node.children.inject([]) do |memo, node|
                                memo << Breakline.new(memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
                                memo << node
                              end
