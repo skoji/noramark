@@ -1139,9 +1139,9 @@ EOF
       it 'should assign ids to headers' do
         body = Nokogiri::XML::Document.parse(@noramark.html[0]).root.at_xpath('xmlns:body')
         h1 = body.at_xpath('//xmlns:h1')
-        expect(h1.parent.selector remove_id: false).to eq "section#hd1"
+        expect(h1.selector remove_id: false).to eq "h1#hd1"
         h2 = body.at_xpath('//xmlns:h2')
-        expect(h2.parent.selector remove_id: false).to eq "section#hd2"
+        expect(h2.selector remove_id: false).to eq "h2#hd2"
         body = Nokogiri::XML::Document.parse(@noramark.html[1]).root.at_xpath('xmlns:body')
         h6 = body.at_xpath('//xmlns:h6')
         expect(h6.selector remove_id: false).to eq "h6#hd3"

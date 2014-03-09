@@ -24,9 +24,10 @@ module NoraMark
       end
 
       def attr_string(attrs)
+        return '' if attrs.nil?
         attrs.map do
           |name, vals|
-          if vals.size == 0
+          if vals.nil? || vals.size == 0
             ''
           else
             " #{name}='#{vals.join(' ')}'"            

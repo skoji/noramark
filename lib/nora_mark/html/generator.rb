@@ -142,7 +142,7 @@ module NoraMark
           #headed-section
           HeadedSection => 
           TagWriter.create('section', self, write_body_preprocessor: proc do |node|
-                             output "<h#{node.level}>"
+                             output "<h#{node.level}#{ids_string(node.named_parameters[:heading_id])}>"
                              write_nodeset node.heading
                              @generator.context.chop_last_space
                              output "</h#{node.level}>\n"
@@ -192,12 +192,12 @@ module NoraMark
         count = 1
         @headings.each do
           |heading|
-          if heading.ids.size == 0
+          if heading.ids.size == 0 || heading.kind_of?(HeadedSection)
             begin 
               id = "hd#{count}"
               count = count + 1
             end while @id_pool[id]
-            heading.ids << id
+            heading.kind_of?(HeadedSection) ? (heading.named_parameters[:heading_id] ||= []) << id : heading.ids << id
           end
         end
       end
@@ -244,11 +244,19 @@ module NoraMark
         end
       end
 
+      def heading_id(node)
+        case node
+        when LineCommand
+          node.ids[0]
+        when HeadedSection
+          node.named_parameters[:heading_id][0]
+        end
+      end
       def generate_toc
         @headings.map do
           |heading|
           { page: heading.ancestors("kind_of?" => Page)[0].page_no,
-            id: heading.ids[0],
+            id: heading_id(heading),
             level: heading_level(heading),
             text: heading_text(heading)
           }
