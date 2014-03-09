@@ -1,0 +1,19 @@
+/*
+  nora-simple-ja.css
+  simple css for NoraMark japanese text
+  */
+
+p {
+  text-indent: 1em;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.noindent {
+  text-indent: 0;
+}
+
+.pgroup {
+    margin-top 1em;
+}
+

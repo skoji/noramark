@@ -72,6 +72,28 @@ module NoraMark
       reparent
     end
 
+    def child_replaced
+      @children = nil
+    end
+    
+    def replace(node)
+      node.parent = @parent
+      node.prev = @prev
+      node.next = @next
+      @parent.first_child = node if (@parent.first_child == self)
+      @parent.last_child = node if (@parent.last_child == self)
+      node.reparent
+      node.parent.child_replaced
+
+      self.prev = nil
+      self.next = nil
+      self.parent = nil
+      self.children = nil
+      self.first_child = nil
+      self.last_child = nil
+
+    end
+    
     def all_nodes
       return [] if @first_child.nil?
       @first_child.inject([]) do

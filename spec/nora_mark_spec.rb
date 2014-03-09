@@ -1052,21 +1052,35 @@ EOF
       end
     end
     describe 'node manipulation' do
-      it 'should access line number' do
-        text = <<EOF
+      before do
+        @text = <<EOF
 1st line.
 d {
 3rd line.
 }
 5th line.
 EOF
-        noramark = NoraMark::Document.parse(text)
+      end
+      it 'should access line number' do
+        noramark = NoraMark::Document.parse(@text)
         page = noramark.root.children[0]
         expect(page.children.size).to eq 3
         expect(page.line_no).to eq 1
         expect(page.children[0].line_no).to eq 1
         expect(page.children[1].line_no).to eq 2
         expect(page.children[2].children[0].line_no).to eq 5
+      end
+
+      it 'replace existing node' do
+        noramark = NoraMark::Document.parse(@text)
+        page = noramark.root.children[0]
+        first_pgroup = page.children[0]
+        line_no = first_pgroup.line_no
+        new_node = NoraMark::ParagraphGroup.new(['the_id'], ['the_class'], [], {}, [ NoraMark::Text.new("replaced.", line_no)],  line_no)
+        first_pgroup.replace(new_node)
+        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children(remove_id: false)).to eq(
+          ['p#the_id.the_class', 'replaced.'])
       end
       it 'should reparent tree' do
         text = <<EOF
@@ -1114,7 +1128,6 @@ EOF
 
         second_div = first_pgroup.next
         expect(second_div.class).to be NoraMark::Block
-        
       end
     end
     describe 'table of contents' do
