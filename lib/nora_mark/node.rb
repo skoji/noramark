@@ -145,7 +145,7 @@ module NoraMark
     end
   end
 
-  class LineCommand < Node
+  class Block < Node
     def heading_info
       @name =~ /h([1-6])/
       return {} if $1.nil?

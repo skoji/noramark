@@ -99,24 +99,6 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :content
       attr_reader :line_no
     end
-    class LineCommand < Node
-      def initialize(name, ids, classes, parameters, named_parameters, content, line_no)
-        @name = name
-        @ids = ids
-        @classes = classes
-        @parameters = parameters
-        @named_parameters = named_parameters
-        @content = content
-        @line_no = line_no
-      end
-      attr_reader :name
-      attr_reader :ids
-      attr_reader :classes
-      attr_reader :parameters
-      attr_reader :named_parameters
-      attr_reader :content
-      attr_reader :line_no
-    end
     class Newpage < Node
       def initialize(ids, classes, parameters, named_parameters, content, line_no)
         @ids = ids
@@ -293,9 +275,6 @@ class NoraMark::Parser < KPeg::CompiledParser
     end
     def inline(name, ids, classes, parameters, named_parameters, content, line_no)
       ::NoraMark::Inline.new(name, ids, classes, parameters, named_parameters, content, line_no)
-    end
-    def line_command(name, ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::LineCommand.new(name, ids, classes, parameters, named_parameters, content, line_no)
     end
     def newpage(ids, classes, parameters, named_parameters, content, line_no)
       ::NoraMark::Newpage.new(ids, classes, parameters, named_parameters, content, line_no)
@@ -3005,7 +2984,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # LineCommand = - !CommandNameForSpecialLineCommand Command:c ":" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}
+  # LineCommand = - !CommandNameForSpecialLineCommand Command:c ":" - DocumentContent?:content - Le EmptyLine* {block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}
   def _LineCommand
 
     _save = self.pos
@@ -3070,7 +3049,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; line_command(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln]); end
+      @result = begin; block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -4280,7 +4259,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_LongDefinitionList] = rule_info("LongDefinitionList", "ln:ln LongDefinitionItem+:items {definition_list([], [], [], [], items, ln)}")
   Rules[:_LongDefinitionItem] = rule_info("LongDefinitionItem", "- ln:ln \";:\" - DocumentContentExcept('{'):term \"{\" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], [], definition, ln)}")
   Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
-  Rules[:_LineCommand] = rule_info("LineCommand", "- !CommandNameForSpecialLineCommand Command:c \":\" - DocumentContent?:content - Le EmptyLine* {line_command(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
+  Rules[:_LineCommand] = rule_info("LineCommand", "- !CommandNameForSpecialLineCommand Command:c \":\" - DocumentContent?:content - Le EmptyLine* {block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_LineBlock] = rule_info("LineBlock", "(ItemsList | LineCommand)")
   Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
   Rules[:_BlockDelimiter] = rule_info("BlockDelimiter", "(BlockHead | BlockEnd)")

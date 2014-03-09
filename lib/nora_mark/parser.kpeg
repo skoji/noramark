@@ -5,7 +5,6 @@
 %% paragraph = ast Paragraph(ids, classes, parameters, named_parameters, content, line_no)
 %% paragraph_group = ast ParagraphGroup(ids, classes, parameters,named_parameters,  content, line_no)
 %% br = ast Breakline(line_no)
-%% line_command = ast LineCommand(name, ids, classes, parameters,named_parameters,  content, line_no)
 %% block = ast Block(name, ids, classes, parameters, named_parameters,  content, line_no)
 %% newpage = ast Newpage(ids, classes, parameters, named_parameters,  content, line_no)
 %% inline = ast Inline(name, ids, classes, parameters, named_parameters,  content, line_no)
@@ -138,7 +137,7 @@ ItemsList = (UnorderedList
           | LongDefinitionList) 
 
 # generic line command
-LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~line_command(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
+LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
 
 # blocks
 LineBlock =  ItemsList | LineCommand 

@@ -55,9 +55,16 @@ module NoraMark
                              node.body_empty = true
                              node
                            end),
-          LineCommand =>
+          Block =>
           WriterSelector.new(self,
                              {
+                               'd' => TagWriter.create('div', self),
+                               'art' => article_writer,
+                               'arti' => article_writer,
+                               'article' => article_writer,
+                               'sec' => section_writer,
+                               'sect' => section_writer,
+                               'section' => section_writer,
                                'image' =>
                                TagWriter.create('div', self,
                                                 node_preprocessor: proc do |node|
@@ -79,17 +86,6 @@ module NoraMark
                                                 end
                                                 ),
 
-                               }),
-          Block =>
-          WriterSelector.new(self,
-                             {
-                               'd' => TagWriter.create('div', self),
-                               'art' => article_writer,
-                               'arti' => article_writer,
-                               'article' => article_writer,
-                               'sec' => section_writer,
-                               'sect' => section_writer,
-                               'section' => section_writer,
                              }),
           Newpage => newpage_writer,
           Inline =>
@@ -184,7 +180,7 @@ module NoraMark
             end
             @id_pool[id] = x
           end
-          @headings << x if (x.kind_of?(LineCommand) && x.name =~ /h[1-6]/) || x.kind_of?(HeadedSection)
+          @headings << x if (x.kind_of?(Block) && x.name =~ /h[1-6]/) || x.kind_of?(HeadedSection)
         end
       end
       def assign_id_to_headings 
