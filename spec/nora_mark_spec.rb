@@ -388,7 +388,7 @@ describe NoraMark do
     end
 
     it 'should handle block image with before caption' do
-      text = "this is normal line.\nimage(./image1.jpg, alt text, caption_before: true): caption text"
+      text = "this is normal line.\nimage(./image1.jpg, alt text)[caption_before: true]: caption text"
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
       converted = noramark.html
       body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')

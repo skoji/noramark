@@ -2,20 +2,20 @@
 
 %% ast-location = ::NoraMark
 %% text = ast Text(content, line_no)
-%% paragraph = ast Paragraph(ids, classes, parameters, content, line_no)
-%% paragraph_group = ast ParagraphGroup(ids, classes, parameters, content, line_no)
+%% paragraph = ast Paragraph(ids, classes, parameters, named_parameters, content, line_no)
+%% paragraph_group = ast ParagraphGroup(ids, classes, parameters,named_parameters,  content, line_no)
 %% br = ast Breakline(line_no)
-%% line_command = ast LineCommand(name, ids, classes, parameters, content, line_no)
-%% block = ast Block(name, ids, classes, parameters, content, line_no)
-%% newpage = ast Newpage(ids, classes, parameters, content, line_no)
-%% inline = ast Inline(name, ids, classes, parameters, content, line_no)
-%% ul_item = ast UlItem(ids, classes, parameters, content, line_no)
-%% unordered_list = ast UnorderedList(ids, classes, parameters, content, line_no)
-%% ol_item = ast OlItem(ids, classes, parameters, content, line_no)
-%% ordered_list = ast OrderedList(ids, classes, parameters, content, line_no)
-%% dl_item = ast DLItem(ids, classes, parameters, content, line_no)
-%% definition_list = ast DefinitionList(ids, classes, parameters, content, line_no)
-%% preformatted_block = ast PreformattedBlock(name, ids, classes, parameters, codelanguage, content, line_no)
+%% line_command = ast LineCommand(name, ids, classes, parameters,named_parameters,  content, line_no)
+%% block = ast Block(name, ids, classes, parameters, named_parameters,  content, line_no)
+%% newpage = ast Newpage(ids, classes, parameters, named_parameters,  content, line_no)
+%% inline = ast Inline(name, ids, classes, parameters, named_parameters,  content, line_no)
+%% ul_item = ast UlItem(ids, classes, parameters, named_parameters,  content, line_no)
+%% unordered_list = ast UnorderedList(ids, classes, parameters, named_parameters,  content, line_no)
+%% ol_item = ast OlItem(ids, classes, parameters, named_parameters,  content, line_no)
+%% ordered_list = ast OrderedList(ids, classes, parameters,named_parameters,  content, line_no)
+%% dl_item = ast DLItem(ids, classes, parameters, named_parameters, content, line_no)
+%% definition_list = ast DefinitionList(ids, classes, parameters, named_parameters, content, line_no)
+%% preformatted_block = ast PreformattedBlock(name, ids, classes, parameters, named_parameters, codelanguage, content, line_no)
 %% frontmatter = ast Frontmatter(content, line_no)
 %% h_section = ast HeadedSection(level, heading, content, line_no)
 %% page = ast Page(content, line_no)
@@ -52,28 +52,39 @@ Parameter = (ParameterQuoted
            | ParameterSingleQuoted
            | ParameterNormal ):value { value }
 
+NParameterNormal = < /[^,\]]/* > { text }
+NParameterQuoted = '"' < /[^"]/* > '"' - &/[,\]]/  { text }
+NParameterSingleQuoted = "'" < /[^']/* > "'" - &/[,\]]/ { text }
+NParameter = (NParameterQuoted
+           | NParameterSingleQuoted
+           | NParameterNormal ):value { value }
+
 Parameters = Parameter:parameter ',' - Parameters:parameters { [ parameter ] + parameters }
            | Parameter:parameter { [ parameter ] }
 
-Command = CommandName:cn ('(' - Parameters:args - ')')? { args ||= []; cn.merge({ args: args }) }
+NamedParameter = Word:key - ':' - NParameter:parameter { { key.to_sym => parameter } }
+NamedParameters = NamedParameter:parameter - ',' - NamedParameters:parameters { parameter.merge parameters }
+                | NamedParameter:parameter { parameter }
+
+Command = CommandName:cn ('(' - Parameters:args - ')')? ('[' - NamedParameters:named_args - ']')? { cn.merge({ args: args || [] , named_args: named_args || {}}) }
 
 # paragraph
-ImplicitParagraph =  - !ParagraphDelimiter Comment* DocumentLine:content ln:ln  Comment* EofComment? ~paragraph([],[], [], content, ln)
+ImplicitParagraph =  - !ParagraphDelimiter Comment* DocumentLine:content ln:ln  Comment* EofComment? ~paragraph([],[], [], [], content, ln)
 
 # explicit paragraph
 ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
-ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content Le EmptyLine* ~paragraph(c[:ids], c[:classes], c[:args], content, c[:ln])
+ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content Le EmptyLine* ~paragraph(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln])
 
 Paragraph = ExplicitParagraph | ImplicitParagraph 
 
 # paragraph_group
-ParagraphGroup = ln:ln Paragraph+:p EmptyLine* ~paragraph_group([],[],[],p, ln)
+ParagraphGroup = ln:ln Paragraph+:p EmptyLine* ~paragraph_group([],[],[],[],p, ln)
 
 # explicit block 
 BlockHead = Command:command - '{' - Nl EmptyLine* { command }
 BlockEnd =  - '}' - Le EmptyLine*
 BlockBody = (!BlockEnd Block)+:body { body } 
-ExplicitBlock = -  BlockHead:c - BlockBody:content - BlockEnd ~block(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])
+ExplicitBlock = -  BlockHead:c - BlockBody:content - BlockEnd ~block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args], content,  c[:ln])
 
 # preformatted block
 PreformattedCommand = Command:command &{ ['pre', 'code'].include? command[:name] }
@@ -84,42 +95,42 @@ PreformatEndSimple = - '}' - Le EmptyLine*
 PreformatEndComplex = - '//}' - Le EmptyLine*
 
 PreformattedBlockSimple = -  PreformattedCommandHeadSimple:c (!PreformatEndSimple (CharString Nl))+:content PreformatEndSimple
-                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln])
+                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args],  c[:named_args], c[:codelanguage], content,  c[:ln])
 
 PreformattedBlockComplex = - PreformattedCommandHeadComplex:c (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex
-                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:codelanguage], content,  c[:ln])
+                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])
 
 PreformattedBlock = PreformattedBlockComplex | PreformattedBlockSimple
 
 # inline command
 Inline = ImgInline | CommonInline
-CommonInline =  '[' Command:c '{' - DocumentContentExcept('}'):content '}' ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])
+CommonInline =  '[' Command:c '{' - DocumentContentExcept('}'):content '}' ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
 ImgCommand = Command:c &{ c[:name] == 'img' && c[:args].size == 2}
-ImgInline =  '[' ImgCommand:c  ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], nil,  c[:ln])
+ImgInline =  '[' ImgCommand:c  ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])
 
 # special line commands
 CommandNameForSpecialLineCommand = NewpageCommand | ExplicitParagraphCommand
 
 # newpage
 NewpageCommand = Command:command &{ command[:name] == 'newpage' }
-Newpage = -  NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:ids],c[:classes],c[:args], content,  c[:ln])
+Newpage = -  NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])
 
 
 # unordered list
-UnorderedList = ln:ln UnorderedItem+:items ~unordered_list([],[],[], items, ln)
-UnorderedItem = ln:ln '*:' - DocumentContent:content Le ~ul_item([], [], [], content, ln)
+UnorderedList = ln:ln UnorderedItem+:items ~unordered_list([],[],[],[], items, ln)
+UnorderedItem = ln:ln '*:' - DocumentContent:content Le ~ul_item([], [], [], [], content, ln)
 
 # ordered list
-OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], items, ln)
-OrderedItem = ln:ln Num ':' - DocumentContent:content Le ~ol_item([], [], [], content, ln)
+OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], [], items, ln)
+OrderedItem = ln:ln Num ':' - DocumentContent:content Le ~ol_item([], [], [], [], content, ln)
 
 # definition list
-DefinitionList = ln:ln DefinitionItem+:items ~definition_list([], [], [], items, ln)
-DefinitionItem = -  ln:ln ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], definition, ln)
+DefinitionList = ln:ln DefinitionItem+:items ~definition_list([], [], [], [], items, ln)
+DefinitionItem = -  ln:ln ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], [], definition, ln)
 
 # long definition list
-LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], items, ln)
-LongDefinitionItem = -  ln:ln ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], definition, ln)
+LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], [], items, ln)
+LongDefinitionItem = -  ln:ln ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], [], definition, ln)
 
 ItemsList = (UnorderedList
           | OrderedList
@@ -127,7 +138,7 @@ ItemsList = (UnorderedList
           | LongDefinitionList) 
 
 # generic line command
-LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~line_command(c[:name], c[:ids], c[:classes], c[:args], content,  c[:ln])
+LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~line_command(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
 
 # blocks
 LineBlock =  ItemsList | LineCommand 

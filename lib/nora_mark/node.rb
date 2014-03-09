@@ -5,12 +5,12 @@ module NoraMark
     include Enumerable
     attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no
     attr_accessor :parent, :first_child, :last_child, :prev, :next, :holders
+
     def named_parameters=(named_parameters)
       @named_parameters = named_parameters
     end
 
     def named_parameters
-      @named_parameters = Hash[*(parameters.select { |x| x.include?(':') }.map { |x| v = x.split(':', 2); [v[0].strip.to_sym, v[1]]}.flatten)] if !@parameters.nil?
       @named_parameters ||= {}
     end
 
