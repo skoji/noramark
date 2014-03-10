@@ -59,7 +59,7 @@ module NoraMark
       if selector.is_a? String
         selector = { name: selector }
       end
-      s = selector.map { |k,v| modify_selector(k,v) }
+      selector.map { |k,v| modify_selector(k,v) }
     end
     def ancestors(selector = {})
       result = []
@@ -73,7 +73,6 @@ module NoraMark
     
     def reparent
       return if @content.nil?
-      p self.name if @content == 'title' 
       @first_child = @content.first
       @last_child = @content.last
       @content.inject(nil) do |prev, child_node|
@@ -103,22 +102,21 @@ module NoraMark
     
     def replace(node)
       node.parent = @parent
-      node.prev = @prev
-      @prev.next = node unless @prev.nil?
-      node.next = @next
-      @next.prev = node unless @next.nil?
       @parent.first_child = node if (@parent.first_child == self)
       @parent.last_child = node if (@parent.last_child == self)
+
+      node.prev = @prev
+      node.next = @next
+
+      @prev.next = node unless @prev.nil?
+      @next.prev = node unless @next.nil?
+
       node.reparent
       node.parent.child_replaced
 
       self.prev = nil
       self.next = nil
       self.parent = nil
-      self.children = nil
-      self.first_child = nil
-      self.last_child = nil
-
     end
     
     def all_nodes
