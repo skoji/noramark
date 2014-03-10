@@ -40,8 +40,8 @@ module NoraMark
 
     def modify_selector(k,v)
       case k
-      when 'kind_of?'
-        proc { | node | node.kind_of? v }
+      when :type
+        proc { | node | node.kind_of? NoraMark.const_get(v) }
       when :name
         proc { | node | node.name ==  v }
       when :id
@@ -92,12 +92,18 @@ module NoraMark
     end
 
     def children=(x)
-      @content = x
+      @content = x.to_ary
       reparent
     end
 
-    def child_replaced
+    def children_replaced
       @children = nil
+    end
+
+    def unlink
+      @parent = nil
+      @prev = nil
+      @next = nil
     end
     
     def replace(node)
@@ -112,13 +118,41 @@ module NoraMark
       @next.prev = node unless @next.nil?
 
       node.reparent
-      node.parent.child_replaced
+      node.parent.children_replaced
 
-      self.prev = nil
-      self.next = nil
-      self.parent = nil
+      unlink
+    end
+
+    def prepend_child(node)
+      node.unlink
+      node.reparent
+      if @children.size == 0
+        @content = node
+        reparent
+      else
+        @first_child.prev = node
+        node.next = @first_child
+        node.parent = self
+        @first_child = node
+        children_replaced
+      end
     end
     
+    def append_child(node)
+      node.unlink
+      node.reparent
+      if @children.size == 0
+        @content = node
+        reparent
+      else
+        @last_child.next = node 
+        node.prev = @last_child
+        node.parent = self
+        @last_child = node
+        children_replaced
+      end
+    end
+
     def all_nodes
       return [] if @first_child.nil?
       @first_child.inject([]) do

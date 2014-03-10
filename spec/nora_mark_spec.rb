@@ -1083,6 +1083,24 @@ EOF
           ['p#the_id.the_class', 'replaced.'])
       end
 
+      it 'modify existing node by DSL' do
+        text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
+        noramark = NoraMark::Document.parse(text, lang: 'ja')
+
+        noramark.add_transformer(generator: :html) do
+          for_node 'foobar', :modify do
+            @node.name = 'section'
+            @node.prepend_child block("h#{@node.named_parameters[:level]}", @node.parameters[0])
+          end
+        end
+        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children()).to eq(
+          ['div.pgroup', [ 'p', '1st line.' ]])
+        expect(body.element_children[1].selector_and_children()).to eq(
+          ['section', [ 'h3', 'title' ], ['div.pgroup',  ['p', 'in the section.']]])
+        expect(body.element_children[2].selector_and_children()).to eq(
+          ['section', [ 'h1','section 2.' ]])
+      end
       it 'replace existing node by DSL' do
         text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
         noramark = NoraMark::Document.parse(text, lang: 'ja')
@@ -1103,6 +1121,37 @@ EOF
         expect(body.element_children[2].selector_and_children()).to eq(
           ['section', [ 'h1','section 2.' ]])
       end
+      it 'generate complex-style headed section' do
+        text = <<EOF
+---
+lang: ja
+---
+
+=: 見出し
+
+パラグラフ。
+パラグラフ。
+
+EOF
+        noramark = NoraMark::Document.parse(text)
+        noramark.add_transformer(generator: :html) do
+          for_node({:type => :HeadedSection}, :replace) do
+            @node.name = 'section'
+            header = block('header',
+                           block('div',
+                                 block('h1', @node.heading),
+                                 classes: ['hgroup']))
+            body = block('div', @node.children, classes:['section-body'])
+            block('section', [ header, body ], inherit: true)
+          end
+        end
+        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children()).to eq(
+               ['section', [ 'header', ['div.hgroup', ['h1', '見出し']]],
+                ['div.section-body',
+                 ['div.pgroup', ['p', 'パラグラフ。'], ['p', 'パラグラフ。']]]])
+      end
+      
 
       it 'should reparent tree' do
         text = <<EOF

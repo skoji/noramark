@@ -220,7 +220,7 @@ module NoraMark
       def generate_toc
         @headings.map do
           |heading|
-          { page: heading.ancestors("kind_of?" => Page)[0].page_no }.merge heading.heading_info
+          { page: heading.ancestors(type: :Page)[0].page_no }.merge heading.heading_info
         end
       end
 
