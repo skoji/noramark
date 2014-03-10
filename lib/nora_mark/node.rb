@@ -32,14 +32,37 @@ module NoraMark
 
     def match(selector)
       selector.each {
-        |k,v|
-        return false unless send(k, v)
+        |selector|
+        return selector.call self
       }
     end
 
+    def modify_selector(k,v)
+      case k
+      when 'kind_of?'
+        proc { | node | node.kind_of? v }
+      when :name
+        proc { | node | node.name ==  v }
+      when :id
+        proc { | node | (node.ids || []).contain? v }
+      when :class
+        proc { | node | (node.class || []).contain? v }
+      when :proc
+        v
+      else
+        raise 'no selector'
+      end
+    end
+    def build_selector(selector)
+      if selector.is_a? String
+        selector = { name: selector }
+      end
+      selector.map { |k,v| modify_selector(k,v) }
+    end
     def ancestors(selector = {})
       result = []
       node = parent
+      selector = build_selector(selector)
       while !node.nil?
         result << node if node.match(selector)
         node = node.parent
