@@ -1084,24 +1084,24 @@ EOF
       end
 
       it 'replace existing node by DSL' do
-        text = "1st line.\nfoobar(title) {\n in the section.\n}\n=: section 2."
+        text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
         noramark = NoraMark::Document.parse(text, lang: 'ja')
-        noramark.operate_nodes(
-                               [ 'foobar', 
-                                 proc do |node|
-                                   block( 'section',
-                                           children: [
-                                                     block( "h#{node.level}", children: node.parameters[0] ),
-                                                    ] + node.children)
-                                 end ])
-        
+
+        noramark.add_transformer(generator: :html) do
+          for_node 'foobar', :replace do
+            block('section',
+                   [
+                    block( "h#{@node.named_parameters[:level]}", @node.parameters[0]),
+                   ] + @node.children)
+          end
+        end
         body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
         expect(body.element_children[0].selector_and_children()).to eq(
-          ['div.pgroup', [ 'p' '1st line.' ]])
+          ['div.pgroup', [ 'p', '1st line.' ]])
         expect(body.element_children[1].selector_and_children()).to eq(
-          ['section', [ 'h1' 'title' ], ['div.pgroup',  ['p', 'in the section']]])
+          ['section', [ 'h3', 'title' ], ['div.pgroup',  ['p', 'in the section.']]])
         expect(body.element_children[2].selector_and_children()).to eq(
-          ['section', [ 'h2' 'section 2.' ]])
+          ['section', [ 'h1','section 2.' ]])
       end
 
       it 'should reparent tree' do

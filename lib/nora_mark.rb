@@ -3,6 +3,8 @@ require 'nora_mark/html/generator'
 require 'nora_mark/node'
 require 'nora_mark/node_set'
 require 'nora_mark/parser'
+require 'nora_mark/transformer'
+require 'nora_mark/node_builder'
 require 'securerandom'
 
 module NoraMark
@@ -43,6 +45,7 @@ module NoraMark
 
     def html
       if @html.nil?
+        @transformers[:html].each { |t| t.transform @root }
         @html = Html::Generator.new(@param).convert(@root.clone, @render_parameter)
       end
       @html
@@ -52,6 +55,10 @@ module NoraMark
       @render_parameter.merge! param
       self
     end
+
+    def add_transformer(generator: :html, text: nil, &block)
+      (@transformers[generator] ||= []) << TransformerFactory.create(text: text, &block)
+    end
     
     def initialize(param = {})
       @param = param
@@ -60,6 +67,7 @@ module NoraMark
                        ]
       @document_name = param[:document_name] || "noramark_#{SecureRandom.uuid}"
       @render_parameter = {}
+      @transformers = { html: []}
     end 
   end
 end

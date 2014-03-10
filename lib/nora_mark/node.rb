@@ -31,6 +31,7 @@ module NoraMark
     end
 
     def match(selector)
+      selector = build_selector(selector)
       selector.each {
         |selector|
         return selector.call self
@@ -53,16 +54,16 @@ module NoraMark
         raise 'no selector'
       end
     end
+
     def build_selector(selector)
       if selector.is_a? String
         selector = { name: selector }
       end
-      selector.map { |k,v| modify_selector(k,v) }
+      s = selector.map { |k,v| modify_selector(k,v) }
     end
     def ancestors(selector = {})
       result = []
       node = parent
-      selector = build_selector(selector)
       while !node.nil?
         result << node if node.match(selector)
         node = node.parent
@@ -72,6 +73,7 @@ module NoraMark
     
     def reparent
       return if @content.nil?
+      p self.name if @content == 'title' 
       @first_child = @content.first
       @last_child = @content.last
       @content.inject(nil) do |prev, child_node|
@@ -102,7 +104,9 @@ module NoraMark
     def replace(node)
       node.parent = @parent
       node.prev = @prev
+      @prev.next = node unless @prev.nil?
       node.next = @next
+      @next.prev = node unless @next.nil?
       @parent.first_child = node if (@parent.first_child == self)
       @parent.last_child = node if (@parent.last_child == self)
       node.reparent
