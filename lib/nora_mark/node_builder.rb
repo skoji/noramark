@@ -12,7 +12,7 @@ module NoraMark
         children_arg = [ children_arg ] if !children_arg.kind_of? Array
         children_arg = children_arg.map { |node| (node.is_a? String) ? Text.new(node, @node.line_no) : node }
       end
-      if (inherit)
+      if inherit
         node = klass.new(name, @node.ids, @node.classes, @node.parameters, @node.named_parameters, @node.children, @node.line_no)
         node.ids = (node.ids ||[] + ids) if !ids.nil?
         node.classes = (node.classes || [])  +  classes if !classes.nil?
@@ -21,11 +21,12 @@ module NoraMark
         node.content = children_arg if !children_arg.nil?
       else
         node = klass.new(name, ids, classes, parameters, named_parameters, children_arg, @node.line_no)
+        node.reparent
       end
       node
     end
 
-    def block(name, children = nil, ids: nil, children_: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, inherit: true)
+    def block(name, children = nil, ids: nil, children_: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, inherit: false)
       _node(Block, name, children, ids: ids, children_: children_, classes: classes, parameters: parameters, named_parameters: named_parameters, attrs: attrs, inherit: inherit)
     end
 
@@ -33,7 +34,7 @@ module NoraMark
       Text.new(value, @node.line_no)
     end
 
-    def inline(name, children = nil, ids: nil, children_: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, inherit: true)
+    def inline(name, children = nil, ids: nil, children_: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, inherit: false)
       _node(Inline, name, children, ids: ids, children_: children_, classes: classes, parameters: parameters, named_parameters: named_parameters, attrs: attrs, inherit: inherit)
     end
 

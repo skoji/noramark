@@ -1136,20 +1136,17 @@ sub: 副見出し
 EOF
         noramark = NoraMark::Document.parse(text)
         noramark.add_transformer(generator: :html) do
+
           for_node({:type => :HeadedSection}, :replace) do
-            header_body = [block("h#{@node.level}", @node.heading)]
-            if @node.children[0].name == 'sub'
-              sub = @node.children[0]
-              sub.remove
-              sub.name = 'p'
-              sub.classes = ['subh']
-              header_body << sub
-            end
             header = block('header',
                            block('div',
-                                 header_body,
+                                 block("h#{@node.level}", @node.heading),
                                  classes: ['hgroup'])) 
-
+            if (fc = @node.first_child).name == 'sub'
+              fc.name = 'p'
+              fc.classes = ['subh']
+              header.first_child.append_child fc 
+            end
             body = block('div', @node.children, classes:['section-body'])
             block('section', [ header, body ], inherit: true)
           end

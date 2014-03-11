@@ -30,11 +30,11 @@ module NoraMark
       end
     end
 
-    def match(selector)
+    def match?(selector)
       selector = build_selector(selector)
-      selector.each {
-        |selector|
-        return selector.call self
+      selector.inject(true) {
+        |result, selector|
+        result && selector.call(self)
       }
     end
 
@@ -66,14 +66,17 @@ module NoraMark
       result = []
       node = parent
       while !node.nil?
-        result << node if node.match(selector)
+        result << node if node.match?(selector)
         node = node.parent
       end
       result
     end
-    
+
     def reparent
       return if @content.nil?
+
+      @content.each {|node| node.remove }
+
       @first_child = @content.first
       @last_child = @content.last
       @content.inject(nil) do |prev, child_node|
@@ -134,10 +137,10 @@ module NoraMark
     end
 
     def prepend_child(node)
-      node.unlink
+      node.remove
       node.reparent
-      if @children.size == 0
-        @content = node
+      if self.children.size == 0
+        @content = [ node ]
         reparent
       else
         @first_child.prev = node
@@ -149,10 +152,10 @@ module NoraMark
     end
     
     def append_child(node)
-      node.unlink
+      node.remove
       node.reparent
-      if @children.size == 0
-        @content = node
+      if self.children.size == 0
+        @content = [ node ]
         reparent
       else
         @last_child.next = node 

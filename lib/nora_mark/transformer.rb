@@ -7,7 +7,7 @@ module NoraMark
     def transform(node)
       node.all_nodes.each do 
         |node|
-        if match_rule = @rules.find { |rule| node.match(rule[0]) }
+        if match_rule = @rules.find { |rule| node.match?(rule[0]) }
           selector, action, p = match_rule
           NodeBuilder.new(node, @options).send(action, &p)
         end 
