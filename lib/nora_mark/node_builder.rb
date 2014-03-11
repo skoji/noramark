@@ -33,7 +33,7 @@ module NoraMark
       Text.new(value, @node.line_no)
     end
 
-    def inline
+    def inline(name, children = nil, ids: nil, children_: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, inherit: true)
       _node(Inline, name, children, ids: ids, children_: children_, classes: classes, parameters: parameters, named_parameters: named_parameters, attrs: attrs, inherit: inherit)
     end
 

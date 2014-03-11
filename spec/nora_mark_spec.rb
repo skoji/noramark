@@ -1136,7 +1136,6 @@ EOF
         noramark = NoraMark::Document.parse(text)
         noramark.add_transformer(generator: :html) do
           for_node({:type => :HeadedSection}, :replace) do
-            @node.name = 'section'
             header = block('header',
                            block('div',
                                  block('h1', @node.heading),
@@ -1150,6 +1149,22 @@ EOF
                ['section', [ 'header', ['div.hgroup', ['h1', '見出し']]],
                 ['div.section-body',
                  ['div.pgroup', ['p', 'パラグラフ。'], ['p', 'パラグラフ。']]]])
+      end
+      it 'converts my markup' do
+        text = "speak(Alice): Alice is speaking.\nspeak(Bob): and this is Bob."
+        noramark = NoraMark::Document.parse(text)
+        noramark.add_transformer(generator: :html) do
+          for_node("speak", :modify) do
+            @node.name = 'p'
+            @node.prepend_child inline('span', @node.parameters[0], classes: ['speaker'])
+          end
+        end
+        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children()).to eq(
+                 ['p', ['span.speaker', 'Alice'], 'Alice is speaking.'])
+        expect(body.element_children[1].selector_and_children()).to eq(
+                 ['p', ['span.speaker', 'Bob'], 'and this is Bob.'])
+
       end
       
 
