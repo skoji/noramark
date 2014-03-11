@@ -71,32 +71,29 @@ An example of markup text (text is in english, but the paragraph style is japane
 
 The converted XHTML file
 
-    <?xml version="1.0" encoding="UTF-8"?>
-    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-    <head>
-    <title> test title</title>
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+  <head>
+    <title>test title</title>
     <link rel="stylesheet" type="text/css" href="css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
-    </head>
-    <body>
-    <article>
-    <h1>header 1</h1>
-    <div class='pgroup'>
-    <p>article comes here.</p>
-    <p>linebreak will produce paragraph.</p>
-    </div>
-    <div class='pgroup'>
-    <p>blank line will produce</p>
-    </div>
-    <div class='column'>
-    <div class='pgroup'>
-    <p>This block will produce div.column.</p>
-    <p>Inline commands like <a href='http://github.com/skoji/nora_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
-    </div>
-    </div>
+  </head>
+  <body>
+    <article><h1 id='heading_index_1'>header 1</h1>
+      <div class='pgroup'><p>article comes here.</p>
+        <p>linebreak will produce paragraph.</p>
+      </div>
+      <div class='pgroup'><p>blank line will procude div.pgroup.</p>
+      </div>
+      <div class='column'><div class='pgroup'><p>This block will produce div.column.</p>
+          <p>Inline commands like <a href='http://github.com/skoji/nora_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
+        </div>
+      </div>
     </article>
-    </body>
-    </html>
+  </body>
+</html>
+```
 
 Another example of markup text in non-japanese (paragraph style is default)
 
@@ -124,24 +121,26 @@ Another example of markup text in non-japanese (paragraph style is default)
 
 The converted XHTML file
 
-    <?xml version="1.0" encoding="UTF-8"?>
-    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-    <head>
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
     <title> test title</title>
     <link rel="stylesheet" type="text/css" href="css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
-    </head>
-    <body>
+  </head>
+  <body>
     <article>
-    <h1>header 1</h1>
-    <p>article comes here.<br />linebreak will produce paragraph.</p>
-    <p>blank line will produce paragraph</p>
-    <div class='column'>
-    <p>This block will produce div.column.<br />Inline commands like <a href='http://github.com/skoji/nora_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
-    </div>
+      <h1>header 1</h1>
+      <p>article comes here.<br />linebreak will produce paragraph.</p>
+      <p>blank line will produce paragraph</p>
+      <div class='column'>
+        <p>This block will produce div.column.<br />Inline commands like <a href='http://github.com/skoji/nora_mark/'>this</a> and <span class='strong'>this</span> is available.</p>
+      </div>
     </article>
-    </body>
-    </html>
+  </body>
+</html>
+```
 
 
 Another example of markup text
@@ -169,30 +168,86 @@ Another example of markup text
 
 The converted XHTML file
 
-    <?xml version="1.0" encoding="UTF-8"?>
-    <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="en">
-    <head>
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="en">
+  <head>
     <title>test title</title>
     <link rel="stylesheet" type="text/css" href="css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
-    </head>
-    <body>
+  </head>
+  <body>
     <section><h1>this is the first heading</h1>
-    <div class='pgroup'><p>This line is in a section.</p>
-    <p>This line is in a section.</p>
-    </div>
-    <section><h2>this is the second heading</h2>
-    <div class='pgroup'><p>This section is nested.</p>
-    </div>
-    </section>
+      <div class='pgroup'><p>This line is in a section.</p>
+        <p>This line is in a section.</p>
+      </div>
+      <section><h2>this is the second heading</h2>
+        <div class='pgroup'><p>This section is nested.</p>
+        </div>
+      </section>
     </section>
     <section><h1>this is the third heading</h1>
-    <div class='pgroup'><p>will terminate lower level section</p>
-    </div>
+      <div class='pgroup'><p>will terminate lower level section</p>
+      </div>
     </section>
-    </body>
-    </html>    
+  </body>
+</html>    
+```
+Yet another example of markup text.
 
+    # Markdown-ish heading with explicit setion boundary
+
+    ---
+    lang: ja
+    title: test title
+    stylesheets: css/normalize.css, css/main.css
+    ---
+    
+    =: this is the first heading
+
+    This line is in a section.
+    This line is in a section.
+
+    ==: this is the second heading with explicit boundary {
+
+    This section is nested.
+    
+    }
+    
+    Here is in the first section again.
+    
+    =: this is the third heading
+
+    will terminate same level section
+
+The converted XHTML file
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+  <head>
+    <title>test title</title>
+    <link rel="stylesheet" type="text/css" href="css/normalize.css, css/main.css" />
+  </head>
+  <body>
+    <section><h1 id='heading_index_1'>this is the first heading</h1>
+      <div class='pgroup'><p>This line is in a section.</p>
+        <p>This line is in a section.</p>
+      </div>
+      <section><h2 id='heading_index_2'>this is the second heading with explicit boundary</h2>
+        <div class='pgroup'><p>This section is nested.</p>
+        </div>
+      </section>
+      <div class='pgroup'><p>Here is in the first section again.</p>
+      </div>
+    </section>
+    <section><h1 id='heading_index_3'>this is the third heading</h1>
+      <div class='pgroup'><p>will terminate same level section.</p>
+      </div>
+    </section>
+  </body>
+</html>
+```
 
 ## Customize
 

@@ -155,13 +155,13 @@ ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newp
 
 # markdown-style headings
 HStartMark(n) = - < '='+ ':' > &{ text.length - 1 == n }
-HMarkupTerminator(n) = - < '='+ ':' > - CharStringExcept('{') (- '{' - )?:x  &{ text.length - 1 <= n && x.nil? } | - Eof
+HMarkupTerminator(n) = - < '='+ ':' > - CharString:cs Le &{ text.length - 1 <= n && !cs.strip.end_with?('{') } | - Eof
 
 HStart(n) = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
 HSection(n) = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* ~h_section(h[:level], h[:heading], content, h[:ln])
 
-BlockHStart(n) = - HStartMark(n) ln:ln - DocumentContentExcept('{'):s - '{' - Le { { level: n, heading: s, ln: ln} }
-ExplicitHSection(n) BlockHStart(n):h - BlockBody:content - BlockEnd ~h_section(h[:level], h[:heading], content, h[:ln])
+BlockHStart(n) = - HStartMark(n) ln:ln - DocumentContentExcept('{'):s - '{' - Nl { { level: n, heading: s, ln: ln} }
+ExplicitHSection(n) = BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd ~h_section(h[:level], h[:heading], content, h[:ln])
 
 HeadedStart = HStart(1)
             | HStart(2)
@@ -176,7 +176,13 @@ HeadedStart = HStart(1)
             | BlockHStart(5)
             | BlockHStart(6)
 
-HeadedSection = HSection(1)
+HeadedSection = ExplicitHSection(1)
+              | ExplicitHSection(2)
+              | ExplicitHSection(3)
+              | ExplicitHSection(4)
+              | ExplicitHSection(5)
+              | ExplicitHSection(6)
+              | HSection(1)
               | HSection(2)
               | HSection(3)
               | HSection(4)

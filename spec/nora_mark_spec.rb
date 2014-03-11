@@ -959,6 +959,50 @@ EOF
            ['p', 'このように。']]]
       )
       end
+      it 'should markdown style heading not interrupted by other explicit section' do
+        text = "=: タイトルです。\r\nこれは、セクションの中です。\n ==: また次のセクションです。{\n 入れ子になります。\n =: 中にもかけます。\nさらにネストされます。\n}\nこのように。"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 1
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+          ['h1', 'タイトルです。'],
+          ['div.pgroup', 
+           ['p', 'これは、セクションの中です。']],
+           ['section',
+             ['h2', 'また次のセクションです。'],
+             ['div.pgroup', 
+              ['p', '入れ子になります。']],
+             ['section',
+              ['h1', '中にもかけます。'],
+              ['div.pgroup', 
+               ['p', 'さらにネストされます。']]]],
+          ['div.pgroup', 
+           ['p', 'このように。']]]
+      )
+      end
+
+      it 'should markdown style explicit heading correctly nested' do
+        text = "=: head one \n in the top level section.\n ==: second level section. { \n\n in the second level.\n}\n top level again."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 1
+        expect(body.element_children[0].selector_and_children).to eq(
+        ['section',
+          ['h1', 'head one'],
+          ['div.pgroup', 
+           ['p', 'in the top level section.']],
+           ['section',
+             ['h2', 'second level section.'],
+             ['div.pgroup', 
+              ['p', 'in the second level.']]],
+         ['div.pgroup', 
+          ['p', 'top level again.']]]
+      )
+      end
+
       it 'should markdown style heading not interrupted by smaller section' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。\n ==: また次のセクションです。\n 入れ子になります。\n===: さらに中のセクション \nさらに入れ子になっているはず。\n=:ここで次のセクションです。\n脱出しているはずです。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
