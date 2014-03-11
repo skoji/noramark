@@ -1,6 +1,6 @@
 ---
 lang: ja
-stylesheets: nora-simple.css, nora-simple-ja.css
+stylesheets: [nora-simple.css, nora-simple-ja.css]
 title: NoraMark Manual
 ---
 
