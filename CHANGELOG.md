@@ -1,3 +1,11 @@
+# version 0.2beta7 (NoraMark beta)
+
+* new table of contents feature. assign table of contents heading to every heading element (h1-h2 and Markdown style header)
+* new customize feature Transformer based on parse tree operation
+* new markups including Section header
+* command line tool nora2html 
+* and many other changes
+
 # version 0.2beta1 (NoraMark beta)
  * Change name to NoraMark
  
