@@ -4,8 +4,8 @@ require File.expand_path('../lib/nora_mark/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["KOJIMA Satoshi"]
   gem.email         = ["skoji@mac.com"]
-  gem.description   = %q{simple and customizable text markup language for EPUB}
-  gem.summary       = %q{simple and customizable text markup language for EPUB}
+  gem.description   = %q{Simple and customizable text markup language for EPUB/XHTML}
+  gem.summary       = %q{Simple and customizable text markup language for EPUB/XHTML}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)

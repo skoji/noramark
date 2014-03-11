@@ -2,7 +2,7 @@
 [<img src="https://secure.travis-ci.org/skoji/noramark.png" />](http://travis-ci.org/skoji/noramark) [![Coverage Status](https://coveralls.io/repos/skoji/noramark/badge.png?branch=master)](https://coveralls.io/r/skoji/noramark?branch=master)
 [![Gem Version](https://badge.fury.io/rb/nora_mark.png)](http://badge.fury.io/rb/nora_mark)
 
-NoraMark is a simple text markup language. It is designed to create XHTML files for EPUB books. Its default mode is for Japanese text.
+NoraMark is a simple and customizable text markup language. It is designed to create XHTML files for EPUB books.
 
 **CAUTION This is very early alpha version, so it's not stable at all, even the markup syntax will change**
 

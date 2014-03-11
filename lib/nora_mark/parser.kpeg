@@ -154,11 +154,14 @@ BlockDelimiter = BlockHead | BlockEnd
 ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart
 
 # markdown-style headings
-HStartMark(n) = < '='+ ':' > &{ text.length - 1 == n }
-HMarkupTerminator(n) = - < '='+ ':' > &{ text.length - 1 <= n } | - Eof
+HStartMark(n) = - < '='+ ':' > &{ text.length - 1 == n }
+HMarkupTerminator(n) = - < '='+ ':' > - CharStringExcept('{') (- '{' - )?:x  &{ text.length - 1 <= n && x.nil? } | - Eof
 
 HStart(n) = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
 HSection(n) = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* ~h_section(h[:level], h[:heading], content, h[:ln])
+
+BlockHStart(n) = - HStartMark(n) ln:ln - DocumentContentExcept('{'):s - '{' - Le { { level: n, heading: s, ln: ln} }
+ExplicitHSection(n) BlockHStart(n):h - BlockBody:content - BlockEnd ~h_section(h[:level], h[:heading], content, h[:ln])
 
 HeadedStart = HStart(1)
             | HStart(2)
@@ -166,6 +169,12 @@ HeadedStart = HStart(1)
             | HStart(4)
             | HStart(5)
             | HStart(6)
+            | BlockHStart(1)
+            | BlockHStart(2)
+            | BlockHStart(3)
+            | BlockHStart(4)
+            | BlockHStart(5)
+            | BlockHStart(6)
 
 HeadedSection = HSection(1)
               | HSection(2)
@@ -182,6 +191,7 @@ Frontmatter = FrontmatterSeparator ln:ln (!FrontmatterSeparator ( CharString Nl)
 Char = < /[[:print:]]/ > { text }
 CharString = < Char* > { text }
 CharExcept(e) = Char:c &{ c != e }
+CharStringExcept(e) = < CharExcept(e) > { text }
 DocumentTextExcept(e) = < (!Inline CharExcept(e))+ > ln:ln ~text(text, ln)
 DocumentContentExcept(e) = (Inline | DocumentTextExcept(e))+:content { content } 
 DocumentText = < (!Inline Char)+ > ln:ln ~text(text, ln)
