@@ -61,6 +61,7 @@ module NoraMark
       end
       selector.map { |k,v| modify_selector(k,v) }
     end
+
     def ancestors(selector = {})
       result = []
       node = parent
@@ -104,6 +105,15 @@ module NoraMark
       @parent = nil
       @prev = nil
       @next = nil
+    end
+
+    def remove
+      @parent.first_child = @next  if !@parent.nil? && @parent.first_child == self
+      @parent.last_child = @prev  if !@parent.nil? && @parent.last_child == self
+      @next.prev = @prev unless @next.nil?
+      @prev.next = @next unless @prev.nil?
+      @parent.children_replaced unless @parent.nil?
+      unlink
     end
     
     def replace(node)

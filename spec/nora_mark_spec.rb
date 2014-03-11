@@ -1128,6 +1128,7 @@ lang: ja
 ---
 
 =: 見出し
+sub: 副見出し
 
 パラグラフ。
 パラグラフ。
@@ -1136,17 +1137,26 @@ EOF
         noramark = NoraMark::Document.parse(text)
         noramark.add_transformer(generator: :html) do
           for_node({:type => :HeadedSection}, :replace) do
+            header_body = [block("h#{@node.level}", @node.heading)]
+            if @node.children[0].name == 'sub'
+              sub = @node.children[0]
+              sub.remove
+              sub.name = 'p'
+              sub.classes = ['subh']
+              header_body << sub
+            end
             header = block('header',
                            block('div',
-                                 block('h1', @node.heading),
-                                 classes: ['hgroup']))
+                                 header_body,
+                                 classes: ['hgroup'])) 
+
             body = block('div', @node.children, classes:['section-body'])
             block('section', [ header, body ], inherit: true)
           end
         end
         body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
         expect(body.element_children[0].selector_and_children()).to eq(
-               ['section', [ 'header', ['div.hgroup', ['h1', '見出し']]],
+               ['section', [ 'header', ['div.hgroup', ['h1', '見出し'], ['p.subh', '副見出し']]],
                 ['div.section-body',
                  ['div.pgroup', ['p', 'パラグラフ。'], ['p', 'パラグラフ。']]]])
       end
