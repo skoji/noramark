@@ -3,7 +3,7 @@
 
 NoraMark is a simple text markup language. It is designed to create XHTML files for EPUB books. Its default mode is for Japanese text.
 
-**CAUTION This is very early alpha version, so it's not stable at all, even the markup syntax**
+**CAUTION This is very early alpha version, so it's not stable at all, even the markup syntax will change**
 
 In non-beta release version, the syntax will be more stable.
 
@@ -193,7 +193,90 @@ The converted XHTML file
     </html>    
 
 
-In a near future version, you will be able to add custom commands.
+## Customize
+
+Simple Customization Sample
+
+Markup text and the code
+```ruby
+text =<<EOF
+speak(Alice): Alice is speaking.
+speak(Bob): and this is Bob.
+EOF
+ 
+document = NoraMark::Document.parse(text)
+document.add_transformer(generator: :html) do
+  for_node("speak", :modify) do # "speak" is selector for node. :modify is action.
+    @node.name = 'p'
+    @node.prepend_child inline('span', @node.parameters[0], classes: ['speaker'])
+  end
+end
+puts document.html[0]
+
+```
+
+Rendered XHTML
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>NoraMark generated document</title>
+</head>
+<body>
+<p><span class='speaker'>Alice</span>Alice is speaking.</p>
+<p><span class='speaker'>Bob</span>and this is Bob.</p>
+</body>
+</html>
+```
+
+Another Example
+
+```
+text = <<EOF
+---
+lang: ja
+---
+ 
+=: 見出し
+ 
+パラグラフ。
+パラグラフ。
+EOF
+ 
+document = NoraMark::Document.parse(text)
+document.add_transformer(generator: :html) do
+  for_node({:type => :HeadedSection}, :replace) do 
+    header = block('header',
+                   block('div',
+                         block("h#{@node.level}", @node.heading),
+                         classes: ['hgroup']))
+    body = block('div', @node.children, classes:['section-body'])
+    block('section', [ header, body ], inherit: true) 
+  end
+end
+
+puts document.html[0]
+```
+
+Result.
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+<title>NoraMark generated document</title>
+</head>
+<body>
+<section><header><div class='hgroup'><h1 id='heading_index_1'>見出し</h1>
+</div>
+</header>
+<div class='section-body'><div class='pgroup'><p>パラグラフ。</p>
+<p>パラグラフ。</p>
+</div>
+</div>
+</section>
+</body>
+</html>
+```
 
 ## Contributing
 

@@ -16,6 +16,9 @@ module NoraMark
     def each(&block)
       @list.each(&block)
     end
-    
+
+    def to_ary
+      @list.dup
+    end
   end
 end

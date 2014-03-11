@@ -30,25 +30,53 @@ module NoraMark
       end
     end
 
-    def match(selector)
-      selector.each {
-        |k,v|
-        return false unless send(k, v)
+    def match?(selector)
+      selector = build_selector(selector)
+      selector.inject(true) {
+        |result, selector|
+        result && selector.call(self)
       }
+    end
+
+    def modify_selector(k,v)
+      case k
+      when :type
+        proc { | node | node.kind_of? NoraMark.const_get(v) }
+      when :name
+        proc { | node | node.name ==  v }
+      when :id
+        proc { | node | (node.ids || []).contain? v }
+      when :class
+        proc { | node | (node.class || []).contain? v }
+      when :proc
+        v
+      else
+        raise 'no selector'
+      end
+    end
+
+    def build_selector(selector)
+      if selector.is_a? String
+        selector = { name: selector }
+      end
+      selector.map { |k,v| modify_selector(k,v) }
     end
 
     def ancestors(selector = {})
       result = []
       node = parent
       while !node.nil?
-        result << node if node.match(selector)
+        result << node if node.match?(selector)
         node = node.parent
       end
       result
     end
-    
+
     def reparent
       return if @content.nil?
+
+      @content.each {|node| node.remove }
+
       @first_child = @content.first
       @last_child = @content.last
       @content.inject(nil) do |prev, child_node|
@@ -68,32 +96,76 @@ module NoraMark
     end
 
     def children=(x)
-      @content = x
+      @content = x.to_ary
       reparent
     end
 
-    def child_replaced
+    def children_replaced
       @children = nil
+    end
+
+    def unlink
+      @parent = nil
+      @prev = nil
+      @next = nil
+    end
+
+    def remove
+      @parent.first_child = @next  if !@parent.nil? && @parent.first_child == self
+      @parent.last_child = @prev  if !@parent.nil? && @parent.last_child == self
+      @next.prev = @prev unless @next.nil?
+      @prev.next = @next unless @prev.nil?
+      @parent.children_replaced unless @parent.nil?
+      unlink
     end
     
     def replace(node)
       node.parent = @parent
-      node.prev = @prev
-      node.next = @next
       @parent.first_child = node if (@parent.first_child == self)
       @parent.last_child = node if (@parent.last_child == self)
+
+      node.prev = @prev
+      node.next = @next
+
+      @prev.next = node unless @prev.nil?
+      @next.prev = node unless @next.nil?
+
       node.reparent
-      node.parent.child_replaced
+      node.parent.children_replaced
 
-      self.prev = nil
-      self.next = nil
-      self.parent = nil
-      self.children = nil
-      self.first_child = nil
-      self.last_child = nil
+      unlink
+    end
 
+    def prepend_child(node)
+      node.remove
+      node.reparent
+      if self.children.size == 0
+        @content = [ node ]
+        reparent
+      else
+        @first_child.prev = node
+        node.next = @first_child
+        node.parent = self
+        @first_child = node
+        children_replaced
+      end
     end
     
+    def append_child(node)
+      node.remove
+      node.reparent
+      if self.children.size == 0
+        @content = [ node ]
+        reparent
+      else
+        @last_child.next = node 
+        node.prev = @last_child
+        node.parent = self
+        @last_child = node
+        children_replaced
+      end
+    end
+
     def all_nodes
       return [] if @first_child.nil?
       @first_child.inject([]) do
