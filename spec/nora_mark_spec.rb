@@ -1136,7 +1136,6 @@ sub: 副見出し
 EOF
         noramark = NoraMark::Document.parse(text)
         noramark.add_transformer(generator: :html) do
-
           for_node({:type => :HeadedSection}, :replace) do
             header = block('header',
                            block('div',
@@ -1148,7 +1147,7 @@ EOF
               header.first_child.append_child fc 
             end
             body = block('div', @node.children, classes:['section-body'])
-            block('section', [ header, body ], inherit: true)
+            block('section', [ header, body ], template: @node)
           end
         end
         body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
