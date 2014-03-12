@@ -36,8 +36,12 @@ module NoraMark
       (@options ||= {}).merge options 
     end
     
-    def for_node(selector, action = :replace, &block)
-      @rules << [ selector, action, block ]
-    end 
+    def modify(selector, &block)
+      @rules << [ selector, :modify, block ]
+    end
+
+    def replace(selector, &block)
+      @rules << [ selector, :replace, block ]
+    end
   end
 end

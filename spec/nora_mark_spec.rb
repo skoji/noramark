@@ -1132,7 +1132,7 @@ EOF
         noramark = NoraMark::Document.parse(text, lang: 'ja')
 
         noramark.add_transformer(generator: :html) do
-          for_node 'foobar', :modify do
+          modify 'foobar' do
             @node.name = 'section'
             @node.prepend_child block("h#{@node.named_parameters[:level]}", @node.parameters[0])
           end
@@ -1150,7 +1150,7 @@ EOF
         noramark = NoraMark::Document.parse(text, lang: 'ja')
 
         noramark.add_transformer(generator: :html) do
-          for_node 'foobar', :replace do
+          replace 'foobar' do
             block('section',
                    [
                     block( "h#{@node.named_parameters[:level]}", @node.parameters[0]),
@@ -1180,7 +1180,7 @@ sub: 副見出し
 EOF
         noramark = NoraMark::Document.parse(text)
         noramark.add_transformer(generator: :html) do
-          for_node({:type => :HeadedSection}, :replace) do
+          replace({:type => :HeadedSection}) do
             header = block('header',
                            block('div',
                                  block("h#{@node.level}", @node.heading),
@@ -1204,7 +1204,7 @@ EOF
         text = "speak(Alice): Alice is speaking.\nspeak(Bob): and this is Bob."
         noramark = NoraMark::Document.parse(text)
         noramark.add_transformer(generator: :html) do
-          for_node("speak", :modify) do
+          modify "speak" do
             @node.name = 'p'
             @node.prepend_child inline('span', @node.parameters[0], classes: ['speaker'])
           end

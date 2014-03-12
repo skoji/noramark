@@ -262,7 +262,7 @@ EOF
  
 document = NoraMark::Document.parse(text)
 document.add_transformer(generator: :html) do
-  for_node("speak", :modify) do # "speak" is selector for node. :modify is action.
+  modify "speak" do # "speak" is selector for node. :modify is action.
     @node.name = 'p'
     @node.prepend_child inline('span', @node.parameters[0], classes: ['speaker'])
   end
@@ -287,7 +287,7 @@ Rendered XHTML
 
 Another Example
 
-```
+```ruby
 text = <<EOF
 ---
 lang: ja
@@ -301,7 +301,7 @@ EOF
  
 document = NoraMark::Document.parse(text)
 document.add_transformer(generator: :html) do
-  for_node({:type => :HeadedSection}, :replace) do 
+  replace({:type => :HeadedSection}) do
     header = block('header',
                    block('div',
                          block("h#{@node.level}", @node.heading),
