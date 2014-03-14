@@ -4,808 +4,887 @@ require File.dirname(__FILE__) + '/../lib/nora_mark'
 require 'nokogiri'
 require File.dirname(__FILE__) + '/nokogiri_test_helper.rb'
 
-describe NoraMark do 
-  describe 'convert' do
-    it 'should generate valid xhtml' do
+describe NoraMark::Document do 
+  describe 'parse' do
+    it 'generate valid xhtml' do
       text = 'some text'
       noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
       xhtml = Nokogiri::XML::Document.parse(noramark.html[0])
       expect(xhtml.root.name).to eq('html')
-      expect(xhtml.root.namespaces['xmlns']).to eq('http://www.w3.org/1999/xhtml')
-      expect(xhtml.root['xml:lang']).to eq('ja')
+      expect(xhtml.root.namespaces['xmlns'])
+        .to eq('http://www.w3.org/1999/xhtml')
+      expect(xhtml.root['xml:lang'])
+        .to eq('ja')
       expect(xhtml.root.element_children[0].name).to eq 'head'
-      expect(xhtml.root.at_xpath('xmlns:head/xmlns:title').text).to eq('the title')
+      expect(xhtml.root.at_xpath('xmlns:head/xmlns:title').text)
+        .to eq('the title')
       expect(xhtml.root.element_children[1].name).to eq 'body'
     end
-    it 'should convert simple paragraph' do
-      text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'ここから、パラグラフがはじまります。'],
-         ['p.noindent', '「二行目です。」'],
-         ['p', '三行目です。']
-        ]
-      )
+    describe 'implicit markup' do
+      it 'convert simple paragraph' do
+        text = "ここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'ここから、パラグラフがはじまります。'],
+                  ['p.noindent', '「二行目です。」'],
+                  ['p', '三行目です。']
+                 ]
+                 )
 
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p', 'ここから、次のパラグラフです。']]
-      )
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'ここから、次のパラグラフです。']]
+                 )
+      end
+      it 'convert simple paragraph with BOM' do
+        text = "\uFEFFここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'ここから、パラグラフがはじまります。'],
+                  ['p.noindent', '「二行目です。」'],
+                  ['p', '三行目です。']
+                 ]
+                 )
+
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'ここから、次のパラグラフです。']]
+                 )
+      end
+
+      it 'convert simple paragraph in english mode' do
+        text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+        noramark = NoraMark::Document.parse(text, lang: 'en', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['p', 
+                  'paragraph begins.', ['br', ''],
+                  '2nd line.', ['br', ''],
+                  '3rd line.'
+                 ]
+                 )
+
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['p', 'next paragraph.']
+                 )
+      end
+
+
+      it 'convert simple paragraph in english mode specified in frontmatter' do
+        text = "---\nlang: en\ntitle: the title\n---\n\n\n\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+        noramark = NoraMark::Document.parse(text)
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['p', 
+                  'paragraph begins.', ['br', ''],
+                  '2nd line.', ['br', ''],
+                  '3rd line.'
+                 ]
+                 )
+
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['p', 'next paragraph.']
+                 )
+      end
+
+      it 'convert simple paragraph in japanese mode, but paragraph mode is default' do
+        text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_style: :default)
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['p', 
+                  'paragraph begins.', ['br', ''],
+                  '2nd line.', ['br', ''],
+                  '3rd line.'
+                 ]
+                 )
+
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['p', 'next paragraph.']
+                 )
+      end
+
+      it 'convert simple paragraph in japanese mode, but paragraph mode is default (using frontmatter)' do
+        text = "---\nlang: ja\ntitle: the title\nparagraph_style: default\n---\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_styl: :default)
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['p', 
+                  'paragraph begins.', ['br', ''],
+                  '2nd line.', ['br', ''],
+                  '3rd line.'
+                 ]
+                 )
+
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['p', 'next paragraph.']
+                 )
+      end
     end
-    it 'should convert simple paragraph with BOM' do
-      text = "\uFEFFここから、パラグラフがはじまります。\n「二行目です。」\n三行目です。\n\n\n ここから、次のパラグラフです。"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'ここから、パラグラフがはじまります。'],
-         ['p.noindent', '「二行目です。」'],
-         ['p', '三行目です。']
-        ]
-      )
+    describe 'divs and hN headers' do
+      it 'parse paragraph with header' do
+        text = "h1: タイトルです。\r\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 5
+        expect(body.element_children[0].a).to eq ['h1', 'タイトルです。']
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'ここから、パラグラフがはじまります。']
+                 ]
+                 )
+        expect(body.element_children[2].a).to eq ['h2.column', 'ふたつめの見出しです。']
+        expect(body.element_children[3].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'ここから、次のパラグラフです。']
+                 ]
+                 )
+        expect(body.element_children[4].a).to eq ['h3.third.foo', 'クラスが複数ある見出しです']
+      end
 
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p', 'ここから、次のパラグラフです。']]
-      )
+      it 'parse div and paragraph' do
+        text = "d {\n1st line. \n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the document title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['div.pgroup',
+                   ['p', '1st line.']
+                  ]
+                 ]
+                 )
+      end
+
+
+      it 'parse div without pgroup' do
+        text = "d('wo-pgroup') {\n1st line. \n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['p', '1st line.']
+                 ]
+                 )
+      end
+
+      it 'parse nested div without pgroup' do
+        text = "d(wo-pgroup) {\nd {\nnested.\n} \n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['div',
+                   ['p', 'nested.']
+                  ]
+                 ]
+                 )
+      end
+
+      it 'handle divs with empty lines' do
+        text = "\n\n\nd('wo-pgroup') {\n\n\n1st line. \n\n\n}\n\n\nd {\n 2nd div.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['p', '1st line.']
+                 ])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['div.pgroup',
+                   ['p', '2nd div.']]
+                 ]
+
+                 )
+      end
+
+      it 'parse nested div without pgroup and with pgroup' do
+        text = "d(wo-pgroup) {\nd {\nnested.\n} \n}\n\nd {\nin pgroup\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['div',
+                   ['p', 'nested.']
+                  ]
+                 ])                                                                   
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div',
+                  ['div.pgroup',
+                   ['p', 'in pgroup']
+                  ]
+                 ])
+      end
+
+      it 'parse div with class' do
+        text = "d.preface-one {\n h1: title.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.preface-one',
+                  ['h1', 'title.']
+                 ]
+                 )
+      end
+
+      it 'parse div with id and class' do
+        text = "d#thecontents.preface-one {\nh1: title.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children(remove_id: false))
+          .to eq(
+                 ['div#thecontents.preface-one',
+                  ['h1#heading_index_1', 'title.']
+                 ]
+                 )
+      end
+
+      it 'parse nested div' do
+        text = "d.preface {\n outer div. \n d.nested {\n nested!\n}\nouter div again.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.preface',
+                  ['div.pgroup',
+                   ['p', 'outer div.']
+                  ],
+                  ['div.nested',
+                   ['div.pgroup',
+                    ['p', 'nested!']
+                   ]
+                  ],
+                  ['div.pgroup',
+                   ['p', 'outer div again.']
+                  ],
+                 ]
+                 )
+      end
     end
+    describe 'article and section' do
+      it 'parse article' do
+        text = "art {\n in the article.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['article',
+                  ['div.pgroup',
+                   ['p', 'in the article.']
+                  ]
+                 ]
+                 ) 
+      end
 
-    it 'should convert simple paragraph in english mode' do
-      text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
-      noramark = NoraMark::Document.parse(text, lang: 'en', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['p', 
-         'paragraph begins.', ['br', ''],
-         '2nd line.', ['br', ''],
-         '3rd line.'
-        ]
-      )
+      it 'parse article with other notation' do
+        text = "arti {\n in the article.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['article',
+                  ['div.pgroup',
+                   ['p', 'in the article.']
+                  ]
+                 ]
+                 ) 
+      end
 
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['p', 'next paragraph.']
-      )
+      it 'parse article with yet anther notation' do
+        text = "article {\n in the article.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['article',
+                  ['div.pgroup',
+                   ['p', 'in the article.']
+                  ]
+                 ]
+                 ) 
+      end
+
+      it 'parse section ' do
+        text = "art {\nsec {\n section in the article. \n}\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['article',
+                  ['section',
+                   ['div.pgroup',
+                    ['p', 'section in the article.']
+                   ]
+                  ]
+                 ]
+                 ) 
+      end
+
+      it 'parse section with other notation' do
+        text = "art {\nsect {\n section in the article. \n}\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['article',
+                  ['section',
+                   ['div.pgroup',
+                    ['p', 'section in the article.']
+                   ]
+                  ]
+                 ]
+                 ) 
+      end
+
+      it 'parse section with yet other notation' do
+        text = "art {\nsection {\n section in the article. \n}\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['article',
+                  ['section',
+                   ['div.pgroup',
+                    ['p', 'section in the article.']
+                   ]
+                  ]
+                 ]
+                 ) 
+      end
     end
+    describe 'other block command' do
+      it 'handle block image' do
+        text = "this is normal line.\nimage(./image1.jpg, \"alt text\"): caption text"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is normal line.']
+                 ]
+                 )      
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.img-wrap',
+                  ["img[src='./image1.jpg'][alt='alt text']", ''],
+                  ['p', 'caption text']
+                 ]
+                 )      
+      end
 
+      it 'handle block image with before caption' do
+        text = "this is normal line.\nimage(./image1.jpg, alt text)[caption_before: true]: caption text"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is normal line.']
+                 ]
+                 )      
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.img-wrap',
+                  ['p', 'caption text'],
+                  ["img[src='./image1.jpg'][alt='alt text']", '']
+                 ]
+                 )      
+      end
 
-    it 'should convert simple paragraph in english mode specified in frontmatter' do
-      text = "---\nlang: en\ntitle: the title\n---\n\n\n\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
-      noramark = NoraMark::Document.parse(text)
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['p', 
-         'paragraph begins.', ['br', ''],
-         '2nd line.', ['br', ''],
-         '3rd line.'
-        ]
-      )
+      it 'handle block image without caption' do
+        text = "this is normal line.\nimage(./image1.jpg, alt text):"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is normal line.']
+                 ]
+                 )      
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.img-wrap',
+                  ["img[src='./image1.jpg'][alt='alt text']", '']
+                 ]
+                 )      
+      end
 
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['p', 'next paragraph.']
-      )
+      it 'handle page change article' do
+        text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        expect(converted.size).to eq 3
+        body1 = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body1.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is start.']
+                 ]
+                 )
+
+        head2 = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
+        expect(head2.element_children[0].a).to eq ['title', 'page changed']
+        body2 = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:body')
+        expect(body2.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is second page.']
+                 ]
+                 )
+
+        head3 = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:head')
+        expect(head3.element_children[0].a).to eq ['title', 'page changed']
+        body3 = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:body')
+        expect(body3.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'and the third.']
+                 ]
+                 )
+      end
+
+      it 'handle stylesheets' do
+        text = "d.styled {\n this is styled document.\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the document title', stylesheets: ['reset.css', 'mystyle.css'])
+        converted = noramark.html
+        head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'the document title']
+        expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='reset.css']", '']
+        expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='mystyle.css']", '']
+      end
+
+      it 'handle custom paragraph' do
+        text = "this is normal line.\np.custom: this text is in custom class."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is normal line.'],
+                  ['p.custom', 'this text is in custom class.']
+                 ]
+                 )        
+      end
+
+      it 'handle any block' do
+        text = "this is normal line.\ncite {\n this block should be in cite. \n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'this is normal line.']
+                 ]
+                 )
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['cite',
+                  ['div.pgroup',
+                   ['p', 'this block should be in cite.']
+                  ]
+                 ]
+                 )
+      end
+      it 'convert h1 in article after title' do
+        text = "---\nstylesheets: css/default.css\ntitle: foo\n---\narticle.atogaki {\n\nh1: あとがき。\n\natogaki\n}"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ["article.atogaki",
+                  ["h1", "あとがき。"],
+                  ["div.pgroup",
+                   ["p", "atogaki"]]]
+                 ) 
+      end
+
     end
+    describe 'inline' do
+      it 'handle link' do
+        text = " link to [link(http://github.com/skoji/noramark){noramark repository}]. \ncan you see this?"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p',
+                   'link to ',
+                   ["a[href='http://github.com/skoji/noramark']", 'noramark repository'],
+                   '.'
+                  ],
+                  ['p', 'can you see this?']
+                 ]
+                 )       
+      end
 
-    it 'should convert simple paragraph in japanese mode, but paragraph mode is default' do
-      text = "paragraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_style: :default)
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['p', 
-         'paragraph begins.', ['br', ''],
-         '2nd line.', ['br', ''],
-         '3rd line.'
-        ]
-      )
+      it 'handle link with l' do
+        text = "link to [l(http://github.com/skoji/noramark){noramark repository}]. \ncan you see this?"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p',
+                   'link to ',
+                   ["a[href='http://github.com/skoji/noramark']", 'noramark repository'],
+                   '.'
+                  ],
+                  ['p', 'can you see this?']
+                 ]
+                 )       
+      end
 
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['p', 'next paragraph.']
-      )
+      it 'handle span' do
+        text = "p.custom: this text is in [s.keyword{custom}] class."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p.custom', 'this text is in ', ['span.keyword', 'custom'], ' class.'
+                  ]]
+                 )
+      end
+
+      it 'handle inline image' do
+        text = "simple image [img(./image1.jpg, alt)]."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p',
+                   'simple image ', ["img[src='./image1.jpg'][alt='alt']", ''], '.']]
+                 )
+      end
+
+      it 'handle any inline' do
+        text = "should be [strong{marked as strong}]."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'should be ', ['strong', 'marked as strong'],'.']]
+                 )
+      end
+
+      it 'convert inline command within line block' do
+        text = "h1: [tcy{20}]縦中横タイトル"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children).to eq ['h1', ['span.tcy', '20'], '縦中横タイトル']
+      end
+
+      it 'handle ruby' do
+        text = "[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children).to eq ['div.pgroup', ['p', 
+                                                                                     ['ruby', '蜻蛉', ['rp','('],['rt','とんぼ'],['rp', ')']],
+                                                                                     'の',                                                                                   
+                                                                                     ['ruby', '眼鏡', ['rp','('],['rt','めがね'],['rp', ')']],
+                                                                                     'はみずいろめがね']]
+      end
+
+      it 'handle tatechuyoko' do
+        text = "[tcy{10}]年前のことだった"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', ['span.tcy', '10'], '年前のことだった']
+                 ])
+      end
     end
+    describe 'list' do
+      it 'handle ordered list ' do
+        text = "this is normal line.\n1: for the 1st.\n2: secondly, blah.\n3: and last...\nthe ordered list ends."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 3
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'this is normal line.']
+                 ])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['ol', 
+                  ['li', 'for the 1st.'],
+                  ['li', 'secondly, blah.'],
+                  ['li', 'and last...']
+                 ])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'the ordered list ends.']
+                 ])
+      end
 
-    it 'should convert simple paragraph in japanese mode, but paragraph mode is default (using frontmatter)' do
-      text = "---\nlang: ja\ntitle: the title\nparagraph_style: default\n---\nparagraph begins.\n2nd line.\n 3rd line.\n\n\n next paragraph."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_styl: :default)
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['p', 
-         'paragraph begins.', ['br', ''],
-         '2nd line.', ['br', ''],
-         '3rd line.'
-        ]
-      )
+      it 'handle unordered list ' do
+        text = "this is normal line.\n*: for the 1st.\n*: secondly, blah.\n*: and last...\nthe ordered list ends."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 3
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'this is normal line.']
+                 ])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['ul', 
+                  ['li', 'for the 1st.'],
+                  ['li', 'secondly, blah.'],
+                  ['li', 'and last...']
+                 ])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'the ordered list ends.']
+                 ])
+      end
 
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['p', 'next paragraph.']
-      )
+      it 'handle definition list ' do
+        text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah :blah.\n;: 3rd: this term is the last.\nthe list ends."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 3
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'this is normal line.']
+                 ])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['dl', 
+                  ['dt', '1st'],['dd', 'this is the first definition'],
+                  ['dt', '2nd'],['dd', 'blah :blah.'],
+                  ['dt', '3rd'],['dd', 'this term is the last.'],
+                 ])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'the list ends.']
+                 ])
+      end
+
+      it 'handle long definition list ' do
+        text = "this is normal line.\n;: 1st {\n this is the first definition\n}\n;: 2nd { \nblah :blah.\n}\n;: 3rd{\n this term is the last.\n}\nthe list ends."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 3
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'this is normal line.']
+                 ])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['dl', 
+                  ['dt', '1st'],['dd', ['div.pgroup', ['p', 'this is the first definition']]],
+                  ['dt', '2nd'],['dd', ['div.pgroup', ['p', 'blah :blah.']]],
+                  ['dt', '3rd'],['dd', ['div.pgroup', ['p', 'this term is the last.']]]
+                 ])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'the list ends.']
+                 ])
+      end
+      it 'escape html in definition list' do
+        text = ";:definition<div>:</div>"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['dl', 
+                  ['dt', 'definition<div>'],['dd', '</div>']
+                 ])
+      end
     end
-
-    it 'should convert paragraph with header' do
-      text = "h1: タイトルです。\r\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 5
-      expect(body.element_children[0].a).to eq ['h1', 'タイトルです。']
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p', 'ここから、パラグラフがはじまります。']
-        ]
-      )
-      expect(body.element_children[2].a).to eq ['h2.column', 'ふたつめの見出しです。']
-      expect(body.element_children[3].selector_and_children).to eq(
-        ['div.pgroup',
-         ['p', 'ここから、次のパラグラフです。']
-        ]
-      )
-      expect(body.element_children[4].a).to eq ['h3.third.foo', 'クラスが複数ある見出しです']
-    end
-
-    it 'should convert div and paragraph' do
-      text = "d {\n1st line. \n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the document title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div',
-          ['div.pgroup',
-           ['p', '1st line.']
-          ]
-        ]
-      )
-    end
-
-
-    it 'should convert div without pgroup' do
-      text = "d('wo-pgroup') {\n1st line. \n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div',
-           ['p', '1st line.']
-        ]
-      )
-    end
-
-    it 'should nest div without pgroup' do
-      text = "d(wo-pgroup) {\nd {\nnested.\n} \n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div',
-          ['div',
-           ['p', 'nested.']
-         ]
-        ]
-      )
-    end
-
-    it 'should handle divs with empty lines' do
-      text = "\n\n\nd('wo-pgroup') {\n\n\n1st line. \n\n\n}\n\n\nd {\n 2nd div.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div',
-           ['p', '1st line.']
-        ])
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['div',
-          ['div.pgroup',
-           ['p', '2nd div.']]
-        ]
-
-      )
-    end
-
-    it 'should nest div without pgroup and with pgroup' do
-      text = "d(wo-pgroup) {\nd {\nnested.\n} \n}\n\nd {\nin pgroup\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div',
-          ['div',
-           ['p', 'nested.']
-         ]
-        ])                                                                   
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['div',
-          ['div.pgroup',
-           ['p', 'in pgroup']
-         ]
-        ])
-    end
-
-
-    it 'should convert div with class' do
-      text = "d.preface-one {\n h1: title.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.preface-one',
-         ['h1', 'title.']
-        ]
-      )
-    end
-
-    it 'should convert div with id and class' do
-      text = "d#thecontents.preface-one {\nh1: title.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children(remove_id: false)).to eq(
-        ['div#thecontents.preface-one',
-         ['h1#heading_index_1', 'title.']
-        ]
-      )
-    end
-
-    it 'should convert nested div' do
-      text = "d.preface {\n outer div. \n d.nested {\n nested!\n}\nouter div again.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.preface',
-         ['div.pgroup',
-          ['p', 'outer div.']
-         ],
-         ['div.nested',
-          ['div.pgroup',
-           ['p', 'nested!']
-          ]
-         ],
-         ['div.pgroup',
-          ['p', 'outer div again.']
-         ],
-        ]
-      )
-    end
-
-    it 'should convert article' do
-      text = "art {\n in the article.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-     expect(body.element_children[0].selector_and_children).to eq(
-      ['article',
-       ['div.pgroup',
-        ['p', 'in the article.']
-       ]
-      ]
-     ) 
-    end
-
-    it 'should convert article with other notation' do
-      text = "arti {\n in the article.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-     expect(body.element_children[0].selector_and_children).to eq(
-      ['article',
-       ['div.pgroup',
-        ['p', 'in the article.']
-       ]
-      ]
-     ) 
-    end
-
-    it 'should convert article with yet anther notation' do
-      text = "article {\n in the article.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-     expect(body.element_children[0].selector_and_children).to eq(
-      ['article',
-       ['div.pgroup',
-        ['p', 'in the article.']
-       ]
-      ]
-     ) 
-    end
-
-    it 'should convert section ' do
-      text = "art {\nsec {\n section in the article. \n}\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['article',
-       ['section',
-       ['div.pgroup',
-        ['p', 'section in the article.']
-       ]
-       ]
-      ]
-     ) 
-    end
-
-    it 'should convert section with other notation' do
-      text = "art {\nsect {\n section in the article. \n}\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['article',
-       ['section',
-       ['div.pgroup',
-        ['p', 'section in the article.']
-       ]
-       ]
-      ]
-     ) 
-    end
-
-    it 'should convert section with yet other notation' do
-      text = "art {\nsection {\n section in the article. \n}\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['article',
-       ['section',
-       ['div.pgroup',
-        ['p', 'section in the article.']
-       ]
-       ]
-      ]
-     ) 
-    end
-
-    it 'should handle block image' do
-      text = "this is normal line.\nimage(./image1.jpg, \"alt text\"): caption text"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-       ['div.pgroup',
-        ['p', 'this is normal line.']
-       ]
-      )      
-      expect(body.element_children[1].selector_and_children).to eq(
-       ['div.img-wrap',
-        ["img[src='./image1.jpg'][alt='alt text']", ''],
-        ['p', 'caption text']
-       ]
-      )      
-    end
-
-    it 'should handle block image with before caption' do
-      text = "this is normal line.\nimage(./image1.jpg, alt text)[caption_before: true]: caption text"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-       ['div.pgroup',
-        ['p', 'this is normal line.']
-       ]
-      )      
-      expect(body.element_children[1].selector_and_children).to eq(
-       ['div.img-wrap',
-        ['p', 'caption text'],
-        ["img[src='./image1.jpg'][alt='alt text']", '']
-       ]
-      )      
-    end
-
-    it 'should handle block image without caption' do
-      text = "this is normal line.\nimage(./image1.jpg, alt text):"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-       ['div.pgroup',
-        ['p', 'this is normal line.']
-       ]
-      )      
-      expect(body.element_children[1].selector_and_children).to eq(
-       ['div.img-wrap',
-        ["img[src='./image1.jpg'][alt='alt text']", '']
-       ]
-      )      
-    end
-
-    it 'should handle page change article' do
-      text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      expect(converted.size).to eq 3
-      body1 = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body1.element_children[0].selector_and_children).to eq(
-       ['div.pgroup',
-        ['p', 'this is start.']
-       ]
-      )
-
-      head2 = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
-      expect(head2.element_children[0].a).to eq ['title', 'page changed']
-      body2 = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:body')
-      expect(body2.element_children[0].selector_and_children).to eq(
-       ['div.pgroup',
-        ['p', 'this is second page.']
-       ]
-      )
-
-      head3 = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:head')
-      expect(head3.element_children[0].a).to eq ['title', 'page changed']
-      body3 = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:body')
-      expect(body3.element_children[0].selector_and_children).to eq(
-       ['div.pgroup',
-        ['p', 'and the third.']
-       ]
-      )
-    end
-
-    it 'should handle stylesheets' do
-      text = "d.styled {\n this is styled document.\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the document title', stylesheets: ['reset.css', 'mystyle.css'])
-      converted = noramark.html
-      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
-      expect(head.element_children[0].a).to eq ['title', 'the document title']
-      expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='reset.css']", '']
-      expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='mystyle.css']", '']
-    end
-
-    it 'should handle link' do
-      text = " link to [link(http://github.com/skoji/noramark){noramark repository}]. \ncan you see this?"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['div.pgroup',
-       ['p',
-        'link to ',
-         ["a[href='http://github.com/skoji/noramark']", 'noramark repository'],
-         '.'
-       ],
-       ['p', 'can you see this?']
-      ]
-     )       
-    end
-
-    it 'should handle link with l' do
-      text = "link to [l(http://github.com/skoji/noramark){noramark repository}]. \ncan you see this?"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['div.pgroup',
-       ['p',
-        'link to ',
-         ["a[href='http://github.com/skoji/noramark']", 'noramark repository'],
-         '.'
-       ],
-       ['p', 'can you see this?']
-      ]
-     )       
-    end
-
-    it 'should handle custom paragraph' do
-      text = "this is normal line.\np.custom: this text is in custom class."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['div.pgroup',
-       ['p', 'this is normal line.'],
-       ['p.custom', 'this text is in custom class.']
-      ]
-     )        
-    end
-
-    it 'should handle span' do
-      text = "p.custom: this text is in [s.keyword{custom}] class."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-         ['p.custom', 'this text is in ', ['span.keyword', 'custom'], ' class.'
-        ]]
-      )
-    end
-
-    it 'should handle any block' do
-      text = "this is normal line.\ncite {\n this block should be in cite. \n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p', 'this is normal line.']
-        ]
-      )
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['cite',
-         ['div.pgroup',
-            ['p', 'this block should be in cite.']
-          ]
-        ]
-      )
-    end
-
-    it 'should handle inline image' do
-      text = "simple image [img(./image1.jpg, alt)]."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p',
-            'simple image ', ["img[src='./image1.jpg'][alt='alt']", ''], '.']]
-      )
-    end
-
-    it 'should handle any inline' do
-      text = "should be [strong{marked as strong}]."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-      ['div.pgroup',
-        ['p', 'should be ', ['strong', 'marked as strong'],'.']]
-      )
-    end
-
-    it 'should convert inline command within line block' do
-      text = "h1: [tcy{20}]縦中横タイトル"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq ['h1', ['span.tcy', '20'], '縦中横タイトル']
-    end
-
-    it 'should handle ruby' do
-      text = "[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq ['div.pgroup', ['p', 
-         ['ruby', '蜻蛉', ['rp','('],['rt','とんぼ'],['rp', ')']],
-         'の',                                                                                   
-         ['ruby', '眼鏡', ['rp','('],['rt','めがね'],['rp', ')']],
-         'はみずいろめがね']]
-    end
-
-    it 'should handle tatechuyoko' do
-      text = "[tcy{10}]年前のことだった"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', ['span.tcy', '10'], '年前のことだった']
-        ])
-    end
-
-    it 'should handle ordered list ' do
-      text = "this is normal line.\n1: for the 1st.\n2: secondly, blah.\n3: and last...\nthe ordered list ends."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 3
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'this is normal line.']
-        ])
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['ol', 
-         ['li', 'for the 1st.'],
-         ['li', 'secondly, blah.'],
-         ['li', 'and last...']
-        ])
-      expect(body.element_children[2].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'the ordered list ends.']
-        ])
-    end
-
-    it 'should handle unordered list ' do
-      text = "this is normal line.\n*: for the 1st.\n*: secondly, blah.\n*: and last...\nthe ordered list ends."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 3
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'this is normal line.']
-        ])
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['ul', 
-         ['li', 'for the 1st.'],
-         ['li', 'secondly, blah.'],
-         ['li', 'and last...']
-        ])
-      expect(body.element_children[2].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'the ordered list ends.']
-        ])
-    end
-
-    it 'should handle definition list ' do
-      text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah :blah.\n;: 3rd: this term is the last.\nthe list ends."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 3
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'this is normal line.']
-        ])
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['dl', 
-         ['dt', '1st'],['dd', 'this is the first definition'],
-         ['dt', '2nd'],['dd', 'blah :blah.'],
-         ['dt', '3rd'],['dd', 'this term is the last.'],
-        ])
-      expect(body.element_children[2].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'the list ends.']
-        ])
-    end
-
-    it 'should handle long definition list ' do
-      text = "this is normal line.\n;: 1st {\n this is the first definition\n}\n;: 2nd { \nblah :blah.\n}\n;: 3rd{\n this term is the last.\n}\nthe list ends."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 3
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'this is normal line.']
-        ])
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['dl', 
-         ['dt', '1st'],['dd', ['div.pgroup', ['p', 'this is the first definition']]],
-         ['dt', '2nd'],['dd', ['div.pgroup', ['p', 'blah :blah.']]],
-         ['dt', '3rd'],['dd', ['div.pgroup', ['p', 'this term is the last.']]]
-        ])
-      expect(body.element_children[2].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'the list ends.']
-        ])
-    end
-
-    it 'should escape html' do
-      text = ";:definition<div>:</div>&"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['dl', 
-         ['dt', 'definition<div>'],['dd', '</div>&']
-        ])
-    end
-
-    it 'should specify stylesheets' do
-      text = <<EOF
+    
+    describe 'metadata' do
+      it 'specify stylesheets' do
+        text = <<EOF
 ---
 stylesheets: [ css/default.css, css/specific.css, [ css/iphone.css, 'only screen and (min-device-width : 320px) and (max-device-width : 480px)']]
 ---
 text.
 
 EOF
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the document title')
-      converted = noramark.html
-      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
-      expect(head.element_children[0].a).to eq ['title', 'the document title']
-      expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='css/default.css']", '']
-      expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='css/specific.css']", '']
-      expect(head.element_children[3].a).to eq ["link[rel='stylesheet'][type='text/css'][media='only screen and (min-device-width : 320px) and (max-device-width : 480px)'][href='css/iphone.css']", '']
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the document title')
+        converted = noramark.html
+        head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'the document title']
+        expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='css/default.css']", '']
+        expect(head.element_children[2].a).to eq ["link[rel='stylesheet'][type='text/css'][href='css/specific.css']", '']
+        expect(head.element_children[3].a).to eq ["link[rel='stylesheet'][type='text/css'][media='only screen and (min-device-width : 320px) and (max-device-width : 480px)'][href='css/iphone.css']", '']
 
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p',
-            'text.']])
-    end
-
-    it 'should specify title' do
-      text = "---\ntitle: the title of the book in the text.\n---\n\ntext."
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
-      expect(head.element_children[0].a).to eq ['title', 'the title of the book in the text.']
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p',
-            'text.']])
-
-    end
-
-    it 'should specify title on each page' do
-      text = "---\ntitle: page1\n---\n\n1st page.\nnewpage:\n---\ntitle: page2\n---\nh1:2nd page"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_style: :use_paragraph_group)
-      converted = noramark.html
-      # 1st page
-      head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
-      expect(head.element_children[0].a).to eq ['title', 'page1']
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p',
-            '1st page.']])
-      # 2nd page
-      head = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
-      expect(head.element_children[0].a).to eq ['title', 'page2']
-      body = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['h1',"2nd page"])
-    end
-
-
-    it 'should ignore comments' do
-      text = "# この行はコメントです\nここから、パラグラフがはじまります。\n # これもコメント\n「二行目です。」\n三行目です。\n\n# これもコメント\n\n ここから、次のパラグラフです。\n#最後のコメントです"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children.size).to eq 2
-
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'ここから、パラグラフがはじまります。'],
-         ['p.noindent', '「二行目です。」'],
-         ['p', '三行目です。']
-        ]
-      )
-
-      expect(body.element_children[1].selector_and_children).to eq(
-        ['div.pgroup',
-          ['p', 'ここから、次のパラグラフです。']]
-      )
-    end
-
-    it 'should handle preprocessor' do
-      text = "pre-preprocess text"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title') do
-        |nora|
-        nora.preprocessor do
-          |text|
-          text.gsub('pre-preprocess', 'post-process')
-        end
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p',
+                   'text.']])
       end
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup', 
-         ['p', 'post-process text'],
-        ]
-      )
+
+      it 'specify title' do
+        text = "---\ntitle: the title of the book in the text.\n---\n\ntext."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'the title of the book in the text.']
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p',
+                   'text.']])
+
+      end
+
+      it 'specify title on each page' do
+        text = "---\ntitle: page1\n---\n\n1st page.\nnewpage:\n---\ntitle: page2\n---\nh1:2nd page"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_style: :use_paragraph_group)
+        converted = noramark.html
+        # 1st page
+        head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'page1']
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p',
+                   '1st page.']])
+        # 2nd page
+        head = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'page2']
+        body = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['h1',"2nd page"])
+      end
+
+      it 'ignore comments' do
+        text = "# この行はコメントです\nここから、パラグラフがはじまります。\n # これもコメント\n「二行目です。」\n三行目です。\n\n# これもコメント\n\n ここから、次のパラグラフです。\n#最後のコメントです"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 2
+
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'ここから、パラグラフがはじまります。'],
+                  ['p.noindent', '「二行目です。」'],
+                  ['p', '三行目です。']
+                 ]
+                 )
+
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'ここから、次のパラグラフです。']]
+                 )
+      end
+
+      it 'handle preprocessor' do
+        text = "pre-preprocess text"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title') do
+          |nora|
+          nora.preprocessor do
+            |text|
+            text.gsub('pre-preprocess', 'post-process')
+          end
+        end
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'post-process text'],
+                 ]
+                 )
+      end
     end
 
-    it 'should convert h1 in article after title' do
-      text = "---\nstylesheets: css/default.css\ntitle: foo\n---\narticle.atogaki {\n\nh1: あとがき。\n\natogaki\n}"
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-     expect(body.element_children[0].selector_and_children).to eq(
-["article.atogaki",
- ["h1", "あとがき。"],
- ["div.pgroup",
-  ["p", "atogaki"]]]
-     ) 
-    end
-
-    it 'should convert preformatted text' do
-      text = <<EOF
+    describe 'preformatted' do
+      it 'convert preformatted text' do
+        text = <<EOF
 normal line.
   pre {//
 d {
@@ -814,15 +893,17 @@ line_command: this will be not converted too.
 }
   //}
 EOF
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"])
-    end
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(["pre", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"])
+      end
 
-    it 'should convert preformatted code' do
-      text = <<EOF
+      it 'should convert preformatted code' do
+        text = <<EOF
 normal line.
 code {//
 d {
@@ -832,16 +913,19 @@ line_command: this will be not converted too.
 //}
 normal line again.
 EOF
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre", ["code", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"]])
-      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
-    end
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(["pre", ["code", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"]])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
+      end
 
-    it 'should convert preformatted code with language' do
-      text = <<EOF
+      it 'convert preformatted code with language' do
+        text = <<EOF
 normal line.
 code {//ruby
 # ruby code example.
@@ -849,16 +933,19 @@ code {//ruby
 //}
 normal line again.
 EOF
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre.code-ruby[data-code-language='ruby']", ["code", "# ruby code example.\n\"Hello, World\".split(',').map(&:strip).map(&:to_sym) # => [:Hello, :World]"]])
-      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
-    end
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(["pre.code-ruby[data-code-language='ruby']", ["code", "# ruby code example.\n\"Hello, World\".split(',').map(&:strip).map(&:to_sym) # => [:Hello, :World]"]])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
+      end
 
-    it 'should convert preformatted text (simple notation)' do
-      text = <<EOF
+      it 'convert preformatted text (simple notation)' do
+        text = <<EOF
 normal line.
 pre {
 this [l(link){link}] will not be converted.
@@ -866,32 +953,34 @@ line_command: this will be not converted too.
 }
 normal line again.
 EOF
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre", "this [l(link){link}] will not be converted.\nline_command: this will be not converted too."])
-      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
-    end
-    it 'should convert preformatted code (simple notation)' do
-      text = <<EOF
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(["pre", "this [l(link){link}] will not be converted.\nline_command: this will be not converted too."])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
+      end
+      it 'should convert preformatted code (simple notation)' do
+        text = <<EOF
 normal line.
 code {
 line_command: this will be not converted too.
 }
 normal line again.
 EOF
-      noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
-      converted = noramark.html
-      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-      expect(body.element_children[0].selector_and_children).to eq(["div.pgroup", ["p", "normal line."]])
-      expect(body.element_children[1].selector_and_children).to eq(["pre", ["code", "line_command: this will be not converted too."]])
-      expect(body.element_children[2].selector_and_children).to eq(["div.pgroup", ["p", "normal line again."]])
-    end
-
-    it 'should raise error' do
-      text = "d {\n block is\nd {\n nested but\nd {\n not terminated }"
-      expect { NoraMark::Document.parse(text, lang: 'ja', title: 'foo') }.to raise_error KPeg::CompiledParser::ParseError
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(["pre", ["code", "line_command: this will be not converted too."]])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
+      end
     end
 
     describe 'markdown style' do
@@ -901,26 +990,28 @@ EOF
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 1
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-          ['h1', 'タイトル です。'],
-          ['div.pgroup', 
-           ['p', 'これは、セクションの中です。']]]
-      )
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'タイトル です。'],
+                  ['div.pgroup', 
+                   ['p', 'これは、セクションの中です。']]]
+                 )
       end
       it 'should convert markdown style heading with empty body' do
         text = "=: タイトルです。\n*:中身です。\n\n==: 次のタイトルです。これから書きます。\n\n==:ここもこれから。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-         ['h1', 'タイトルです。'],
-         ['ul', ['li', '中身です。']],
-         ['section',
-          ['h2', '次のタイトルです。これから書きます。']],
-         ['section',
-          ['h2', 'ここもこれから。']]])
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'タイトルです。'],
+                  ['ul', ['li', '中身です。']],
+                  ['section',
+                   ['h2', '次のタイトルです。これから書きます。']],
+                  ['section',
+                   ['h2', 'ここもこれから。']]])
       end
       it 'should markdown style heading interrupted by other headed section' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。\n =: また次のセクションです。\n次のセクションの中です。"
@@ -928,17 +1019,19 @@ EOF
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 2
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-          ['h1', 'タイトルです。'],
-          ['div.pgroup', 
-           ['p', 'これは、セクションの中です。']]])
-        expect(body.element_children[1].selector_and_children).to eq(
-        ['section',
-          ['h1', 'また次のセクションです。'],
-          ['div.pgroup', 
-           ['p', '次のセクションの中です。']]]
-      )
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'タイトルです。'],
+                  ['div.pgroup', 
+                   ['p', 'これは、セクションの中です。']]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'また次のセクションです。'],
+                  ['div.pgroup', 
+                   ['p', '次のセクションの中です。']]]
+                 )
       end
       it 'should markdown style heading not interrupted by other explicit section' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。\n section {\n h2: また次のセクションです。\n入れ子になります。\n}\nこのように。"
@@ -946,18 +1039,19 @@ EOF
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 1
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-          ['h1', 'タイトルです。'],
-          ['div.pgroup', 
-           ['p', 'これは、セクションの中です。']],
-           ['section',
-             ['h2', 'また次のセクションです。'],
-             ['div.pgroup', 
-              ['p', '入れ子になります。']]],
-          ['div.pgroup', 
-           ['p', 'このように。']]]
-      )
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'タイトルです。'],
+                  ['div.pgroup', 
+                   ['p', 'これは、セクションの中です。']],
+                  ['section',
+                   ['h2', 'また次のセクションです。'],
+                   ['div.pgroup', 
+                    ['p', '入れ子になります。']]],
+                  ['div.pgroup', 
+                   ['p', 'このように。']]]
+                 )
       end
       it 'should markdown style heading not interrupted by other explicit section' do
         text = "=: タイトルです。\r\nこれは、セクションの中です。\n ==: また次のセクションです。{\n 入れ子になります。\n =: 中にもかけます。\nさらにネストされます。\n}\nこのように。"
@@ -965,22 +1059,23 @@ EOF
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 1
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-          ['h1', 'タイトルです。'],
-          ['div.pgroup', 
-           ['p', 'これは、セクションの中です。']],
-           ['section',
-             ['h2', 'また次のセクションです。'],
-             ['div.pgroup', 
-              ['p', '入れ子になります。']],
-             ['section',
-              ['h1', '中にもかけます。'],
-              ['div.pgroup', 
-               ['p', 'さらにネストされます。']]]],
-          ['div.pgroup', 
-           ['p', 'このように。']]]
-      )
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'タイトルです。'],
+                  ['div.pgroup', 
+                   ['p', 'これは、セクションの中です。']],
+                  ['section',
+                   ['h2', 'また次のセクションです。'],
+                   ['div.pgroup', 
+                    ['p', '入れ子になります。']],
+                   ['section',
+                    ['h1', '中にもかけます。'],
+                    ['div.pgroup', 
+                     ['p', 'さらにネストされます。']]]],
+                  ['div.pgroup', 
+                   ['p', 'このように。']]]
+                 )
       end
 
       it 'should markdown style explicit heading correctly nested' do
@@ -989,18 +1084,19 @@ EOF
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 1
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-          ['h1', 'head one'],
-          ['div.pgroup', 
-           ['p', 'in the top level section.']],
-           ['section',
-             ['h2', 'second level section.'],
-             ['div.pgroup', 
-              ['p', 'in the second level.']]],
-         ['div.pgroup', 
-          ['p', 'top level again.']]]
-      )
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'head one'],
+                  ['div.pgroup', 
+                   ['p', 'in the top level section.']],
+                  ['section',
+                   ['h2', 'second level section.'],
+                   ['div.pgroup', 
+                    ['p', 'in the second level.']]],
+                  ['div.pgroup', 
+                   ['p', 'top level again.']]]
+                 )
       end
 
       it 'should markdown style heading not interrupted by smaller section' do
@@ -1009,24 +1105,26 @@ EOF
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children.size).to eq 2
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['section',
-          ['h1', 'タイトルです。'],
-          ['div.pgroup', 
-           ['p', 'これは、セクションの中です。']],
-           ['section',
-             ['h2', 'また次のセクションです。'],
-             ['div.pgroup', 
-              ['p', '入れ子になります。']],
-            ['section',
-             ['h3', 'さらに中のセクション'],
-             ['div.pgroup', 
-              ['p', 'さらに入れ子になっているはず。']]]]] )
-        expect(body.element_children[1].selector_and_children).to eq(
-        ['section',
-          ['h1', 'ここで次のセクションです。'],
-          ['div.pgroup', 
-           ['p', '脱出しているはずです。']]])
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'タイトルです。'],
+                  ['div.pgroup', 
+                   ['p', 'これは、セクションの中です。']],
+                  ['section',
+                   ['h2', 'また次のセクションです。'],
+                   ['div.pgroup', 
+                    ['p', '入れ子になります。']],
+                   ['section',
+                    ['h3', 'さらに中のセクション'],
+                    ['div.pgroup', 
+                     ['p', 'さらに入れ子になっているはず。']]]]] )
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['h1', 'ここで次のセクションです。'],
+                  ['div.pgroup', 
+                   ['p', '脱出しているはずです。']]])
 
       end
     end
@@ -1037,14 +1135,17 @@ EOF
         converted = noramark.render_parameter(nonpaged: true).html
         expect(converted.size).to eq 1
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children).to eq(
-        ['div.pgroup',
-         ['p', 'some text']])
-        expect(body.element_children[1].selector_and_children).to eq(
-        ['hr.page-break'])
-        expect(body.element_children[2].selector_and_children).to eq(
-        ['div.pgroup',
-         ['p', 'next page']])
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'some text']])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['hr.page-break'])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(
+                 ['div.pgroup',
+                  ['p', 'next page']])
       end
     end
     describe 'create file' do
@@ -1095,177 +1196,6 @@ EOF
         expect(@stdout.strip).to eq ""
       end
     end
-    describe 'node manipulation' do
-      before do
-        @text = <<EOF
-1st line.
-d.the_class {
-3rd line.
-}
-5th line.
-EOF
-      end
-      it 'should access line number' do
-        noramark = NoraMark::Document.parse(@text)
-        page = noramark.root.children[0]
-        expect(page.children.size).to eq 3
-        expect(page.line_no).to eq 1
-        expect(page.children[0].line_no).to eq 1
-        expect(page.children[1].line_no).to eq 2
-        expect(page.children[2].children[0].line_no).to eq 5
-      end
-
-      it 'replace existing node' do
-        noramark = NoraMark::Document.parse(@text)
-        page = noramark.root.children[0]
-        first_pgroup = page.children[0]
-        line_no = first_pgroup.line_no
-        new_node = NoraMark::ParagraphGroup.new(['the_id'], ['the_class'], [], {}, [ NoraMark::Text.new("replaced.", line_no)],  line_no)
-        first_pgroup.replace(new_node)
-        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children(remove_id: false)).to eq(
-          ['p#the_id.the_class', 'replaced.'])
-      end
-
-      it 'modify existing node by DSL' do
-        text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
-        noramark = NoraMark::Document.parse(text, lang: 'ja')
-
-        noramark.add_transformer(generator: :html) do
-          modify 'foobar' do
-            @node.name = 'section'
-            @node.prepend_child block("h#{@node.named_parameters[:level]}", @node.parameters[0])
-          end
-        end
-        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children()).to eq(
-          ['div.pgroup', [ 'p', '1st line.' ]])
-        expect(body.element_children[1].selector_and_children()).to eq(
-          ['section', [ 'h3', 'title' ], ['div.pgroup',  ['p', 'in the section.']]])
-        expect(body.element_children[2].selector_and_children()).to eq(
-          ['section', [ 'h1','section 2.' ]])
-      end
-      it 'replace existing node by DSL' do
-        text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
-        noramark = NoraMark::Document.parse(text, lang: 'ja')
-
-        noramark.add_transformer(generator: :html) do
-          replace 'foobar' do
-            block('section',
-                   [
-                    block( "h#{@node.named_parameters[:level]}", @node.parameters[0]),
-                   ] + @node.children)
-          end
-        end
-        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children()).to eq(
-          ['div.pgroup', [ 'p', '1st line.' ]])
-        expect(body.element_children[1].selector_and_children()).to eq(
-          ['section', [ 'h3', 'title' ], ['div.pgroup',  ['p', 'in the section.']]])
-        expect(body.element_children[2].selector_and_children()).to eq(
-          ['section', [ 'h1','section 2.' ]])
-      end
-      it 'generate complex-style headed section' do
-        text = <<EOF
----
-lang: ja
----
-
-=: 見出し
-sub: 副見出し
-
-パラグラフ。
-パラグラフ。
-
-EOF
-        noramark = NoraMark::Document.parse(text)
-        noramark.add_transformer(generator: :html) do
-          replace({:type => :HeadedSection}) do
-            header = block('header',
-                           block('div',
-                                 block("h#{@node.level}", @node.heading),
-                                 classes: ['hgroup'])) 
-            if (fc = @node.first_child).name == 'sub'
-              fc.name = 'p'
-              fc.classes = ['subh']
-              header.first_child.append_child fc 
-            end
-            body = block('div', @node.children, classes:['section-body'])
-            block('section', [ header, body ], template: @node)
-          end
-        end
-        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children()).to eq(
-               ['section', [ 'header', ['div.hgroup', ['h1', '見出し'], ['p.subh', '副見出し']]],
-                ['div.section-body',
-                 ['div.pgroup', ['p', 'パラグラフ。'], ['p', 'パラグラフ。']]]])
-      end
-      it 'converts my markup' do
-        text = "speak(Alice): Alice is speaking.\nspeak(Bob): and this is Bob."
-        noramark = NoraMark::Document.parse(text)
-        noramark.add_transformer(generator: :html) do
-          modify "speak" do
-            @node.name = 'p'
-            @node.prepend_child inline('span', @node.parameters[0], classes: ['speaker'])
-          end
-        end
-        body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
-        expect(body.element_children[0].selector_and_children()).to eq(
-                 ['p', ['span.speaker', 'Alice'], 'Alice is speaking.'])
-        expect(body.element_children[1].selector_and_children()).to eq(
-                 ['p', ['span.speaker', 'Bob'], 'and this is Bob.'])
-
-      end
-      
-
-      it 'should reparent tree' do
-        text = <<EOF
-1st line.
-d {
-in the div
-}
-*: ul item
-text [s{with inline}] within
-EOF
-        root = NoraMark::Document.parse(text).root
-
-        expect(root.parent).to be nil
-        expect(root.prev).to be nil
-        expect(root.next).to be nil
-        expect(root.content).to be nil
-
-        expect(root.children.size).to eq 1
-        page = root.first_child
-        expect(root.children[0]).to eq page
-        expect(root.last_child).to eq page
-        expect(page.parent).to eq root
-        expect(page.prev).to be nil
-        expect(page.next).to be nil
-
-        first_pgroup = page.first_child
-        expect(first_pgroup.class).to be NoraMark::ParagraphGroup
-        expect(first_pgroup.parent).to eq page
-        expect(first_pgroup.children.size).to eq 1
-        expect(first_pgroup.prev).to be nil
-
-        paragraph = first_pgroup.first_child
-        expect(paragraph.class).to be NoraMark::Paragraph
-        expect(paragraph.parent).to be first_pgroup
-        expect(paragraph.prev).to be nil
-        expect(paragraph.next).to be nil
-        expect(paragraph.children.size).to eq 1
-        text = paragraph.first_child
-        expect(text.class).to be NoraMark::Text
-        expect(text.content).to eq '1st line.'
-        expect(text.children.size).to eq 0
-        expect(text.prev).to be nil
-        expect(text.next).to be nil
-        expect(text.parent).to eq paragraph
-
-        second_div = first_pgroup.next
-        expect(second_div.class).to be NoraMark::Block
-      end
-    end
     describe 'table of contents' do
       before do
         @text = <<EOF
@@ -1298,10 +1228,17 @@ EOF
       it 'should generate tocs' do
         toc = @noramark.html.toc
         expect(toc.size).to eq 3
-        expect(toc[0]).to eq({link: "nora_00001.xhtml#heading_index_1", level: 1, text: "chapter 1"})
-        expect(toc[1]).to eq({link: "nora_00001.xhtml#heading_index_2", level: 2, text: "section 1-1"})
-        expect(toc[2]).to eq({link: "nora_00002.xhtml#heading_index_3", level: 6, text: "some column"})
+        expect(toc[0])
+          .to eq({link: "nora_00001.xhtml#heading_index_1", level: 1, text: "chapter 1"})
+        expect(toc[1])
+          .to eq({link: "nora_00001.xhtml#heading_index_2", level: 2, text: "section 1-1"})
+        expect(toc[2])
+          .to eq({link: "nora_00002.xhtml#heading_index_3", level: 6, text: "some column"})
       end
+    end
+    it 'should raise error' do
+      text = "d {\n block is\nd {\n nested but\nd {\n not terminated }"
+      expect { NoraMark::Document.parse(text, lang: 'ja', title: 'foo') }.to raise_error KPeg::CompiledParser::ParseError
     end
   end
 end
