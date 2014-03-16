@@ -1,5 +1,6 @@
 # NoraMark
 [<img src="https://secure.travis-ci.org/skoji/noramark.png" />](http://travis-ci.org/skoji/noramark) [![Coverage Status](https://coveralls.io/repos/skoji/noramark/badge.png?branch=master)](https://coveralls.io/r/skoji/noramark?branch=master)
+[![Dependency Status](https://gemnasium.com/skoji/noramark.png)](https://gemnasium.com/skoji/noramark)
 [![Gem Version](https://badge.fury.io/rb/nora_mark.png)](http://badge.fury.io/rb/nora_mark)
 
 NoraMark is a simple and customizable text markup language. It is designed to create XHTML files for EPUB books.
