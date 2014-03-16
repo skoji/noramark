@@ -27,9 +27,9 @@ ln = { current_line }
 BOM = /\uFEFF/
 Eof = !. 
 Space = ' ' | '\t' 
-EofComment = Space* "#" (!Eof .)* 
-Comment =   Space* "#" (!Nl .)* Nl EmptyLine*
 - =  Space* 
+EofComment = - "//" (!Eof .)* 
+Comment =   - "//" (!Nl .)* Nl EmptyLine*
 EmptyLine = /^/ - (Nl | Comment | EofComment)
 
 Nl = /\r?\n/
@@ -117,15 +117,15 @@ Newpage = -  NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:id
 
 # unordered list
 UnorderedList = ln:ln UnorderedItem+:items ~unordered_list([],[],[],[], items, ln)
-UnorderedItem = ln:ln '*:' - DocumentContent:content Le ~ul_item([], [], [], [], content, ln)
+UnorderedItem = - ln:ln '*' - DocumentContent:content Le ~ul_item([], [], [], [], content, ln)
 
 # ordered list
 OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], [], items, ln)
-OrderedItem = ln:ln Num ':' - DocumentContent:content Le ~ol_item([], [], [], [], content, ln)
+OrderedItem = - ln:ln Num '.' - DocumentContent:content Le ~ol_item([], [], [], [], content, ln)
 
 # definition list
 DefinitionList = ln:ln DefinitionItem+:items ~definition_list([], [], [], [], items, ln)
-DefinitionItem = -  ln:ln ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], [], definition, ln)
+DefinitionItem = -  ln:ln - ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], [], definition, ln)
 
 # long definition list
 LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], [], items, ln)
@@ -154,8 +154,8 @@ BlockDelimiter = BlockHead | BlockEnd
 ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart
 
 # markdown-style headings
-HStartMark(n) = - < '='+ ':' > &{ text.length - 1 == n }
-HMarkupTerminator(n) = - < '='+ ':' > - CharString:cs Le &{ text.length - 1 <= n && !cs.strip.end_with?('{') } | - Eof
+HStartMark(n) = - < '#'+ > &{ text.length == n }
+HMarkupTerminator(n) = - < '#'+ > - CharString:cs Le &{ text.length <= n && !cs.strip.end_with?('{') } | - Eof
 
 HStart(n) = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
 HSection(n) = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* ~h_section(h[:level], h[:heading], content, h[:ln])
@@ -163,31 +163,31 @@ HSection(n) = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content Empt
 BlockHStart(n) = - HStartMark(n) ln:ln - DocumentContentExcept('{'):s - '{' - Nl { { level: n, heading: s, ln: ln} }
 ExplicitHSection(n) = BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd ~h_section(h[:level], h[:heading], content, h[:ln])
 
-HeadedStart = HStart(1)
-            | HStart(2)
-            | HStart(3)
-            | HStart(4)
+HeadedStart = HStart(6)
             | HStart(5)
-            | HStart(6)
-            | BlockHStart(1)
-            | BlockHStart(2)
-            | BlockHStart(3)
-            | BlockHStart(4)
-            | BlockHStart(5)
+            | HStart(4)
+            | HStart(3)
+            | HStart(2)
+            | HStart(1)
             | BlockHStart(6)
+            | BlockHStart(5)
+            | BlockHStart(4)
+            | BlockHStart(3)
+            | BlockHStart(2)
+            | BlockHStart(1)
 
-HeadedSection = ExplicitHSection(1)
-              | ExplicitHSection(2)
-              | ExplicitHSection(3)
-              | ExplicitHSection(4)
+HeadedSection = ExplicitHSection(6)
               | ExplicitHSection(5)
-              | ExplicitHSection(6)
-              | HSection(1)
-              | HSection(2)
-              | HSection(3)
-              | HSection(4)
-              | HSection(5)
+              | ExplicitHSection(4)
+              | ExplicitHSection(3)
+              | ExplicitHSection(2)
+              | ExplicitHSection(1)
               | HSection(6)
+              | HSection(5)
+              | HSection(4)
+              | HSection(3)
+              | HSection(2)
+              | HSection(1)
 
 # frontmatter
 FrontmatterSeparator =  - '---' - Nl

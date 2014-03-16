@@ -355,40 +355,47 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # EofComment = Space* "#" (!Eof .)*
+  # - = Space*
+  def __hyphen_
+    while true
+      _tmp = apply(:_Space)
+      break unless _tmp
+    end
+    _tmp = true
+    set_failed_rule :__hyphen_ unless _tmp
+    return _tmp
+  end
+
+  # EofComment = - "//" (!Eof .)*
   def _EofComment
 
     _save = self.pos
     while true # sequence
-      while true
-        _tmp = apply(:_Space)
-        break unless _tmp
-      end
-      _tmp = true
+      _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = match_string("#")
+      _tmp = match_string("//")
       unless _tmp
         self.pos = _save
         break
       end
       while true
 
-        _save3 = self.pos
+        _save2 = self.pos
         while true # sequence
-          _save4 = self.pos
+          _save3 = self.pos
           _tmp = apply(:_Eof)
           _tmp = _tmp ? nil : true
-          self.pos = _save4
+          self.pos = _save3
           unless _tmp
-            self.pos = _save3
+            self.pos = _save2
             break
           end
           _tmp = get_byte
           unless _tmp
-            self.pos = _save3
+            self.pos = _save2
           end
           break
         end # end sequence
@@ -406,40 +413,36 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Comment = Space* "#" (!Nl .)* Nl EmptyLine*
+  # Comment = - "//" (!Nl .)* Nl EmptyLine*
   def _Comment
 
     _save = self.pos
     while true # sequence
-      while true
-        _tmp = apply(:_Space)
-        break unless _tmp
-      end
-      _tmp = true
+      _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = match_string("#")
+      _tmp = match_string("//")
       unless _tmp
         self.pos = _save
         break
       end
       while true
 
-        _save3 = self.pos
+        _save2 = self.pos
         while true # sequence
-          _save4 = self.pos
+          _save3 = self.pos
           _tmp = apply(:_Nl)
           _tmp = _tmp ? nil : true
-          self.pos = _save4
+          self.pos = _save3
           unless _tmp
-            self.pos = _save3
+            self.pos = _save2
             break
           end
           _tmp = get_byte
           unless _tmp
-            self.pos = _save3
+            self.pos = _save2
           end
           break
         end # end sequence
@@ -468,17 +471,6 @@ class NoraMark::Parser < KPeg::CompiledParser
     end # end sequence
 
     set_failed_rule :_Comment unless _tmp
-    return _tmp
-  end
-
-  # - = Space*
-  def __hyphen_
-    while true
-      _tmp = apply(:_Space)
-      break unless _tmp
-    end
-    _tmp = true
-    set_failed_rule :__hyphen_ unless _tmp
     return _tmp
   end
 
@@ -2593,18 +2585,23 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # UnorderedItem = ln:ln "*:" - DocumentContent:content Le {ul_item([], [], [], [], content, ln)}
+  # UnorderedItem = - ln:ln "*" - DocumentContent:content Le {ul_item([], [], [], [], content, ln)}
   def _UnorderedItem
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_ln)
       ln = @result
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = match_string("*:")
+      _tmp = match_string("*")
       unless _tmp
         self.pos = _save
         break
@@ -2680,11 +2677,16 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # OrderedItem = ln:ln Num ":" - DocumentContent:content Le {ol_item([], [], [], [], content, ln)}
+  # OrderedItem = - ln:ln Num "." - DocumentContent:content Le {ol_item([], [], [], [], content, ln)}
   def _OrderedItem
 
     _save = self.pos
     while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:_ln)
       ln = @result
       unless _tmp
@@ -2696,7 +2698,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = match_string(":")
+      _tmp = match_string(".")
       unless _tmp
         self.pos = _save
         break
@@ -2772,7 +2774,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # DefinitionItem = - ln:ln ";:" - DocumentContentExcept(':'):term ":" - DocumentContent:definition Le {dl_item([], [], [term], [], definition, ln)}
+  # DefinitionItem = - ln:ln - ";:" - DocumentContentExcept(':'):term ":" - DocumentContent:definition Le {dl_item([], [], [term], [], definition, ln)}
   def _DefinitionItem
 
     _save = self.pos
@@ -2784,6 +2786,11 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       _tmp = apply(:_ln)
       ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
@@ -3176,7 +3183,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HStartMark = - < "="+ ":" > &{ text.length - 1 == n }
+  # HStartMark = - < "#"+ > &{ text.length == n }
   def _HStartMark(n)
 
     _save = self.pos
@@ -3187,31 +3194,17 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _text_start = self.pos
-
       _save1 = self.pos
-      while true # sequence
-        _save2 = self.pos
-        _tmp = match_string("=")
-        if _tmp
-          while true
-            _tmp = match_string("=")
-            break unless _tmp
-          end
-          _tmp = true
-        else
-          self.pos = _save2
+      _tmp = match_string("#")
+      if _tmp
+        while true
+          _tmp = match_string("#")
+          break unless _tmp
         end
-        unless _tmp
-          self.pos = _save1
-          break
-        end
-        _tmp = match_string(":")
-        unless _tmp
-          self.pos = _save1
-        end
-        break
-      end # end sequence
-
+        _tmp = true
+      else
+        self.pos = _save1
+      end
       if _tmp
         text = get_text(_text_start)
       end
@@ -3219,9 +3212,9 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _save3 = self.pos
-      _tmp = begin;  text.length - 1 == n ; end
-      self.pos = _save3
+      _save2 = self.pos
+      _tmp = begin;  text.length == n ; end
+      self.pos = _save2
       unless _tmp
         self.pos = _save
       end
@@ -3232,7 +3225,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HMarkupTerminator = (- < "="+ ":" > - CharString:cs Le &{ text.length - 1 <= n && !cs.strip.end_with?('{') } | - Eof)
+  # HMarkupTerminator = (- < "#"+ > - CharString:cs Le &{ text.length <= n && !cs.strip.end_with?('{') } | - Eof)
   def _HMarkupTerminator(n)
 
     _save = self.pos
@@ -3246,31 +3239,17 @@ class NoraMark::Parser < KPeg::CompiledParser
           break
         end
         _text_start = self.pos
-
         _save2 = self.pos
-        while true # sequence
-          _save3 = self.pos
-          _tmp = match_string("=")
-          if _tmp
-            while true
-              _tmp = match_string("=")
-              break unless _tmp
-            end
-            _tmp = true
-          else
-            self.pos = _save3
+        _tmp = match_string("#")
+        if _tmp
+          while true
+            _tmp = match_string("#")
+            break unless _tmp
           end
-          unless _tmp
-            self.pos = _save2
-            break
-          end
-          _tmp = match_string(":")
-          unless _tmp
-            self.pos = _save2
-          end
-          break
-        end # end sequence
-
+          _tmp = true
+        else
+          self.pos = _save2
+        end
         if _tmp
           text = get_text(_text_start)
         end
@@ -3294,9 +3273,9 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        _save4 = self.pos
-        _tmp = begin;  text.length - 1 <= n && !cs.strip.end_with?('{') ; end
-        self.pos = _save4
+        _save3 = self.pos
+        _tmp = begin;  text.length <= n && !cs.strip.end_with?('{') ; end
+        self.pos = _save3
         unless _tmp
           self.pos = _save1
         end
@@ -3306,16 +3285,16 @@ class NoraMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
 
-      _save5 = self.pos
+      _save4 = self.pos
       while true # sequence
         _tmp = apply(:__hyphen_)
         unless _tmp
-          self.pos = _save5
+          self.pos = _save4
           break
         end
         _tmp = apply(:_Eof)
         unless _tmp
-          self.pos = _save5
+          self.pos = _save4
         end
         break
       end # end sequence
@@ -3566,45 +3545,45 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HeadedStart = (HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6) | BlockHStart(1) | BlockHStart(2) | BlockHStart(3) | BlockHStart(4) | BlockHStart(5) | BlockHStart(6))
+  # HeadedStart = (HStart(6) | HStart(5) | HStart(4) | HStart(3) | HStart(2) | HStart(1) | BlockHStart(6) | BlockHStart(5) | BlockHStart(4) | BlockHStart(3) | BlockHStart(2) | BlockHStart(1))
   def _HeadedStart
 
     _save = self.pos
     while true # choice
-      _tmp = apply_with_args(:_HStart, 1)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply_with_args(:_HStart, 2)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply_with_args(:_HStart, 3)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply_with_args(:_HStart, 4)
+      _tmp = apply_with_args(:_HStart, 6)
       break if _tmp
       self.pos = _save
       _tmp = apply_with_args(:_HStart, 5)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_HStart, 6)
+      _tmp = apply_with_args(:_HStart, 4)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_BlockHStart, 1)
+      _tmp = apply_with_args(:_HStart, 3)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_BlockHStart, 2)
+      _tmp = apply_with_args(:_HStart, 2)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_BlockHStart, 3)
+      _tmp = apply_with_args(:_HStart, 1)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_BlockHStart, 4)
+      _tmp = apply_with_args(:_BlockHStart, 6)
       break if _tmp
       self.pos = _save
       _tmp = apply_with_args(:_BlockHStart, 5)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_BlockHStart, 6)
+      _tmp = apply_with_args(:_BlockHStart, 4)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_BlockHStart, 3)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_BlockHStart, 2)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_BlockHStart, 1)
       break if _tmp
       self.pos = _save
       break
@@ -3614,45 +3593,45 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HeadedSection = (ExplicitHSection(1) | ExplicitHSection(2) | ExplicitHSection(3) | ExplicitHSection(4) | ExplicitHSection(5) | ExplicitHSection(6) | HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))
+  # HeadedSection = (ExplicitHSection(6) | ExplicitHSection(5) | ExplicitHSection(4) | ExplicitHSection(3) | ExplicitHSection(2) | ExplicitHSection(1) | HSection(6) | HSection(5) | HSection(4) | HSection(3) | HSection(2) | HSection(1))
   def _HeadedSection
 
     _save = self.pos
     while true # choice
-      _tmp = apply_with_args(:_ExplicitHSection, 1)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply_with_args(:_ExplicitHSection, 2)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply_with_args(:_ExplicitHSection, 3)
-      break if _tmp
-      self.pos = _save
-      _tmp = apply_with_args(:_ExplicitHSection, 4)
+      _tmp = apply_with_args(:_ExplicitHSection, 6)
       break if _tmp
       self.pos = _save
       _tmp = apply_with_args(:_ExplicitHSection, 5)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_ExplicitHSection, 6)
+      _tmp = apply_with_args(:_ExplicitHSection, 4)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_HSection, 1)
+      _tmp = apply_with_args(:_ExplicitHSection, 3)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_HSection, 2)
+      _tmp = apply_with_args(:_ExplicitHSection, 2)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_HSection, 3)
+      _tmp = apply_with_args(:_ExplicitHSection, 1)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_HSection, 4)
+      _tmp = apply_with_args(:_HSection, 6)
       break if _tmp
       self.pos = _save
       _tmp = apply_with_args(:_HSection, 5)
       break if _tmp
       self.pos = _save
-      _tmp = apply_with_args(:_HSection, 6)
+      _tmp = apply_with_args(:_HSection, 4)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_HSection, 3)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_HSection, 2)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply_with_args(:_HSection, 1)
       break if _tmp
       self.pos = _save
       break
@@ -4400,9 +4379,9 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_BOM] = rule_info("BOM", "/\\uFEFF/")
   Rules[:_Eof] = rule_info("Eof", "!.")
   Rules[:_Space] = rule_info("Space", "(\" \" | \"\\\\t\")")
-  Rules[:_EofComment] = rule_info("EofComment", "Space* \"\#\" (!Eof .)*")
-  Rules[:_Comment] = rule_info("Comment", "Space* \"\#\" (!Nl .)* Nl EmptyLine*")
   Rules[:__hyphen_] = rule_info("-", "Space*")
+  Rules[:_EofComment] = rule_info("EofComment", "- \"//\" (!Eof .)*")
+  Rules[:_Comment] = rule_info("Comment", "- \"//\" (!Nl .)* Nl EmptyLine*")
   Rules[:_EmptyLine] = rule_info("EmptyLine", "/^/ - (Nl | Comment | EofComment)")
   Rules[:_Nl] = rule_info("Nl", "/\\r?\\n/")
   Rules[:_Le] = rule_info("Le", "(Nl | Eof)")
@@ -4451,11 +4430,11 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
   Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_UnorderedList] = rule_info("UnorderedList", "ln:ln UnorderedItem+:items {unordered_list([],[],[],[], items, ln)}")
-  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "ln:ln \"*:\" - DocumentContent:content Le {ul_item([], [], [], [], content, ln)}")
+  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "- ln:ln \"*\" - DocumentContent:content Le {ul_item([], [], [], [], content, ln)}")
   Rules[:_OrderedList] = rule_info("OrderedList", "ln:ln OrderedItem+:items {ordered_list([],[],[], [], items, ln)}")
-  Rules[:_OrderedItem] = rule_info("OrderedItem", "ln:ln Num \":\" - DocumentContent:content Le {ol_item([], [], [], [], content, ln)}")
+  Rules[:_OrderedItem] = rule_info("OrderedItem", "- ln:ln Num \".\" - DocumentContent:content Le {ol_item([], [], [], [], content, ln)}")
   Rules[:_DefinitionList] = rule_info("DefinitionList", "ln:ln DefinitionItem+:items {definition_list([], [], [], [], items, ln)}")
-  Rules[:_DefinitionItem] = rule_info("DefinitionItem", "- ln:ln \";:\" - DocumentContentExcept(':'):term \":\" - DocumentContent:definition Le {dl_item([], [], [term], [], definition, ln)}")
+  Rules[:_DefinitionItem] = rule_info("DefinitionItem", "- ln:ln - \";:\" - DocumentContentExcept(':'):term \":\" - DocumentContent:definition Le {dl_item([], [], [term], [], definition, ln)}")
   Rules[:_LongDefinitionList] = rule_info("LongDefinitionList", "ln:ln LongDefinitionItem+:items {definition_list([], [], [], [], items, ln)}")
   Rules[:_LongDefinitionItem] = rule_info("LongDefinitionItem", "- ln:ln \";:\" - DocumentContentExcept('{'):term \"{\" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], [], definition, ln)}")
   Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
@@ -4464,14 +4443,14 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
   Rules[:_BlockDelimiter] = rule_info("BlockDelimiter", "(BlockHead | BlockEnd)")
   Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
-  Rules[:_HStartMark] = rule_info("HStartMark", "- < \"=\"+ \":\" > &{ text.length - 1 == n }")
-  Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "(- < \"=\"+ \":\" > - CharString:cs Le &{ text.length - 1 <= n && !cs.strip.end_with?('{') } | - Eof)")
+  Rules[:_HStartMark] = rule_info("HStartMark", "- < \"\#\"+ > &{ text.length == n }")
+  Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "(- < \"\#\"+ > - CharString:cs Le &{ text.length <= n && !cs.strip.end_with?('{') } | - Eof)")
   Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }")
   Rules[:_HSection] = rule_info("HSection", "HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* {h_section(h[:level], h[:heading], content, h[:ln])}")
   Rules[:_BlockHStart] = rule_info("BlockHStart", "- HStartMark(n) ln:ln - DocumentContentExcept('{'):s - \"{\" - Nl { { level: n, heading: s, ln: ln} }")
   Rules[:_ExplicitHSection] = rule_info("ExplicitHSection", "BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd {h_section(h[:level], h[:heading], content, h[:ln])}")
-  Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(1) | HStart(2) | HStart(3) | HStart(4) | HStart(5) | HStart(6) | BlockHStart(1) | BlockHStart(2) | BlockHStart(3) | BlockHStart(4) | BlockHStart(5) | BlockHStart(6))")
-  Rules[:_HeadedSection] = rule_info("HeadedSection", "(ExplicitHSection(1) | ExplicitHSection(2) | ExplicitHSection(3) | ExplicitHSection(4) | ExplicitHSection(5) | ExplicitHSection(6) | HSection(1) | HSection(2) | HSection(3) | HSection(4) | HSection(5) | HSection(6))")
+  Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(6) | HStart(5) | HStart(4) | HStart(3) | HStart(2) | HStart(1) | BlockHStart(6) | BlockHStart(5) | BlockHStart(4) | BlockHStart(3) | BlockHStart(2) | BlockHStart(1))")
+  Rules[:_HeadedSection] = rule_info("HeadedSection", "(ExplicitHSection(6) | ExplicitHSection(5) | ExplicitHSection(4) | ExplicitHSection(3) | ExplicitHSection(2) | ExplicitHSection(1) | HSection(6) | HSection(5) | HSection(4) | HSection(3) | HSection(2) | HSection(1))")
   Rules[:_FrontmatterSeparator] = rule_info("FrontmatterSeparator", "- \"---\" - Nl")
   Rules[:_Frontmatter] = rule_info("Frontmatter", "FrontmatterSeparator ln:ln (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* {frontmatter(yaml, ln)}")
   Rules[:_Char] = rule_info("Char", "< /[[:print:]]/ > { text }")

@@ -46,10 +46,10 @@ I am planning to release nora2epub and other external tools.
 
 An example of markup text (text is in english, but the paragraph style is japanese)
 
-    # line begins with # is a comment.
-    # you don't need to indent noramark text.
+    // line begins with // is a comment.
+    // you don't need to indent noramark text.
 
-    # page/document metadata in YAML frontmatter
+    // page/document metadata in YAML frontmatter
     ---
     lang: ja
     title: test title
@@ -97,8 +97,8 @@ The converted XHTML file
 
 Another example of markup text in non-japanese (paragraph style is default)
 
-    # line begins with # is a comment.
-    # you don't need to indent noramark text.
+    // line begins with // is a comment.
+    // you don't need to indent noramark text.
 
     ---
     lang: en
@@ -145,7 +145,7 @@ The converted XHTML file
 
 Another example of markup text
 
-    # Markdown-ish heading will creates section
+    // Markdown-ish heading will creates section
 
     ---
     lang: ja
@@ -153,16 +153,16 @@ Another example of markup text
     stylesheets: css/normalize.css, css/main.css
     ---
     
-    =: this is the first heading
+    # this is the first heading
 
     This line is in a section.
     This line is in a section.
 
-    ==: this is the second heading
+    ## this is the second heading
 
     This section is nested.
 
-    =: this is the third heading
+    # this is the third heading
 
     will terminate lower level section
 
@@ -195,7 +195,7 @@ The converted XHTML file
 ```
 Yet another example of markup text.
 
-    # Markdown-ish heading with explicit setion boundary
+    // Markdown-ish heading with explicit setion boundary
 
     ---
     lang: ja
@@ -203,12 +203,12 @@ Yet another example of markup text.
     stylesheets: css/normalize.css, css/main.css
     ---
     
-    =: this is the first heading
+    # this is the first heading
 
     This line is in a section.
     This line is in a section.
 
-    ==: this is the second heading with explicit boundary {
+    ## this is the second heading with explicit boundary {
 
     This section is nested.
     
@@ -216,7 +216,7 @@ Yet another example of markup text.
     
     Here is in the first section again.
     
-    =: this is the third heading
+    # this is the third heading
 
     will terminate same level section
 
@@ -293,7 +293,7 @@ text = <<EOF
 lang: ja
 ---
  
-=: 見出し
+# 見出し
  
 パラグラフ。
 パラグラフ。

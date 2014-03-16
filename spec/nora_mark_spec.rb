@@ -666,7 +666,7 @@ describe NoraMark::Document do
     end
     describe 'list' do
       it 'handle ordered list ' do
-        text = "this is normal line.\n1: for the 1st.\n2: secondly, blah.\n3: and last...\nthe ordered list ends."
+        text = "this is normal line.\n1. for the 1st.\n2. secondly, blah.\n3. and last...\nthe ordered list ends."
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -691,7 +691,7 @@ describe NoraMark::Document do
       end
 
       it 'handle unordered list ' do
-        text = "this is normal line.\n*: for the 1st.\n*: secondly, blah.\n*: and last...\nthe ordered list ends."
+        text = "this is normal line.\n* for the 1st.\n* secondly, blah.\n* and last...\nthe ordered list ends."
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -840,7 +840,7 @@ EOF
       end
 
       it 'ignore comments' do
-        text = "# この行はコメントです\nここから、パラグラフがはじまります。\n # これもコメント\n「二行目です。」\n三行目です。\n\n# これもコメント\n\n ここから、次のパラグラフです。\n#最後のコメントです"
+        text = "// この行はコメントです\nここから、パラグラフがはじまります。\n // これもコメント\n「二行目です。」\n三行目です。\n\n// これもコメント\n\n ここから、次のパラグラフです。\n// 最後のコメントです"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -985,7 +985,7 @@ EOF
 
     describe 'markdown style' do
       it 'should convert markdown style heading' do
-        text = "=: タイトル です。\r\n\r\nこれは、セクションの中です。"
+        text = "# タイトル です。\r\n\r\nこれは、セクションの中です。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -999,7 +999,7 @@ EOF
                  )
       end
       it 'should convert markdown style heading with empty body' do
-        text = "=: タイトルです。\n*:中身です。\n\n==: 次のタイトルです。これから書きます。\n\n==:ここもこれから。"
+        text = "# タイトルです。\n* 中身です。\n\n## 次のタイトルです。これから書きます。\n\n## ここもこれから。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1014,7 +1014,7 @@ EOF
                    ['h2', 'ここもこれから。']]])
       end
       it 'should markdown style heading interrupted by other headed section' do
-        text = "=: タイトルです。\r\nこれは、セクションの中です。\n =: また次のセクションです。\n次のセクションの中です。"
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n # また次のセクションです。\n次のセクションの中です。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1034,7 +1034,7 @@ EOF
                  )
       end
       it 'should markdown style heading not interrupted by other explicit section' do
-        text = "=: タイトルです。\r\nこれは、セクションの中です。\n section {\n h2: また次のセクションです。\n入れ子になります。\n}\nこのように。"
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n section {\n h2: また次のセクションです。\n入れ子になります。\n}\nこのように。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1054,7 +1054,7 @@ EOF
                  )
       end
       it 'should markdown style heading not interrupted by other explicit section' do
-        text = "=: タイトルです。\r\nこれは、セクションの中です。\n ==: また次のセクションです。{\n 入れ子になります。\n =: 中にもかけます。\nさらにネストされます。\n}\nこのように。"
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n ## また次のセクションです。{\n 入れ子になります。\n# 中にもかけます。\nさらにネストされます。\n}\nこのように。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1079,7 +1079,7 @@ EOF
       end
 
       it 'should markdown style explicit heading correctly nested' do
-        text = "=: head one \n in the top level section.\n ==: second level section. { \n\n in the second level.\n}\n top level again."
+        text = "# head one \n in the top level section.\n ## second level section. { \n\n in the second level.\n}\n top level again."
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1100,7 +1100,7 @@ EOF
       end
 
       it 'should markdown style heading not interrupted by smaller section' do
-        text = "=: タイトルです。\r\nこれは、セクションの中です。\n ==: また次のセクションです。\n 入れ子になります。\n===: さらに中のセクション \nさらに入れ子になっているはず。\n=:ここで次のセクションです。\n脱出しているはずです。"
+        text = "# タイトルです。\r\nこれは、セクションの中です。\n ## また次のセクションです。\n 入れ子になります。\n### さらに中のセクション \nさらに入れ子になっているはず。\n# ここで次のセクションです。\n脱出しているはずです。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1203,9 +1203,9 @@ EOF
 lang: ja
 title: title
 ---
-=: [strong{chapter 1}]
+# [strong{chapter 1}]
 text
-==: section 1-1
+## section 1-1
 text
 newpage:
 section {

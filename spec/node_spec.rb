@@ -38,7 +38,7 @@ EOF
     end
 
     it 'modify existing node by DSL' do
-      text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
+      text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n# section 2."
       noramark = NoraMark::Document.parse(text, lang: 'ja')
 
       noramark.add_transformer(generator: :html) do
@@ -59,7 +59,7 @@ EOF
                ['section', [ 'h1','section 2.' ]])
     end
     it 'replace existing node by DSL' do
-      text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n=: section 2."
+      text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n# section 2."
       noramark = NoraMark::Document.parse(text, lang: 'ja')
 
       noramark.add_transformer(generator: :html) do
@@ -87,7 +87,7 @@ EOF
 lang: ja
 ---
 
-=: 見出し
+# 見出し
 sub: 副見出し
 
 パラグラフ。
