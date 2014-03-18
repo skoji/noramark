@@ -66,7 +66,7 @@ module NoraMark
                                'sect' => section_writer,
                                'section' => section_writer,
                                'image' =>
-                               TagWriter.create('div', self,
+                               TagWriter.create('figure', self,
                                                 node_preprocessor: proc do |node|
                                                   add_class_if_empty node, 'img-wrap'
                                                   node
@@ -76,11 +76,11 @@ module NoraMark
                                                   alt = (node.parameters[1] || '').strip
                                                   caption_before = node.named_parameters[:caption_before]
                                                   if caption_before && children_not_empty(node)
-                                                    output "<p>"; write_children node; output "</p>"
+                                                    output "<figcaption class='caption'>"; write_children node; output "</figcaption>"
                                                   end
                                                   output "<img src='#{src}' alt='#{escape_html alt}' />"
                                                   if !caption_before && children_not_empty(node)
-                                                    output "<p>"; write_children node; output "</p>"
+                                                    output "<figcaption class='caption'>"; write_children node; output "</figcaption>"
                                                   end
                                                   :done
                                                 end

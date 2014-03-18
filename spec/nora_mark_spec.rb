@@ -418,9 +418,9 @@ describe NoraMark::Document do
                  )      
         expect(body.element_children[1].selector_and_children)
           .to eq(
-                 ['div.img-wrap',
+                 ['figure.img-wrap',
                   ["img[src='./image1.jpg'][alt='alt text']", ''],
-                  ['p', 'caption text']
+                  ['figcaption.caption', 'caption text']
                  ]
                  )      
       end
@@ -438,8 +438,8 @@ describe NoraMark::Document do
                  )      
         expect(body.element_children[1].selector_and_children)
           .to eq(
-                 ['div.img-wrap',
-                  ['p', 'caption text'],
+                 ['figure.img-wrap',
+                  ['figcaption.caption', 'caption text'],
                   ["img[src='./image1.jpg'][alt='alt text']", '']
                  ]
                  )      
@@ -458,7 +458,7 @@ describe NoraMark::Document do
                  )      
         expect(body.element_children[1].selector_and_children)
           .to eq(
-                 ['div.img-wrap',
+                 ['figure.img-wrap',
                   ["img[src='./image1.jpg'][alt='alt text']", '']
                  ]
                  )      
