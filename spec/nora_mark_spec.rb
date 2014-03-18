@@ -420,7 +420,7 @@ describe NoraMark::Document do
           .to eq(
                  ['figure.img-wrap',
                   ["img[src='./image1.jpg'][alt='alt text']", ''],
-                  ['figcaption.caption', 'caption text']
+                  ['figcaption', 'caption text']
                  ]
                  )      
       end
@@ -439,7 +439,7 @@ describe NoraMark::Document do
         expect(body.element_children[1].selector_and_children)
           .to eq(
                  ['figure.img-wrap',
-                  ['figcaption.caption', 'caption text'],
+                  ['figcaption', 'caption text'],
                   ["img[src='./image1.jpg'][alt='alt text']", '']
                  ]
                  )      

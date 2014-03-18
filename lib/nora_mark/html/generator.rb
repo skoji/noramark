@@ -76,11 +76,11 @@ module NoraMark
                                                   alt = (node.parameters[1] || '').strip
                                                   caption_before = node.named_parameters[:caption_before]
                                                   if caption_before && children_not_empty(node)
-                                                    output "<figcaption class='caption'>"; write_children node; output "</figcaption>"
+                                                    output "<figcaption>"; write_children node; output "</figcaption>"
                                                   end
                                                   output "<img src='#{src}' alt='#{escape_html alt}' />"
                                                   if !caption_before && children_not_empty(node)
-                                                    output "<figcaption class='caption'>"; write_children node; output "</figcaption>"
+                                                    output "<figcaption>"; write_children node; output "</figcaption>"
                                                   end
                                                   :done
                                                 end
