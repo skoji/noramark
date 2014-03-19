@@ -56,8 +56,12 @@ module NoraMark
     end
 
     def build_selector(selector)
-      if selector.is_a? String
-        selector = { name: selector }
+      original_selector = selector
+      case selector
+      when String
+        selector = { name: original_selector }
+      when Regexp
+        selector = { proc: proc { |node| original_selector =~ node.name }}
       end
       selector.map { |k,v| modify_selector(k,v) }
     end

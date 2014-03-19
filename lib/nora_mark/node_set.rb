@@ -20,5 +20,13 @@ module NoraMark
     def to_ary
       @list.dup
     end
+
+    def first
+      @list.first
+    end
+
+    def last
+      @list.last
+    end
   end
 end

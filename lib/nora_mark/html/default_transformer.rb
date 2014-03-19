@@ -6,6 +6,11 @@ module NoraMark
       rename 'arti', 'article'
       rename 'sec', 'section'
       rename 'sect', 'section'
+      rename 's', 'span'
+      modify /\A(l|link)\Z/ do
+        @node.name = 'a'
+        (@node.attrs ||= {}).merge!({href: [@node.parameters[0]]})
+      end
       modify 'ruby' do
         @node.append_child inline 'rp', '('
         @node.append_child inline 'rt', escape_html(@node.parameters[0].strip)
@@ -34,6 +39,18 @@ module NoraMark
           end
         end
         newnode
+      end
+      replace({type: :OrderedList}) do
+        block('ol', template: @node)
+      end
+      replace({type: :UnorderedList}) do
+        block('ul', template: @node)
+      end
+      replace({type: :UlItem}) do
+        block('li', template: @node)
+      end
+      replace({type: :OlItem}) do
+        block('li', template: @node)
       end
     end
     DEFAULT_TRANSFORMER.extend Util

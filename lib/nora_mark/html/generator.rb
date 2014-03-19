@@ -16,12 +16,6 @@ module NoraMark
       attr_reader :context
       def initialize(param = {})
         @context = Context.new(param)
-        link_writer = TagWriter.create('a', self, trailer: '', 
-                                       node_preprocessor: proc do |node|
-                                         (node.attrs ||= {}).merge!({href: [node.parameters[0]]})
-                                         node
-                                       end)
-
         frontmatter_writer = FrontmatterWriter.new self
         paragraph_writer = ParagraphWriter.new self
         abstract_node_writer = AbstractNodeWriter.new self
@@ -55,24 +49,9 @@ module NoraMark
                              node.body_empty = true
                              node
                            end),
-          Block =>
-          WriterSelector.new(self,
-                             {
-                             }),
+          Block => TagWriter.create(nil, self),
           Newpage => newpage_writer,
-          Inline =>
-          WriterSelector.new(self, 
-                             {
-                               'link' => link_writer,
-                               'l' => link_writer,
-                               's' => TagWriter.create('span', self),
-                             },
-                             trailer_default:''
-                             ),
-          OrderedList => TagWriter.create('ol', self),
-          UnorderedList => TagWriter.create('ul', self),
-          UlItem => TagWriter.create('li', self),
-          OlItem => TagWriter.create('li', self),
+          Inline =>TagWriter.create(nil, self, trailer: ''),
           DefinitionList => TagWriter.create('dl', self),
           DLItem => 
           TagWriter.create('', self, chop_last_space: true, node_preprocessor: proc do |node| node.no_tag = true; node end,
