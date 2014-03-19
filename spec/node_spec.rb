@@ -24,7 +24,7 @@ EOF
       expect(page.children[2].children[0].line_no).to eq 5
     end
 
-    it 'replace existing node' do
+    it 'replace existing node'  do
       noramark = NoraMark::Document.parse(@text)
       page = noramark.root.children[0]
       first_pgroup = page.children[0]
@@ -35,6 +35,83 @@ EOF
       expect(body.element_children[0].selector_and_children(remove_id: false))
         .to eq(
                ['p#the_id.the_class', 'replaced.'])
+    end
+
+    it 'replace existing node by multiple nodes' do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      first_pgroup = page.children[0]
+      line_no = first_pgroup.line_no
+      new_node1 = NoraMark::ParagraphGroup.new(['the_id'], ['the_class'], [], {}, [ NoraMark::Text.new("replaced.", line_no)],  line_no)
+      new_node2 = NoraMark::ParagraphGroup.new(['the_id2'], ['the_class2'], [], {}, [ NoraMark::Text.new("replaced2.", line_no)],  line_no)
+      first_pgroup.replace([new_node1, new_node2])
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children(remove_id: false))
+        .to eq(
+               ['p#the_id.the_class', 'replaced.'])
+      expect(body.element_children[1].selector_and_children(remove_id: false))
+        .to eq(
+               ['p#the_id2.the_class2', 'replaced2.'])
+      expect(body.element_children[2].selector_and_children(remove_id: false))
+        .to eq(
+               ['div.the_class', ['p', '3rd line.']])
+    end
+
+    it 'append to  existing node'  do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      first_pgroup = page.children[0]
+      line_no = first_pgroup.line_no
+      new_node = NoraMark::ParagraphGroup.new(['the_id'], ['the_class'], [], {}, [ NoraMark::Text.new("added.", line_no)],  line_no)
+      first_pgroup.after(new_node)
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children(remove_id: false))
+        .to eq(
+               ['p', '1st line.'])
+      expect(body.element_children[1].selector_and_children(remove_id: false))
+        .to eq(
+               ['p#the_id.the_class', 'added.'])
+      expect(body.element_children[2].selector_and_children(remove_id: false))
+        .to eq(
+               ['div.the_class', ['p', '3rd line.']])
+    end
+
+    it 'append to the last existing node'  do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      last_pgroup = page.children[2]
+      line_no = last_pgroup.line_no
+      new_node = NoraMark::ParagraphGroup.new(['the_id'], ['the_class'], [], {}, [ NoraMark::Text.new("added.", line_no)],  line_no)
+      last_pgroup.after(new_node)
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[1].selector_and_children(remove_id: false))
+        .to eq(
+               ['div.the_class', ['p', '3rd line.']])
+      expect(body.element_children[2].selector_and_children(remove_id: false))
+        .to eq(
+               ['p', '5th line.'])
+      expect(body.element_children[3].selector_and_children(remove_id: false))
+        .to eq(
+               ['p#the_id.the_class', 'added.'])
+    end
+    
+    it 'prepend to existing node'  do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      first_pgroup = page.children[0]
+      line_no = first_pgroup.line_no
+      new_node = NoraMark::ParagraphGroup.new(['the_id'], ['the_class'], [], {}, [ NoraMark::Text.new("added.", line_no)],  line_no)
+      first_pgroup.before(new_node)
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children(remove_id: false))
+        .to eq(
+               ['p#the_id.the_class', 'added.'])
+      expect(body.element_children[1].selector_and_children(remove_id: false))
+        .to eq(
+               ['p', '1st line.'])
+      expect(body.element_children[2].selector_and_children(remove_id: false))
+        .to eq(
+               ['div.the_class', ['p', '3rd line.']])
     end
 
     it 'modify existing node by DSL' do

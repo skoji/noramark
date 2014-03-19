@@ -82,9 +82,7 @@ module NoraMark
 
     def reparent
       return if @content.nil?
-
       @content.each {|node| node.remove }
-
       @first_child = @content.first
       @last_child = @content.last
       @content.inject(nil) do |prev, child_node|
@@ -127,7 +125,7 @@ module NoraMark
       unlink
     end
 
-    def append(node)
+    def after(node)
       node.remove
       node.parent = @parent
       node.prev = self
@@ -141,6 +139,20 @@ module NoraMark
       @parent.children_replaced
     end
 
+    def before(node)
+      node.remove
+      node.parent = @parent
+      node.next = self
+      node.prev = @prev
+      @prev.next = node unless @prev.nil?
+      @prev = node
+      if @parent.first_child == self
+        @parent.first_child = node
+      end
+      node.reparent
+      @parent.children_replaced
+    end
+    
     def replace(node)
       node = [node] if !node.is_a? Array
       
@@ -162,7 +174,7 @@ module NoraMark
       unlink
       rest_nodes.inject(first_node) do
         |prev, rest_node|
-        prev.append rest_node
+        prev.after rest_node
         rest_node
       end
     end
