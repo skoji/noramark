@@ -102,9 +102,6 @@ module NoraMark
         @generator.context.chop_last_space if (@param[:chop_last_space]) 
       end
       
-      def children_not_empty(node)
-        !node.children.nil? && node.children.size > 0 && node.children.reject { |x| x.nil? }.size > 0
-      end
     end
   end
 end

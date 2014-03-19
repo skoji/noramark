@@ -11,7 +11,8 @@ module NoraMark
           selector, action, p = match_rule
           NodeBuilder.new(node, @options).send(action, &p)
         end 
-      end 
+      end
+      node
     end
   end
   

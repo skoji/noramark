@@ -72,6 +72,10 @@ module NoraMark
       result
     end
 
+    def children_empty?
+      children.nil? || children.size == 0 || children.reject { |x| x.nil? }.size == 0
+    end
+
     def reparent
       return if @content.nil?
 

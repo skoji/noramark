@@ -7,6 +7,8 @@ require 'nora_mark/html/frontmatter_writer'
 require 'nora_mark/html/paragraph_writer'
 require 'nora_mark/html/writer_selector'
 require 'nora_mark/html/abstract_node_writer'
+require 'nora_mark/html/default_transformer'
+
 module NoraMark
   module Html
     class Generator
@@ -65,27 +67,6 @@ module NoraMark
                                'sec' => section_writer,
                                'sect' => section_writer,
                                'section' => section_writer,
-                               'image' =>
-                               TagWriter.create('figure', self,
-                                                node_preprocessor: proc do |node|
-                                                  add_class_if_empty node, 'img-wrap'
-                                                  node
-                                                end,
-                                                write_body_preprocessor: proc do |node|
-                                                  src = node.parameters[0].strip
-                                                  alt = (node.parameters[1] || '').strip
-                                                  caption_before = node.named_parameters[:caption_before]
-                                                  if caption_before && children_not_empty(node)
-                                                    output "<figcaption>"; write_children node; output "</figcaption>"
-                                                  end
-                                                  output "<img src='#{src}' alt='#{escape_html alt}' />"
-                                                  if !caption_before && children_not_empty(node)
-                                                    output "<figcaption>"; write_children node; output "</figcaption>"
-                                                  end
-                                                  :done
-                                                end
-                                                ),
-
                              }),
           Newpage => newpage_writer,
           Inline =>
@@ -97,10 +78,14 @@ module NoraMark
                                'img' =>
                                TagWriter.create('img', self,
                                                 node_preprocessor: proc do |node|
-                                                  node.body_empty = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
-                                                  (node.attrs ||= {}).merge!({src: [node.parameters[0] ]})
-                                                  node.attrs.merge!({alt: [ escape_html(node.parameters[1].strip)]}) if (node.parameters.size > 1 && node.parameters[1].size > 0)
-                                                  node
+                                                  if (node.attrs && node.attrs[:src])
+                                                    node
+                                                  else
+                                                    node.body_empty = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
+                                                    (node.attrs ||= {}).merge!({src: [node.parameters[0] ]})
+                                                    node.attrs.merge!({alt: [ escape_html(node.parameters[1].strip)]}) if (node.parameters.size > 1 && node.parameters[1].size > 0)
+                                                    node
+                                                  end
                                                 end)  ,
                                'tcy' =>
                                TagWriter.create('span', self,
@@ -199,8 +184,8 @@ module NoraMark
       end
 
       def convert(parsed_result, render_parameter = {})
-        @parsed_result = parsed_result
-
+        @parsed_result = DEFAULT_TRANSFORMER.transform parsed_result
+        
         assign_id_to_headings 
 
         children = parsed_result.children
