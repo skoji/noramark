@@ -16,8 +16,6 @@ module NoraMark
       attr_reader :context
       def initialize(param = {})
         @context = Context.new(param)
-        article_writer = TagWriter.create('article', self)
-        section_writer = TagWriter.create('section', self)
         link_writer = TagWriter.create('a', self, trailer: '', 
                                        node_preprocessor: proc do |node|
                                          (node.attrs ||= {}).merge!({href: [node.parameters[0]]})
@@ -60,13 +58,6 @@ module NoraMark
           Block =>
           WriterSelector.new(self,
                              {
-                               'd' => TagWriter.create('div', self),
-                               'art' => article_writer,
-                               'arti' => article_writer,
-                               'article' => article_writer,
-                               'sec' => section_writer,
-                               'sect' => section_writer,
-                               'section' => section_writer,
                              }),
           Newpage => newpage_writer,
           Inline =>
@@ -75,13 +66,6 @@ module NoraMark
                                'link' => link_writer,
                                'l' => link_writer,
                                's' => TagWriter.create('span', self),
-                               'tcy' =>
-                               TagWriter.create('span', self,
-                                                node_preprocessor: proc do |node|
-                                                  add_class node, 'tcy'
-                                                  node
-                                                end),
-                               
                              },
                              trailer_default:''
                              ),

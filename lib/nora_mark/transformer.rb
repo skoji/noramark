@@ -57,5 +57,9 @@ module NoraMark
     def replace(selector, &block)
       @rules << [ selector, :replace, block ]
     end
+
+    def rename(selector, name)
+      @rules << [ selector, :modify, proc { @node.name = name } ]
+    end
   end
 end

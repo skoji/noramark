@@ -1,10 +1,19 @@
 module NoraMark
   module Html
     DEFAULT_TRANSFORMER = TransformerFactory.create do
+      rename 'd', 'div'
+      rename 'art', 'article'
+      rename 'arti', 'article'
+      rename 'sec', 'section'
+      rename 'sect', 'section'
       modify 'ruby' do
         @node.append_child inline 'rp', '('
         @node.append_child inline 'rt', escape_html(@node.parameters[0].strip)
         @node.append_child inline 'rp', ')'
+      end
+      modify 'tcy' do
+        @node.name = 'span'
+        @node.classes = ['tcy']
       end
       modify 'img' do
         @node.body_empty = true
