@@ -1,6 +1,11 @@
 module NoraMark
   module Html
     DEFAULT_TRANSFORMER = TransformerFactory.create do
+      modify 'img' do
+        @node.body_empty = true
+        (@node.attrs ||= {}).merge!({src: [@node.parameters[0] ]})        
+        @node.attrs.merge!({alt: [ escape_html(@node.parameters[1].strip)]}) if (@node.parameters.size > 1 && @node.parameters[1].size > 0)
+      end
       replace 'image' do
         newnode = block('figure',
                         class_if_empty:'img-wrap',
@@ -17,5 +22,6 @@ module NoraMark
         newnode
       end
     end
+    DEFAULT_TRANSFORMER.extend Util
   end
 end

@@ -1,19 +1,32 @@
 module NoraMark
   class Transformer
+    include NodeUtil
     def initialize(rules, options)
       @rules = rules
       @options = options
     end
+
     def transform(node)
       node.all_nodes.each do 
         |node|
         if match_rule = @rules.find { |rule| node.match?(rule[0]) }
           selector, action, p = match_rule
-          NodeBuilder.new(node, @options).send(action, &p)
+          @node = node
+          send(action, &p)
         end 
       end
       node
     end
+
+    def modify(&block)
+      instance_eval &block
+    end
+
+    def replace(&block)
+      new_node = instance_eval &block
+      @node.replace new_node
+    end
+
   end
   
   class TransformerFactory

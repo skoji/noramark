@@ -75,18 +75,6 @@ module NoraMark
                                'link' => link_writer,
                                'l' => link_writer,
                                's' => TagWriter.create('span', self),
-                               'img' =>
-                               TagWriter.create('img', self,
-                                                node_preprocessor: proc do |node|
-                                                  if (node.attrs && node.attrs[:src])
-                                                    node
-                                                  else
-                                                    node.body_empty = true #TODO : it is not just an item's attribute, 'img_inline' has no body. maybe should specify in parser.{rb|kpeg}
-                                                    (node.attrs ||= {}).merge!({src: [node.parameters[0] ]})
-                                                    node.attrs.merge!({alt: [ escape_html(node.parameters[1].strip)]}) if (node.parameters.size > 1 && node.parameters[1].size > 0)
-                                                    node
-                                                  end
-                                                end)  ,
                                'tcy' =>
                                TagWriter.create('span', self,
                                                 node_preprocessor: proc do |node|
