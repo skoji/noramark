@@ -57,9 +57,14 @@ module NoraMark
       end
       replace({type: :DLItem}) do
         [
-         block('dt', @node.parameters[0], chop_last_space: true),
+         block('dt', @node.parameters[0], named_parameters: {chop_last_space: true}),
          block('dd', @node.children)
         ]
+      end
+      replace({type: :Breakline}) do
+        newnode = block('br')
+        newnode.body_empty = true
+        newnode
       end
     end
     DEFAULT_TRANSFORMER.extend Util

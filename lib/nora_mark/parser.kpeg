@@ -68,7 +68,7 @@ NamedParameters = NamedParameter:parameter - ',' - NamedParameters:parameters { 
 Command = CommandName:cn ('(' - Parameters:args - ')')? ('[' - NamedParameters:named_args - ']')? { cn.merge({ args: args || [] , named_args: named_args || {}}) }
 
 # paragraph
-ImplicitParagraph =  - !ParagraphDelimiter Comment* DocumentLine:content ln:ln  Comment* EofComment? ~paragraph([],[], [], [], content, ln)
+ImplicitParagraph =  - !ParagraphDelimiter Comment* DocumentLine:content ln:ln  Comment* EofComment? ~paragraph([],[], [], {}, content, ln)
 
 # explicit paragraph
 ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
@@ -77,7 +77,7 @@ ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content 
 Paragraph = ExplicitParagraph | ImplicitParagraph 
 
 # paragraph_group
-ParagraphGroup = ln:ln Paragraph+:p EmptyLine* ~paragraph_group([],[],[],[],p, ln)
+ParagraphGroup = ln:ln Paragraph+:p EmptyLine* ~paragraph_group([],[],[],{},p, ln)
 
 # explicit block 
 BlockHead = Command:command - '{' - Nl EmptyLine* { command }
@@ -116,20 +116,20 @@ Newpage = -  NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:id
 
 
 # unordered list
-UnorderedList = ln:ln UnorderedItem+:items ~unordered_list([],[],[],[], items, ln)
-UnorderedItem = - ln:ln '*' - DocumentContent:content Le ~ul_item([], [], [], [], content, ln)
+UnorderedList = ln:ln UnorderedItem+:items ~unordered_list([],[],[],{}, items, ln)
+UnorderedItem = - ln:ln '*' - DocumentContent:content Le ~ul_item([], [], [], {}, content, ln)
 
 # ordered list
-OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], [], items, ln)
-OrderedItem = - ln:ln Num '.' - DocumentContent:content Le ~ol_item([], [], [], [], content, ln)
+OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], {}, items, ln)
+OrderedItem = - ln:ln Num '.' - DocumentContent:content Le ~ol_item([], [], [], {}, content, ln)
 
 # definition list
-DefinitionList = ln:ln DefinitionItem+:items ~definition_list([], [], [], [], items, ln)
-DefinitionItem = -  ln:ln - ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], [], definition, ln)
+DefinitionList = ln:ln DefinitionItem+:items ~definition_list([], [], [], {}, items, ln)
+DefinitionItem = -  ln:ln - ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], {}, definition, ln)
 
 # long definition list
-LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], [], items, ln)
-LongDefinitionItem = -  ln:ln ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], [], definition, ln)
+LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], {}, items, ln)
+LongDefinitionItem = -  ln:ln ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], {}, definition, ln)
 
 ItemsList = (UnorderedList
           | OrderedList

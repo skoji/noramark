@@ -90,7 +90,7 @@ module NoraMark
           return if instance_exec(node, &x) == :done
         }
         write_children node
-        @generator.context.chop_last_space if node.chop_last_space?
+        @generator.context.chop_last_space if node.named_parameters[:chop_last_space]
       end
 
       def write_children(node)

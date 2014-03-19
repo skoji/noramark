@@ -6,15 +6,6 @@ module NoraMark
     attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no
     attr_accessor :parent, :first_child, :last_child, :prev, :next, :holders
 
-    def chop_last_space?
-      @chop_last_space
-    end
-
-    def chop_last_space=(val)
-      @chop_last_space=val
-      self
-    end
-    
     def named_parameters=(named_parameters)
       @named_parameters = named_parameters
     end
