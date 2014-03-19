@@ -1,6 +1,6 @@
 module NoraMark
   module NodeUtil
-    def _node(klass, name, children_ = nil, ids: nil, children: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, template: nil, class_if_empty: nil)
+    def _node(klass, name, children_ = nil, ids: nil, children: nil, classes: nil, parameters: nil, named_parameters: nil, attrs: nil, template: nil, class_if_empty: nil, chop_last_space: nil)
       children_arg = children || children_
       if !children_arg.nil?
         children_arg = children_arg.to_ary if children_arg.kind_of? NodeSet
@@ -26,6 +26,7 @@ module NoraMark
           node.classes << class_if_empty
         end
       end
+      node.chop_last_space = chop_last_space if chop_last_space
       node.reparent
       node
     end

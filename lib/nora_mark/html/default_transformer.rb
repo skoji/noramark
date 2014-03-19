@@ -52,6 +52,15 @@ module NoraMark
       replace({type: :OlItem}) do
         block('li', template: @node)
       end
+      replace({type: :DefinitionList}) do
+        block('dl', template: @node)
+      end
+      replace({type: :DLItem}) do
+        [
+         block('dt', @node.parameters[0], chop_last_space: true),
+         block('dd', @node.children)
+        ]
+      end
     end
     DEFAULT_TRANSFORMER.extend Util
   end

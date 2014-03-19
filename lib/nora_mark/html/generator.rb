@@ -52,15 +52,6 @@ module NoraMark
           Block => TagWriter.create(nil, self),
           Newpage => newpage_writer,
           Inline =>TagWriter.create(nil, self, trailer: ''),
-          DefinitionList => TagWriter.create('dl', self),
-          DLItem => 
-          TagWriter.create('', self, chop_last_space: true, node_preprocessor: proc do |node| node.no_tag = true; node end,
-                           write_body_preprocessor: proc do |node|
-                             output "<dt>"; write_nodeset node.parameters[0]; output "</dt>\n"
-                             output "<dd>"; write_children node; output "</dd>\n"
-                             :done
-                           end),
-
           Document =>  abstract_node_writer,
           Page =>  abstract_node_writer,
 

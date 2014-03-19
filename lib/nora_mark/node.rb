@@ -6,6 +6,15 @@ module NoraMark
     attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no
     attr_accessor :parent, :first_child, :last_child, :prev, :next, :holders
 
+    def chop_last_space?
+      @chop_last_space
+    end
+
+    def chop_last_space=(val)
+      @chop_last_space=val
+      self
+    end
+    
     def named_parameters=(named_parameters)
       @named_parameters = named_parameters
     end
@@ -126,22 +135,45 @@ module NoraMark
       @parent.children_replaced unless @parent.nil?
       unlink
     end
-    
-    def replace(node)
+
+    def append(node)
+      node.remove
       node.parent = @parent
-      @parent.first_child = node if (@parent.first_child == self)
-      @parent.last_child = node if (@parent.last_child == self)
-
-      node.prev = @prev
+      node.prev = self
       node.next = @next
-
-      @prev.next = node unless @prev.nil?
       @next.prev = node unless @next.nil?
-
+      @next = node
+      if @parent.last_child == self
+        @parent.last_child = node
+      end
       node.reparent
-      node.parent.children_replaced
+      @parent.children_replaced
+    end
 
+    def replace(node)
+      node = [node] if !node.is_a? Array
+      
+      first_node = node.shift
+      rest_nodes = node
+
+      first_node.parent = @parent
+      @parent.first_child = first_node if (@parent.first_child == self)
+      @parent.last_child = first_node if (@parent.last_child == self)
+
+      first_node.prev = @prev
+      first_node.next = @next
+
+      @prev.next = first_node unless @prev.nil?
+      @next.prev = first_node unless @next.nil?
+
+      first_node.reparent
+      first_node.parent.children_replaced
       unlink
+      rest_nodes.inject(first_node) do
+        |prev, rest_node|
+        prev.append rest_node
+        rest_node
+      end
     end
 
     def prepend_child(node)
