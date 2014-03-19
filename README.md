@@ -252,7 +252,9 @@ The converted XHTML file
 
 ## Customize
 
-Simple Customization Sample
+You can define your own markup by transforming parse tree.
+
+### Simple Customization Sample
 
 Markup text and the code
 ```ruby
@@ -286,7 +288,7 @@ Rendered XHTML
 </html>
 ```
 
-Another Example
+### Another Example
 
 ```ruby
 text = <<EOF
@@ -334,6 +336,9 @@ Result.
 </body>
 </html>
 ```
+### HTML generator default transformer
+
+[HTML generator default transformer](https://github.com/skoji/noramark/blob/master/lib/nora_mark/html/default_transformer.rb) is a good example of transformer.
 
 ## Contributing
 
