@@ -5,7 +5,6 @@ require 'nora_mark/html/context'
 require 'nora_mark/html/tag_writer'
 require 'nora_mark/html/frontmatter_writer'
 require 'nora_mark/html/paragraph_writer'
-require 'nora_mark/html/writer_selector'
 require 'nora_mark/html/abstract_node_writer'
 require 'nora_mark/html/default_transformer'
 

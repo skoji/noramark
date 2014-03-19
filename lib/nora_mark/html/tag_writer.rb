@@ -47,10 +47,6 @@ module NoraMark
         (node.classes ||= []) << cls
       end
 
-      def add_class_if_empty(node, cls)
-        add_class(node, cls) if node.classes.nil? || node.classes.size == 0 
-      end
-
       def tag_start(node)
         return if node.no_tag
         ids = node.ids || []
