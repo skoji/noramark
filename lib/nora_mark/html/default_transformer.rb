@@ -7,24 +7,29 @@ module NoraMark
       rename 'sec', 'section'
       rename 'sect', 'section'
       rename 's', 'span'
+
       modify /\A(l|link)\Z/ do
         @node.name = 'a'
         (@node.attrs ||= {}).merge!({href: [@node.parameters[0]]})
       end
+
       modify 'ruby' do
         @node.append_child inline 'rp', '('
         @node.append_child inline 'rt', escape_html(@node.parameters[0].strip)
         @node.append_child inline 'rp', ')'
       end
+
       modify 'tcy' do
         @node.name = 'span'
         @node.classes = ['tcy']
       end
+
       modify 'img' do
         @node.body_empty = true
         (@node.attrs ||= {}).merge!({src: [@node.parameters[0] ]})        
         @node.attrs.merge!({alt: [ escape_html(@node.parameters[1].strip)]}) if (@node.parameters.size > 1 && @node.parameters[1].size > 0)
       end
+
       replace 'image' do
         newnode = block('figure',
                         class_if_empty:'img-wrap',
@@ -40,27 +45,34 @@ module NoraMark
         end
         newnode
       end
+
       replace({type: :OrderedList}) do
         block('ol', template: @node)
       end
+
       replace({type: :UnorderedList}) do
         block('ul', template: @node)
       end
+
       replace({type: :UlItem}) do
         block('li', template: @node)
       end
+
       replace({type: :OlItem}) do
         block('li', template: @node)
       end
+
       replace({type: :DefinitionList}) do
         block('dl', template: @node)
       end
+
       replace({type: :DLItem}) do
         [
          block('dt', @node.parameters[0], named_parameters: {chop_last_space: true}),
          block('dd', @node.children)
         ]
       end
+
       replace({type: :Breakline}) do
         newnode = block('br')
         newnode.body_empty = true
