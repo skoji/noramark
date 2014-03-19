@@ -81,13 +81,6 @@ module NoraMark
                                                   add_class node, 'tcy'
                                                   node
                                                 end),
-                               'ruby' =>
-                               TagWriter.create('ruby', self,
-                                                write_body_preprocessor: proc do |node|
-                                                  write_children node
-                                                  output "<rp>(</rp><rt>#{escape_html node.parameters[0].strip}</rt><rp>)</rp>"
-                                                  :done
-                                                end),
                                
                              },
                              trailer_default:''

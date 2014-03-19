@@ -1,6 +1,11 @@
 module NoraMark
   module Html
     DEFAULT_TRANSFORMER = TransformerFactory.create do
+      modify 'ruby' do
+        @node.append_child inline 'rp', '('
+        @node.append_child inline 'rt', escape_html(@node.parameters[0].strip)
+        @node.append_child inline 'rp', ')'
+      end
       modify 'img' do
         @node.body_empty = true
         (@node.attrs ||= {}).merge!({src: [@node.parameters[0] ]})        
