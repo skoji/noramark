@@ -78,6 +78,10 @@ module NoraMark
         newnode.body_empty = true
         newnode
       end
+
+      replace({type: :HeadedSection}) do
+        block('section', [ block("h#{@node.level}", @node.heading, ids: @node.named_parameters[:heading_id], named_parameters: {chop_last_space: true}) ] + @node.children)
+      end
     end
     DEFAULT_TRANSFORMER.extend Util
   end

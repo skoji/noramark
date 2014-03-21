@@ -269,10 +269,6 @@ module NoraMark
   end
 
   class HeadedSection < Node
-    def heading_info
-      {level: @level, id: (named_parameters[:heading_id] || [])[0], text: @heading.map(&:get_text).join('')}
-    end
-
     def reparent
       super
       @heading.inject(nil) do
