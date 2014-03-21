@@ -80,7 +80,7 @@ module NoraMark
       end
 
       replace({type: :HeadedSection}) do
-        block('section', [ block("h#{@node.level}", @node.heading, ids: @node.named_parameters[:heading_id], named_parameters: {chop_last_space: true}) ] + @node.children)
+        block('section', [ block("h#{@node.level}", @node.heading, ids: @node.named_parameters[:heading_id], named_parameters: {chop_last_space: true}) ] + @node.children, template: @node)
       end
     end
     DEFAULT_TRANSFORMER.extend Util
