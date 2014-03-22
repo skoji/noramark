@@ -57,6 +57,21 @@ EOF
                ['div.the_class', ['p', '3rd line.']])
     end
 
+    it 'wraps existing node'  do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      first_pgroup = page.children[0]
+      line_no = first_pgroup.line_no
+      new_node = NoraMark::Block.new('div', ['the_id'], ['the_class'], [], {}, [
+                                                                                NoraMark::Block.new('p', [], [], [], {}, [
+                                                                                NoraMark::Text.new("replaced.", line_no)], line_no)
+                                                                               ],  line_no)
+      first_pgroup.wrap(new_node)
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children(remove_id: false))
+        .to eq(['div#the_id.the_class', ['p', '1st line.'], ['p', 'replaced.']])
+    end
+
     it 'append to  existing node'  do
       noramark = NoraMark::Document.parse(@text)
       page = noramark.root.children[0]

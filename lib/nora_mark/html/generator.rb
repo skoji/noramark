@@ -110,7 +110,6 @@ module NoraMark
 
       def convert(parsed_result, render_parameter = {})
         @parsed_result = DEFAULT_TRANSFORMER.transform parsed_result
-        
         assign_id_to_headings 
 
         children = parsed_result.children
