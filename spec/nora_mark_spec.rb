@@ -945,6 +945,26 @@ EOF
           .to eq(["div.pgroup", ["p", "normal line again."]])
       end
 
+      it 'convert preformatted code with language fence format' do 
+        text = <<EOF
+normal line.
+```ruby
+# ruby code example.
+"Hello, World".split(',').map(&:strip).map(&:to_sym) # => [:Hello, :World]
+```
+normal line again.
+EOF
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(["pre.code-ruby[data-code-language='ruby']", ["code", "# ruby code example.\n\"Hello, World\".split(',').map(&:strip).map(&:to_sym) # => [:Hello, :World]"]])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
+      end
+
       it 'convert preformatted text (simple notation)' do
         text = <<EOF
 normal line.

@@ -92,7 +92,9 @@ ExplicitBlock = -  BlockHead:c - BlockBody:content - BlockEnd ~block(c[:name], c
 PreformattedCommand = Command:command &{ ['pre', 'code'].include? command[:name] }
 PreformattedCommandHeadSimple = PreformattedCommand:command - '{' - Nl { command }
 PreformattedCommandHeadComplex =  PreformattedCommand:command - '{//' Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }
-PreformattedCommandHead = PreformattedCommandHeadComplex | PreformattedCommandHeadSimple
+PreformattedFence = - "```" Word?:codelanguage - Nl { {codelanguage: codelanguage} }
+
+PreformattedCommandHead = PreformattedCommandHeadComplex | PreformattedCommandHeadSimple | PreformattedFence
 PreformatEndSimple = - '}' - Le EmptyLine*
 PreformatEndComplex = - '//}' - Le EmptyLine*
 
@@ -102,7 +104,11 @@ PreformattedBlockSimple = -  PreformattedCommandHeadSimple:c (!PreformatEndSimpl
 PreformattedBlockComplex = - PreformattedCommandHeadComplex:c (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex
                         ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])
 
-PreformattedBlock = PreformattedBlockComplex | PreformattedBlockSimple
+PreformattedBlockFence = - ln:ln PreformattedFence:c  
+                       (!"```" CharString Nl)+:content - "```" - Le EmptyLine*
+                       ~preformatted_block('code', [], [], [], {}, c[:codelanguage], content, ln)
+
+PreformattedBlock = PreformattedBlockComplex | PreformattedBlockSimple | PreformattedBlockFence
 
 # inline command
 Inline = ImgInline | CommonInline
