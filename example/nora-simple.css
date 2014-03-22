@@ -26,6 +26,23 @@ pre {
     border-radius: 0.5em;
 }
 
+.pre {
+    margin: 1em auto;
+}
+
+.pre .caption {
+   color: #220000;
+   padding-left: 0.5em;
+   margin: 0 auto;
+   font-size: 0.9em;
+   
+}
+
+.pre pre {
+    margin: 0 auto;
+}
+
+
 pre.code-html {
     background: #efefef;
 }

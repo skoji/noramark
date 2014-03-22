@@ -82,6 +82,13 @@ module NoraMark
       replace({type: :HeadedSection}) do
         block('section', [ block("h#{@node.level}", @node.heading, ids: @node.named_parameters[:heading_id], named_parameters: {chop_last_space: true}) ] + @node.children, template: @node)
       end
+
+      modify ({type: :PreformattedBlock}) do
+        if (@node.parameters || []).size> 0
+          method = @node.named_parameters[:caption_after] ? :prepend : :append
+          @node.wrap block('div', classes: ['pre'], children: [ block('p', children: @node.parameters.shift, classes: ['caption']) ]), method
+        end
+      end
     end
     DEFAULT_TRANSFORMER.extend Util
   end

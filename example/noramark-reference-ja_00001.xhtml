@@ -53,12 +53,51 @@ document.html.write_as_files</code></pre>
 <section><h3 id='heading_index_8'>通常のテキスト</h3>
 <div class='pgroup'><p>単なるテキストもHTMLに変換されます。</p>
 </div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>吾輩は猫である。名前はまだ無い。
+どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
+＜中略＞
+この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。
+ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;div class='pgroup'&gt;
+&lt;p&gt;吾輩は猫である。名前はまだ無い。&lt;/p&gt;
+&lt;p&gt;どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。&lt;/p&gt;
+&lt;p&gt;＜中略＞&lt;/p&gt;
+&lt;p&gt;この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='pgroup'&gt;
+&lt;p&gt;ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+</div>
 <div class='pgroup'><p>改行ごとに&lt;p&gt;要素がつくられます。空行で区切られると、&lt;div class='pgroup'&gt;がつくられます。</p>
 <p>言語が日本語(ja)以外の場合は、次のようになります。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation </pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, &lt;br /&gt;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. &lt;/p&gt;
+&lt;p&gt;Ut enim ad minim veniam, quis nostrud exercitation&lt;/p&gt;</code></pre>
 </div>
 </section>
 <section><h3 id='heading_index_9'>明示的なブロック</h3>
 <div class='pgroup'><p>NoraMarkでは、&lt;コマンド&gt; { ではじまり、} のみの行で終わる範囲を明示的なブロックとみなします。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>d.column {
+この部分は、divで囲まれます。
+}</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;div class=&quot;column&quot;&gt;
+&lt;div class=&quot;pgroup&quot;&gt;
+&lt;p&gt;この部分は、divで囲まれます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
 </div>
 <div class='pgroup'><p>定義済みの明示的ブロックのコマンドは、次のものがあります。</p>
 </div>
@@ -72,6 +111,20 @@ document.html.write_as_files</code></pre>
 <div class='pgroup'><p>このほかに、後述のpreformatブロックがあります。</p>
 </div>
 <div class='pgroup'><p>未定義のコマンドの場合は、対応する名前のタグを生成します。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>blockquote {
+山路を登りながら、こう考えた。
+智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい
+}</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;blockquote&gt;
+&lt;div class='pgroup'&gt;
+&lt;p&gt;山路を登りながら、こう考えた。&lt;/p&gt;
+&lt;p&gt;智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;</code></pre>
 </div>
 </section>
 <section><h3 id='heading_index_10'>インラインコマンド</h3>
@@ -132,8 +185,34 @@ document.html.write_as_files</code></pre>
 </section>
 <section><h3 id='heading_index_12'>リスト</h3>
 <section><h4 id='heading_index_13'>箇条書き</h4>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>* *ではじまる行は、箇条書きになる。
+* 空行があくまで、箇条書きがつづく。
+* 空行があくと、あらたな箇条書きになる。</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;ul&gt;&lt;li&gt;*ではじまる行は、箇条書きになる。&lt;/li&gt;
+&lt;li&gt;空行があくまで、箇条書きがつづく。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになる。&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+</div>
 </section>
 <section><h4 id='heading_index_14'>番号つきリスト</h4>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>1. 数字.ではじまる行は、番号つきリストになる。
+2. 空行があくまで、リストがつづく。
+3. 空行があくと、あらたなリストになる。
+10. 先頭の数字にかかわらず、1から順に番号がふられる。</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;ol&gt;&lt;li&gt;数字.ではじまる行は、番号つきリストになる。  &lt;/li&gt;
+&lt;li&gt;空行があくまで、リストがつづく。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ol&gt;&lt;li&gt;空行があくと、あらたなリストになる。&lt;/li&gt;
+&lt;li&gt;先頭の数字にかかわらず、1から順に番号がふられる。&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+</div>
 </section>
 <section><h4 id='heading_index_15'>定義リスト</h4>
 <section><h5 id='heading_index_16'>1行の定義</h5>

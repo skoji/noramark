@@ -24,7 +24,7 @@ module NoraMark
 
     def replace(&block)
       new_node = instance_eval &block
-      @node.replace new_node
+      @node.replace new_node if new_node
     end
 
   end

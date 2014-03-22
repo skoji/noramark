@@ -178,9 +178,13 @@ module NoraMark
         rest_node
       end
     end
-    def wrap(node)
+    def wrap(node, method = :prepend)
       replace(node)
-      node.prepend_child(self)
+      if (method == :prepend)
+        node.prepend_child(self)
+      else
+        node.append_child(self)
+      end
     end
     def prepend_child(node)
       node.remove
