@@ -230,6 +230,13 @@ module NoraMark
         result << node.get_text
       end
     end
+
+    def paramtext
+      (@parameters ||[]).map do
+        |param|
+        param.inject('') {|r,n| r << n.get_text }
+      end
+    end
   end
 
   class Root < Node

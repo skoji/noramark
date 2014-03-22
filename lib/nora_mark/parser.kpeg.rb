@@ -1,6 +1,11 @@
 require 'kpeg/compiled_parser'
 
 class NoraMark::Parser < KPeg::CompiledParser
+
+
+   PARAMETER_END = /[,)]/
+
+
   # :stopdoc:
 
   module ::NoraMark
@@ -813,25 +818,18 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ParameterNormal = < /[^,)]/* > { text }
+  # ParameterNormal = DocumentContentExcept(PARAMETER_END):content { content }
   def _ParameterNormal
 
     _save = self.pos
     while true # sequence
-      _text_start = self.pos
-      while true
-        _tmp = scan(/\A(?-mix:[^,)])/)
-        break unless _tmp
-      end
-      _tmp = true
-      if _tmp
-        text = get_text(_text_start)
-      end
+      _tmp = apply_with_args(:_DocumentContentExcept, PARAMETER_END)
+      content = @result
       unless _tmp
         self.pos = _save
         break
       end
-      @result = begin;  text ; end
+      @result = begin;  content ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -843,7 +841,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ParameterQuoted = "\"" < /[^"]/* > "\"" - &/[,)]/ { text }
+  # ParameterQuoted = "\"" DocumentContentExcept('"'):content "\"" - &/[,)]/ { content }
   def _ParameterQuoted
 
     _save = self.pos
@@ -853,15 +851,8 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _text_start = self.pos
-      while true
-        _tmp = scan(/\A(?-mix:[^"])/)
-        break unless _tmp
-      end
-      _tmp = true
-      if _tmp
-        text = get_text(_text_start)
-      end
+      _tmp = apply_with_args(:_DocumentContentExcept, '"')
+      content = @result
       unless _tmp
         self.pos = _save
         break
@@ -876,14 +867,14 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _save2 = self.pos
+      _save1 = self.pos
       _tmp = scan(/\A(?-mix:[,)])/)
-      self.pos = _save2
+      self.pos = _save1
       unless _tmp
         self.pos = _save
         break
       end
-      @result = begin;  text ; end
+      @result = begin;  content ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -895,7 +886,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ParameterSingleQuoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
+  # ParameterSingleQuoted = "'" DocumentContentExcept("'"):content "'" - &/[,)]/ { content }
   def _ParameterSingleQuoted
 
     _save = self.pos
@@ -905,15 +896,8 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _text_start = self.pos
-      while true
-        _tmp = scan(/\A(?-mix:[^'])/)
-        break unless _tmp
-      end
-      _tmp = true
-      if _tmp
-        text = get_text(_text_start)
-      end
+      _tmp = apply_with_args(:_DocumentContentExcept, "'")
+      content = @result
       unless _tmp
         self.pos = _save
         break
@@ -928,14 +912,14 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _save2 = self.pos
+      _save1 = self.pos
       _tmp = scan(/\A(?-mix:[,)])/)
-      self.pos = _save2
+      self.pos = _save1
       unless _tmp
         self.pos = _save
         break
       end
-      @result = begin;  text ; end
+      @result = begin;  content ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3834,7 +3818,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # CharExcept = Char:c &{ c != e }
+  # CharExcept = Char:c &{ e.is_a?(Regexp) ? e !~ c : e != c }
   def _CharExcept(e)
 
     _save = self.pos
@@ -3846,7 +3830,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save1 = self.pos
-      _tmp = begin;  c != e ; end
+      _tmp = begin;  e.is_a?(Regexp) ? e !~ c : e != c ; end
       self.pos = _save1
       unless _tmp
         self.pos = _save
@@ -4392,9 +4376,9 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_IdName] = rule_info("IdName", "\"\#\" Word:idname { idname }")
   Rules[:_IdNames] = rule_info("IdNames", "IdName*:idnames { idnames }")
   Rules[:_CommandName] = rule_info("CommandName", "Word:name IdNames?:idnames ClassNames?:classes ln:ln { {name: name, ids: idnames, classes: classes, ln:ln } }")
-  Rules[:_ParameterNormal] = rule_info("ParameterNormal", "< /[^,)]/* > { text }")
-  Rules[:_ParameterQuoted] = rule_info("ParameterQuoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,)]/ { text }")
-  Rules[:_ParameterSingleQuoted] = rule_info("ParameterSingleQuoted", "\"'\" < /[^']/* > \"'\" - &/[,)]/ { text }")
+  Rules[:_ParameterNormal] = rule_info("ParameterNormal", "DocumentContentExcept(PARAMETER_END):content { content }")
+  Rules[:_ParameterQuoted] = rule_info("ParameterQuoted", "\"\\\"\" DocumentContentExcept('\"'):content \"\\\"\" - &/[,)]/ { content }")
+  Rules[:_ParameterSingleQuoted] = rule_info("ParameterSingleQuoted", "\"'\" DocumentContentExcept(\"'\"):content \"'\" - &/[,)]/ { content }")
   Rules[:_Parameter] = rule_info("Parameter", "(ParameterQuoted | ParameterSingleQuoted | ParameterNormal):value { value }")
   Rules[:_NParameterNormal] = rule_info("NParameterNormal", "< /[^,\\]]/* > { text }")
   Rules[:_NParameterQuoted] = rule_info("NParameterQuoted", "\"\\\"\" < /[^\"]/* > \"\\\"\" - &/[,\\]]/ { text }")
@@ -4455,7 +4439,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_Frontmatter] = rule_info("Frontmatter", "FrontmatterSeparator ln:ln (!FrontmatterSeparator CharString Nl)+:yaml FrontmatterSeparator EmptyLine* {frontmatter(yaml, ln)}")
   Rules[:_Char] = rule_info("Char", "< /[[:print:]]/ > { text }")
   Rules[:_CharString] = rule_info("CharString", "< Char* > { text }")
-  Rules[:_CharExcept] = rule_info("CharExcept", "Char:c &{ c != e }")
+  Rules[:_CharExcept] = rule_info("CharExcept", "Char:c &{ e.is_a?(Regexp) ? e !~ c : e != c }")
   Rules[:_CharStringExcept] = rule_info("CharStringExcept", "< CharExcept(e) > { text }")
   Rules[:_DocumentTextExcept] = rule_info("DocumentTextExcept", "< (!Inline CharExcept(e))+ > ln:ln {text(text, ln)}")
   Rules[:_DocumentContentExcept] = rule_info("DocumentContentExcept", "(Inline | DocumentTextExcept(e))+:content { content }")

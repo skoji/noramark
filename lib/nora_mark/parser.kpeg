@@ -1,5 +1,7 @@
 %% name = NoraMark::Parser
-
+%%  {
+   PARAMETER_END = /[,)]/
+}
 %% ast-location = ::NoraMark
 %% text = ast Text(content, line_no)
 %% paragraph = ast Paragraph(ids, classes, parameters, named_parameters, content, line_no)
@@ -19,6 +21,7 @@
 %% h_section = ast HeadedSection(level, heading, content, line_no)
 %% page = ast Page(content, line_no)
 %% root = ast Root(content)
+
 
 # line number 
 ln = { current_line }
@@ -44,9 +47,9 @@ IdName = '#' Word:idname { idname }
 IdNames = (IdName)*:idnames { idnames }
 
 CommandName = Word:name IdNames?:idnames ClassNames?:classes ln:ln  { {name: name, ids: idnames, classes: classes, ln:ln } }
-ParameterNormal = < /[^,)]/* > { text }
-ParameterQuoted = '"' < /[^"]/* > '"' - &/[,)]/  { text }
-ParameterSingleQuoted = "'" < /[^']/* > "'" - &/[,)]/ { text }
+ParameterNormal = DocumentContentExcept(PARAMETER_END):content { content }
+ParameterQuoted = '"' DocumentContentExcept('"'):content '"' - &/[,)]/  { content }
+ParameterSingleQuoted = "'" DocumentContentExcept("'"):content "'" - &/[,)]/ { content }
 Parameter = (ParameterQuoted
            | ParameterSingleQuoted
            | ParameterNormal ):value { value }
@@ -196,7 +199,7 @@ Frontmatter = FrontmatterSeparator ln:ln (!FrontmatterSeparator ( CharString Nl)
 # texts
 Char = < /[[:print:]]/ > { text }
 CharString = < Char* > { text }
-CharExcept(e) = Char:c &{ c != e }
+CharExcept(e) = Char:c &{ e.is_a?(Regexp) ? e !~ c : e != c }
 CharStringExcept(e) = < CharExcept(e) > { text }
 DocumentTextExcept(e) = < (!Inline CharExcept(e))+ > ln:ln ~text(text, ln)
 DocumentContentExcept(e) = (Inline | DocumentTextExcept(e))+:content { content } 

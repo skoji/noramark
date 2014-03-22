@@ -26,8 +26,8 @@ module NoraMark
                            end,
                            write_body_preprocessor: proc do |node|
                              title = nil
-                             if node.parameters.size > 0 && node.parameters[0].size > 0
-                               title = escape_html node.parameters.first
+                             if node.parameters.size > 0 && node.paramtext[0].size > 0
+                               title = escape_html node.paramtext.first
                              end
                              @context.title = title unless title.nil?
                              @context.end_html
