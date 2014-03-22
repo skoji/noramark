@@ -96,6 +96,16 @@ module NoraMark
         child_node.reparent 
         child_node
       end
+      if !@parameters.nil?
+        @parameters.each do
+          |node_array|
+          node_array.each do
+            |node|
+            node.parent = self
+            node.reparent
+          end
+        end
+      end
       @content = nil
       @children = nil
     end
