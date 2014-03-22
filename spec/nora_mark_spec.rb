@@ -986,7 +986,7 @@ EOF
       it 'convert preformatted text with caption' do
         text = <<EOF
 normal line.
-  pre(caption [strong{text}]) {//
+  pre(caption [s.the-text{text}]) {//
 d {
    this will not converted to div or p or pgroup.
 line_command: this will be not converted too.
@@ -1001,7 +1001,7 @@ EOF
         expect(body.element_children[1].selector_and_children)
           .to eq(
                  ["div.pre",
-                  ["p.caption", "caption ", ["strong", "text"]],
+                  ["p.caption", "caption ", ["span.the-text", "text"]],
                   ["pre", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"]
                   ])
 

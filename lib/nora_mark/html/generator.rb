@@ -19,7 +19,7 @@ module NoraMark
         paragraph_writer = ParagraphWriter.new self
         abstract_node_writer = AbstractNodeWriter.new self
           
-        newpage_writer = TagWriter.create('div', self,
+        newpage_writer = TagWriter.create(nil, self,
                            node_preprocessor: proc do |node|
                              node.no_tag = true
                              node

@@ -85,7 +85,22 @@ module NoraMark
     end
 
     def reparent
+      if !@parameters.nil? 
+        @parameters.each do
+          |node_array|
+          node_array.inject(nil) do
+            |prev, child_node|
+            child_node.prev = prev
+            prev.next = child_node if !prev.nil?
+            child_node.parent = self
+            child_node.reparent 
+            child_node
+          end
+        end
+      end
+
       return if @content.nil? || raw_text
+
       @content.each {|node| node.remove }
       @first_child = @content.first
       @last_child = @content.last
@@ -95,16 +110,6 @@ module NoraMark
         child_node.parent = self
         child_node.reparent 
         child_node
-      end
-      if !@parameters.nil?
-        @parameters.each do
-          |node_array|
-          node_array.each do
-            |node|
-            node.parent = self
-            node.reparent
-          end
-        end
       end
       @content = nil
       @children = nil
@@ -236,12 +241,25 @@ module NoraMark
     end
 
     def all_nodes
-      return [] if @first_child.nil?
-      @first_child.inject([]) do
-        |result, node|
-        result << node
-        result + node.all_nodes
+      r = [] 
+      if !@parameters.nil?
+        @parameters.each do
+          |node_array|
+          r = node_array[0].inject([]) do
+            |result, node|
+            result << node
+            result + node.all_nodes
+          end
+        end
       end
+      if !@first_child.nil?
+        r = @first_child.inject(r) do
+          |result, node|
+          result << node
+          result + node.all_nodes
+        end
+      end
+      r
     end
     
     def clone
@@ -274,17 +292,6 @@ module NoraMark
   end
 
   class DLItem < Node
-    def reparent
-      super
-      @parameters[0].inject(nil) do
-        |prev, child_node|
-        child_node.prev = prev
-        prev.next = child_node if !prev.nil?
-        child_node.parent = self
-        child_node.reparent 
-        child_node
-      end
-    end
     def get_text
       @parameters[0].inject('') do
         |result, node|
@@ -334,10 +341,6 @@ module NoraMark
 
 
   class PreformattedBlock < Node
-    def reparent
-      # do nothing.
-    end
-
     def raw_text
       true
     end
