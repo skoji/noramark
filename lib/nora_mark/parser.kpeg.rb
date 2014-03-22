@@ -1985,7 +1985,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # PreformattedFence = - "```" Word?:codelanguage - Nl { {codelanguage: codelanguage} }
+  # PreformattedFence = - "```" Word?:codelanguage ("(" - Parameters:args - ")")? ("[" - NamedParameters:named_args - "]")? - Nl { {codelanguage: codelanguage,                      args: args || [],                      named_args: named_args || {} } }
   def _PreformattedFence
 
     _save = self.pos
@@ -2012,6 +2012,86 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      _save2 = self.pos
+
+      _save3 = self.pos
+      while true # sequence
+        _tmp = match_string("(")
+        unless _tmp
+          self.pos = _save3
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save3
+          break
+        end
+        _tmp = apply(:_Parameters)
+        args = @result
+        unless _tmp
+          self.pos = _save3
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save3
+          break
+        end
+        _tmp = match_string(")")
+        unless _tmp
+          self.pos = _save3
+        end
+        break
+      end # end sequence
+
+      unless _tmp
+        _tmp = true
+        self.pos = _save2
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save4 = self.pos
+
+      _save5 = self.pos
+      while true # sequence
+        _tmp = match_string("[")
+        unless _tmp
+          self.pos = _save5
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save5
+          break
+        end
+        _tmp = apply(:_NamedParameters)
+        named_args = @result
+        unless _tmp
+          self.pos = _save5
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save5
+          break
+        end
+        _tmp = match_string("]")
+        unless _tmp
+          self.pos = _save5
+        end
+        break
+      end # end sequence
+
+      unless _tmp
+        _tmp = true
+        self.pos = _save4
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
@@ -2022,7 +2102,9 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  {codelanguage: codelanguage} ; end
+      @result = begin;  {codelanguage: codelanguage,
+                     args: args || [],
+                     named_args: named_args || {} } ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -2329,7 +2411,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # PreformattedBlockFence = - ln:ln PreformattedFence:c (!"```" CharString Nl)+:content - "```" - Le EmptyLine* {preformatted_block('code', [], [], [], {}, c[:codelanguage], content, ln)}
+  # PreformattedBlockFence = - ln:ln PreformattedFence:c (!"```" CharString Nl)+:content - "```" - Le EmptyLine* {preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln)}
   def _PreformattedBlockFence
 
     _save = self.pos
@@ -2444,7 +2526,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; preformatted_block('code', [], [], [], {}, c[:codelanguage], content, ln); end
+      @result = begin; preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -4582,13 +4664,13 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_PreformattedCommand] = rule_info("PreformattedCommand", "Command:command &{ ['pre', 'code'].include? command[:name] }")
   Rules[:_PreformattedCommandHeadSimple] = rule_info("PreformattedCommandHeadSimple", "PreformattedCommand:command - \"{\" - Nl { command }")
   Rules[:_PreformattedCommandHeadComplex] = rule_info("PreformattedCommandHeadComplex", "PreformattedCommand:command - \"{//\" Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }")
-  Rules[:_PreformattedFence] = rule_info("PreformattedFence", "- \"```\" Word?:codelanguage - Nl { {codelanguage: codelanguage} }")
+  Rules[:_PreformattedFence] = rule_info("PreformattedFence", "- \"```\" Word?:codelanguage (\"(\" - Parameters:args - \")\")? (\"[\" - NamedParameters:named_args - \"]\")? - Nl { {codelanguage: codelanguage,                      args: args || [],                      named_args: named_args || {} } }")
   Rules[:_PreformattedCommandHead] = rule_info("PreformattedCommandHead", "(PreformattedCommandHeadComplex | PreformattedCommandHeadSimple | PreformattedFence)")
   Rules[:_PreformatEndSimple] = rule_info("PreformatEndSimple", "- \"}\" - Le EmptyLine*")
   Rules[:_PreformatEndComplex] = rule_info("PreformatEndComplex", "- \"//}\" - Le EmptyLine*")
   Rules[:_PreformattedBlockSimple] = rule_info("PreformattedBlockSimple", "- PreformattedCommandHeadSimple:c (!PreformatEndSimple CharString Nl)+:content PreformatEndSimple {preformatted_block(c[:name], c[:ids], c[:classes], c[:args],  c[:named_args], c[:codelanguage], content,  c[:ln])}")
   Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "- PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])}")
-  Rules[:_PreformattedBlockFence] = rule_info("PreformattedBlockFence", "- ln:ln PreformattedFence:c (!\"```\" CharString Nl)+:content - \"```\" - Le EmptyLine* {preformatted_block('code', [], [], [], {}, c[:codelanguage], content, ln)}")
+  Rules[:_PreformattedBlockFence] = rule_info("PreformattedBlockFence", "- ln:ln PreformattedFence:c (!\"```\" CharString Nl)+:content - \"```\" - Le EmptyLine* {preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln)}")
   Rules[:_PreformattedBlock] = rule_info("PreformattedBlock", "(PreformattedBlockComplex | PreformattedBlockSimple | PreformattedBlockFence)")
   Rules[:_Inline] = rule_info("Inline", "(ImgInline | CommonInline)")
   Rules[:_CommonInline] = rule_info("CommonInline", "\"[\" Command:c \"{\" - DocumentContentExcept('}'):content \"}\" \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
