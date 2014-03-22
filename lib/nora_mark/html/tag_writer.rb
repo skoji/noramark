@@ -90,7 +90,11 @@ module NoraMark
       end
 
       def write_children(node)
-        write_nodeset(node.children)
+        if node.raw_text?
+          output escape_html(node.content.join "\n")
+        else
+          write_nodeset(node.children)
+        end
       end
 
       def write_nodeset(nodeset)

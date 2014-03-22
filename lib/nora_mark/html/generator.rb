@@ -56,22 +56,6 @@ module NoraMark
 
           # frontmatter
           Frontmatter =>  frontmatter_writer,
-          # pre-formatted
-          PreformattedBlock => 
-          TagWriter.create('pre', self,
-                           node_preprocessor: proc do |node|
-                             if node.codelanguage
-                               (node.attrs ||= {}).merge!({'data-code-language' => [node.codelanguage]})
-                               add_class node, "code-#{node.codelanguage}"
-                             end
-                             node
-                           end,
-                           write_body_preprocessor: proc do |node|
-                             output "<code>" if node.name == 'code'
-                             output escape_html(node.content.join "\n")
-                             output "</code>" if node.name == 'code'
-                             :done
-                           end),
           }
       end
 

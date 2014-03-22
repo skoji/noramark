@@ -26,27 +26,33 @@
 <section><h2 id='heading_index_3'>インストール方法</h2>
 <div class='pgroup'><p>Gemfileに次のように書きます</p>
 </div>
-<pre><code>gem 'nora_mark' </code></pre>
+<pre><code>gem 'nora_mark' </code>
+</pre>
 <div class='pgroup'><p>そして、</p>
 </div>
-<pre><code>$ bundle</code></pre>
+<pre><code>$ bundle</code>
+</pre>
 <div class='pgroup'><p>または</p>
 </div>
-<pre><code>gem install nora_mark</code></pre>
+<pre><code>gem install nora_mark</code>
+</pre>
 </section>
 <section><h2 id='heading_index_4'>使い方</h2>
 <section><h3 id='heading_index_5'>コマンドラインから</h3>
-<pre><code>$ nora2html &lt; source.nora &gt; output.xhtml</code></pre>
+<pre><code>$ nora2html &lt; source.nora &gt; output.xhtml</code>
+</pre>
 <div class='pgroup'><p>入力はutf-8のみ受け付けます。日本語のテキストであれば、kconvオプションでうまくうごくかもしれません。</p>
 </div>
-<pre><code>$ nora2html --kconv &lt; source.nora &gt; output.xhtml</code></pre>
+<pre><code>$ nora2html --kconv &lt; source.nora &gt; output.xhtml</code>
+</pre>
 <div class='pgroup'><p><span class='strong'>nora2htmlは、newpageコマンドを&lt;hr /&gt;タグに置き換え、すべてのページをひとつのxhtmlとして出力します</span></p>
 </div>
 </section>
 <section><h3 id='heading_index_6'>コードから</h3>
 <pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
-document.html.write_as_files</code></pre>
+document.html.write_as_files</code>
+</pre>
 </section>
 </section>
 <section><h2 id='heading_index_7'>マークアップ</h2>
@@ -69,7 +75,8 @@ document.html.write_as_files</code></pre>
 &lt;/div&gt;
 &lt;div class='pgroup'&gt;
 &lt;p&gt;ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。&lt;/p&gt;
-&lt;/div&gt;</code></pre>
+&lt;/div&gt;</code>
+</pre>
 </div>
 <div class='pgroup'><p>改行ごとに&lt;p&gt;要素がつくられます。空行で区切られると、&lt;div class='pgroup'&gt;がつくられます。</p>
 <p>言語が日本語(ja)以外の場合は、次のようになります。</p>
@@ -81,7 +88,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, &lt;br /&gt;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. &lt;/p&gt;
-&lt;p&gt;Ut enim ad minim veniam, quis nostrud exercitation&lt;/p&gt;</code></pre>
+&lt;p&gt;Ut enim ad minim veniam, quis nostrud exercitation&lt;/p&gt;</code>
+</pre>
 </div>
 </section>
 <section><h3 id='heading_index_9'>明示的なブロック</h3>
@@ -97,7 +105,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;div class=&quot;pgroup&quot;&gt;
 &lt;p&gt;この部分は、divで囲まれます。&lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;</code></pre>
+&lt;/div&gt;</code>
+</pre>
 </div>
 <div class='pgroup'><p>定義済みの明示的ブロックのコマンドは、次のものがあります。</p>
 </div>
@@ -124,7 +133,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;p&gt;山路を登りながら、こう考えた。&lt;/p&gt;
 &lt;p&gt;智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい&lt;/p&gt;
 &lt;/div&gt;
-&lt;/blockquote&gt;</code></pre>
+&lt;/blockquote&gt;</code>
+</pre>
 </div>
 </section>
 <section><h3 id='heading_index_10'>インラインコマンド</h3>
@@ -195,7 +205,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;li&gt;空行があくまで、箇条書きがつづく。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになる。&lt;/li&gt;
-&lt;/ul&gt;</code></pre>
+&lt;/ul&gt;</code>
+</pre>
 </div>
 </section>
 <section><h4 id='heading_index_14'>番号つきリスト</h4>
@@ -211,7 +222,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;/ol&gt;
 &lt;ol&gt;&lt;li&gt;空行があくと、あらたなリストになる。&lt;/li&gt;
 &lt;li&gt;先頭の数字にかかわらず、1から順に番号がふられる。&lt;/li&gt;
-&lt;/ol&gt;</code></pre>
+&lt;/ol&gt;</code>
+</pre>
 </div>
 </section>
 <section><h4 id='heading_index_15'>定義リスト</h4>

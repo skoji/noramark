@@ -83,11 +83,25 @@ module NoraMark
         block('section', [ block("h#{@node.level}", @node.heading, ids: @node.named_parameters[:heading_id], named_parameters: {chop_last_space: true}) ] + @node.children, template: @node)
       end
 
-      modify ({type: :PreformattedBlock}) do
+      replace ({type: :PreformattedBlock}) do
+        new_node = block('pre')
+        if @node.codelanguage
+          new_node.attrs = {'data-code-language' => [@node.codelanguage]}
+          new_node.classes =  (@node.classes ||[]) << "code-#{@node.codelanguage}"
+        end
+        if @node.name == 'code'
+          code = block('code', raw_text: true)
+          code.content = @node.content
+          new_node.children = [ code ]
+        else
+          new_node.raw_text = true
+          new_node.content = @node.content
+        end
         if (@node.parameters || []).size> 0
           method = @node.named_parameters[:caption_after] ? :prepend : :append
-          @node.wrap block('div', classes: ['pre'], children: [ block('p', children: @node.parameters.shift, classes: ['caption']) ]), method
+          new_node = new_node.wrap block('div', classes: ['pre'], children: [ block('p', children: @node.parameters.shift, classes: ['caption']) ]), method
         end
+        new_node
       end
     end
     DEFAULT_TRANSFORMER.extend Util

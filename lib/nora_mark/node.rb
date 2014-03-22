@@ -3,9 +3,13 @@ require 'yaml'
 module NoraMark
   class Node
     include Enumerable
-    attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no
+    attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no, :raw_text
     attr_accessor :parent, :first_child, :last_child, :prev, :next, :holders
 
+    def raw_text?
+      @raw_text
+    end
+    
     def named_parameters=(named_parameters)
       @named_parameters = named_parameters
     end
@@ -81,7 +85,7 @@ module NoraMark
     end
 
     def reparent
-      return if @content.nil?
+      return if @content.nil? || raw_text
       @content.each {|node| node.remove }
       @first_child = @content.first
       @last_child = @content.last
@@ -132,11 +136,11 @@ module NoraMark
       node.next = @next
       @next.prev = node unless @next.nil?
       @next = node
-      if @parent.last_child == self
+      if !@parent.nil? && @parent.last_child == self
         @parent.last_child = node
       end
       node.reparent
-      @parent.children_replaced
+      @parent.children_replaced unless @parent.nil?
     end
 
     def before(node)
@@ -146,11 +150,11 @@ module NoraMark
       node.prev = @prev
       @prev.next = node unless @prev.nil?
       @prev = node
-      if @parent.first_child == self
+      if !@parent.nil? && @parent.first_child == self
         @parent.first_child = node
       end
       node.reparent
-      @parent.children_replaced
+      @parent.children_replaced unless @parent.nil?
     end
     
     def replace(node)
@@ -160,8 +164,10 @@ module NoraMark
       rest_nodes = node
 
       first_node.parent = @parent
-      @parent.first_child = first_node if (@parent.first_child == self)
-      @parent.last_child = first_node if (@parent.last_child == self)
+      if !@parent.nil? 
+        @parent.first_child = first_node if (@parent.first_child == self)
+        @parent.last_child = first_node if (@parent.last_child == self)
+      end
 
       first_node.prev = @prev
       first_node.next = @next
@@ -170,7 +176,7 @@ module NoraMark
       @next.prev = first_node unless @next.nil?
 
       first_node.reparent
-      first_node.parent.children_replaced
+      first_node.parent.children_replaced unless first_node.parent.nil?
       unlink
       rest_nodes.inject(first_node) do
         |prev, rest_node|
@@ -178,6 +184,7 @@ module NoraMark
         rest_node
       end
     end
+
     def wrap(node, method = :prepend)
       replace(node)
       if (method == :prepend)
@@ -185,7 +192,9 @@ module NoraMark
       else
         node.append_child(self)
       end
+      node
     end
+
     def prepend_child(node)
       node.remove
       node.reparent
@@ -318,6 +327,15 @@ module NoraMark
     def reparent
       # do nothing.
     end
+
+    def raw_text
+      true
+    end
+    
+    def raw_text?
+      true
+    end
+
     def get_text
       @content.join "\n"
     end
