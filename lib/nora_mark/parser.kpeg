@@ -46,7 +46,8 @@ ClassNames = (ClassName)*:classnames { classnames }
 IdName = '#' Word:idname { idname }
 IdNames = (IdName)*:idnames { idnames }
 
-CommandName = Word:name IdNames?:idnames ClassNames?:classes ln:ln  { {name: name, ids: idnames, classes: classes, ln:ln } }
+CommandName = Word:name IdNames?:idnames ClassNames?:classes ln:ln
+            { {name: name, ids: idnames, classes: classes, ln:ln } }
 ParameterNormal = DocumentContentExcept(PARAMETER_END):content { content }
 ParameterQuoted = '"' DocumentContentExcept('"'):content '"' - &/[,)]/  { content }
 ParameterSingleQuoted = "'" DocumentContentExcept("'"):content "'" - &/[,)]/ { content }
@@ -68,64 +69,102 @@ NamedParameter = Word:key - ':' - NParameter:parameter { { key.to_sym => paramet
 NamedParameters = NamedParameter:parameter - ',' - NamedParameters:parameters { parameter.merge parameters }
                 | NamedParameter:parameter { parameter }
 
-Command = CommandName:cn ('(' - Parameters:args - ')')? ('[' - NamedParameters:named_args - ']')? { cn.merge({ args: args || [] , named_args: named_args || {}}) }
+Command = CommandName:cn
+          ('(' - Parameters:args - ')')?
+          ('[' - NamedParameters:named_args - ']')?
+          { cn.merge({ args: args || [] , named_args: named_args || {}}) }
 
 # paragraph
-ImplicitParagraph =  - !ParagraphDelimiter Comment* DocumentLine:content ln:ln  Comment* EofComment? ~paragraph([],[], [], {}, content, ln)
+ImplicitParagraph = - !ParagraphDelimiter
+                      Comment*
+                      DocumentLine:content ln:ln
+                      Comment* EofComment?
+                      ~paragraph([],[], [], {}, content, ln)
 
 # explicit paragraph
 ExplicitParagraphCommand = Command:c &{ c[:name] == 'p' }
-ExplicitParagraph = - ExplicitParagraphCommand:c ':' - DocumentContent?:content Le EmptyLine* ~paragraph(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln])
+ExplicitParagraph = - ExplicitParagraphCommand:c ':' -
+                    DocumentContent?:content Le EmptyLine*
+                    ~paragraph(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln])
 
 Paragraph = ExplicitParagraph | ImplicitParagraph 
 
 # paragraph_group
-ParagraphGroup = ln:ln Paragraph+:p EmptyLine* ~paragraph_group([],[],[],{},p, ln)
+ParagraphGroup = ln:ln
+                 Paragraph+:p
+                 EmptyLine*
+                 ~paragraph_group([],[],[],{},p, ln)
 
 # explicit block 
 BlockHead = Command:command - '{' - Nl EmptyLine* { command }
 BlockEnd =  - '}' - Le EmptyLine*
 BlockBody = (!BlockEnd Block)+:body { body } 
-ExplicitBlock = -  BlockHead:c - BlockBody:content - BlockEnd ~block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args], content,  c[:ln])
+ExplicitBlock = - BlockHead:c -
+                  BlockBody:content -
+                  BlockEnd
+                  ~block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args], content,  c[:ln])
 
 # preformatted block
 PreformattedCommand = Command:command &{ ['pre', 'code'].include? command[:name] }
-PreformattedCommandHeadSimple = PreformattedCommand:command - '{' - Nl { command }
-PreformattedCommandHeadComplex =  PreformattedCommand:command - '{//' Word?:codelanguage - Nl { command.merge({codelanguage: codelanguage}) }
+PreformattedCommandHeadSimple =
+                              PreformattedCommand:command -
+                              '{' - Nl
+                              { command }
+PreformattedCommandHeadComplex =
+                               PreformattedCommand:command -
+                               '{//' Word?:codelanguage - Nl
+                               { command.merge({codelanguage: codelanguage}) }
 PreformattedFence = - "```" Word?:codelanguage
                   ('(' - Parameters:args - ')')?
                   ('[' - NamedParameters:named_args - ']')?  - Nl
                   { {codelanguage: codelanguage,
                      args: args || [],
                      named_args: named_args || {} } }
-PreformattedCommandHead = PreformattedCommandHeadComplex | PreformattedCommandHeadSimple | PreformattedFence
+
+PreformattedCommandHead = PreformattedCommandHeadComplex |
+                          PreformattedCommandHeadSimple |
+                          PreformattedFence
 PreformatEndSimple = - '}' - Le EmptyLine*
 PreformatEndComplex = - '//}' - Le EmptyLine*
 
-PreformattedBlockSimple = -  PreformattedCommandHeadSimple:c (!PreformatEndSimple (CharString Nl))+:content PreformatEndSimple
-                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args],  c[:named_args], c[:codelanguage], content,  c[:ln])
+PreformattedBlockSimple = - PreformattedCommandHeadSimple:c
+                            (!PreformatEndSimple (CharString Nl))+:content
+                            PreformatEndSimple
+                            ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args],  c[:named_args], c[:codelanguage], content,  c[:ln])
 
-PreformattedBlockComplex = - PreformattedCommandHeadComplex:c (!PreformatEndComplex (CharString Nl))+:content PreformatEndComplex
-                        ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])
+PreformattedBlockComplex = - PreformattedCommandHeadComplex:c
+                             (!PreformatEndComplex (CharString Nl))+:content
+                             PreformatEndComplex
+                             ~preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])
 
 PreformattedBlockFence = - ln:ln PreformattedFence:c  
-                       (!"```" CharString Nl)+:content - "```" - Le EmptyLine*
+                       (!"```" CharString Nl)+:content
+                       - "```" - Le EmptyLine*
                        ~preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln)
 
-PreformattedBlock = PreformattedBlockComplex | PreformattedBlockSimple | PreformattedBlockFence
+PreformattedBlock = PreformattedBlockComplex |
+                    PreformattedBlockSimple |
+                    PreformattedBlockFence
 
 # inline command
 Inline = ImgInline | CommonInline
-CommonInline =  '[' Command:c '{' - DocumentContentExcept('}'):content '}' ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
+CommonInline =  '[' Command:c
+                  '{' - DocumentContentExcept('}'):content '}'
+                ']'
+                ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
+
 ImgCommand = Command:c &{ c[:name] == 'img' && c[:args].size == 2}
-ImgInline =  '[' ImgCommand:c  ']' ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])
+ImgInline =  '[' ImgCommand:c  ']'
+             ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])
 
 # special line commands
 CommandNameForSpecialLineCommand = NewpageCommand | ExplicitParagraphCommand
 
 # newpage
 NewpageCommand = Command:command &{ command[:name] == 'newpage' }
-Newpage = -  NewpageCommand:c ':' - DocumentContent?:content - Nl ~newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])
+Newpage = - NewpageCommand:c ':' -
+           DocumentContent?:content - Nl
+           ~newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])
 
 
 # unordered list
@@ -138,11 +177,19 @@ OrderedItem = - ln:ln Num '.' - DocumentContent:content Le ~ol_item([], [], [], 
 
 # definition list
 DefinitionList = ln:ln DefinitionItem+:items ~definition_list([], [], [], {}, items, ln)
-DefinitionItem = -  ln:ln - ';:' - DocumentContentExcept(':'):term ':' - DocumentContent:definition Le ~dl_item([], [], [term], {}, definition, ln)
+DefinitionItem = -  ln:ln - ';:' -
+                    DocumentContentExcept(':'):term ':' -
+                    DocumentContent:definition Le
+                    ~dl_item([], [], [term], {}, definition, ln)
 
 # long definition list
-LongDefinitionList = ln:ln LongDefinitionItem+:items ~definition_list([], [], [], {}, items, ln)
-LongDefinitionItem = -  ln:ln ';:' - DocumentContentExcept('{'):term '{' - Nl - BlockBody:definition - BlockEnd ~dl_item([], [], [term], {}, definition, ln)
+LongDefinitionList = ln:ln LongDefinitionItem+:items
+                     ~definition_list([], [], [], {}, items, ln)
+LongDefinitionItem = -  ln:ln ';:' -
+                       DocumentContentExcept('{'):term '{' - Nl
+                         - BlockBody:definition -
+                       BlockEnd
+                       ~dl_item([], [], [term], {}, definition, ln)
 
 ItemsList = (UnorderedList
           | OrderedList
@@ -150,7 +197,9 @@ ItemsList = (UnorderedList
           | LongDefinitionList) 
 
 # generic line command
-LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' - DocumentContent?:content - Le EmptyLine*  ~block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
+LineCommand =  - !CommandNameForSpecialLineCommand Command:c ':' -
+                 DocumentContent?:content - Le EmptyLine*
+                 ~block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])
 
 # blocks
 LineBlock =  ItemsList | LineCommand 
@@ -164,17 +213,33 @@ Block =
        {block} 
 
 BlockDelimiter = BlockHead | BlockEnd 
-ParagraphDelimiter = BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart
+ParagraphDelimiter = BlockDelimiter |
+                     PreformattedCommandHead |
+                     LineBlock |
+                     Newpage |
+                     HeadedStart
 
 # markdown-style headings
 HStartMark(n) = - < '#'+ > &{ text.length == n }
-HMarkupTerminator(n) = - < '#'+ > - CharString:cs Le &{ text.length <= n && !cs.strip.end_with?('{') } | - Eof
+HMarkupTerminator(n) = - < '#'+ > - CharString:cs Le
+                         &{ text.length <= n && !cs.strip.end_with?('{') } |
+                       - Eof
 
 HStart(n) = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
-HSection(n) = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* ~h_section(h[:level], h[:heading], content, h[:ln])
+HSection(n) = HStart(n):h
+              EmptyLine*
+              (!HMarkupTerminator(n) Block)*:content
+              EmptyLine*
+              ~h_section(h[:level], h[:heading], content, h[:ln])
 
-BlockHStart(n) = - HStartMark(n) ln:ln - DocumentContentExcept('{'):s - '{' - Nl { { level: n, heading: s, ln: ln} }
-ExplicitHSection(n) = BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd ~h_section(h[:level], h[:heading], content, h[:ln])
+BlockHStart(n) = - HStartMark(n) ln:ln -
+                    DocumentContentExcept('{'):s - '{' - Nl
+                    { { level: n, heading: s, ln: ln} }
+ExplicitHSection(n) = BlockHStart(n):h
+                      EmptyLine* -
+                      BlockBody:content -
+                      BlockEnd
+                      ~h_section(h[:level], h[:heading], content, h[:ln])
 
 HeadedStart = HStart(6)
             | HStart(5)
@@ -204,7 +269,10 @@ HeadedSection = ExplicitHSection(6)
 
 # frontmatter
 FrontmatterSeparator =  - '---' - Nl
-Frontmatter = FrontmatterSeparator ln:ln (!FrontmatterSeparator ( CharString Nl))+:yaml FrontmatterSeparator EmptyLine* ~frontmatter(yaml, ln)
+Frontmatter = FrontmatterSeparator ln:ln
+              (!FrontmatterSeparator ( CharString Nl))+:yaml
+              FrontmatterSeparator EmptyLine*
+              ~frontmatter(yaml, ln)
 
 # texts
 Char = < /[[:print:]]/ > { text }
@@ -218,7 +286,11 @@ DocumentContent = (Inline | DocumentText)+:content  { content }
 DocumentLine = DocumentContent:content Le { content }
 
 #page
-Page = Frontmatter?:frontmatter - (!Newpage Block)*:blocks EmptyLine* ~page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)
+Page = Frontmatter?:frontmatter -
+       (!Newpage Block)*:blocks
+       EmptyLine*
+       ~page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)
+
 Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages }
       | Page:page { [ page ] }  
 
