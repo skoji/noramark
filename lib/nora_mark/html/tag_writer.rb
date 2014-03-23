@@ -2,6 +2,7 @@ module NoraMark
   module Html
     class TagWriter
       include Util
+      include NodeUtil
       attr_accessor :trailer, :node_preprocessors, :write_body_preprocessors
 
       def self.create(tag_name, generator, node_preprocessor: nil, write_body_preprocessor: nil, trailer: "\n", chop_last_space: false)

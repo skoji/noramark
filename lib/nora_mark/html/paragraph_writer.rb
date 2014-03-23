@@ -37,7 +37,7 @@ module NoraMark
           TagWriter.create("p", @generator,
                            node_preprocessor: proc do |node|
                              node.children = node.children.inject([]) do |memo, node|
-                               memo << Breakline.new(memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
+                               memo << inline('br', body_empty: true, line_no: memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
                                memo << node
                              end
                              node
@@ -48,7 +48,7 @@ module NoraMark
       end
       def write(node)
         writer_set = @writer_set[@context.paragraph_style] 
-        writer_set = @writer_set['default'] if writer_set.nil?
+        writer_set = @writer_set[:default] if writer_set.nil?
         writer_set[node.class].write(node)
       end
     end

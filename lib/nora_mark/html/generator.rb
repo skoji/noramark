@@ -43,11 +43,6 @@ module NoraMark
         @writers = {
           Paragraph => paragraph_writer,
           ParagraphGroup => paragraph_writer,
-          Breakline => 
-          TagWriter.create('br', self, node_preprocessor: proc do |node|
-                             node.body_empty = true
-                             node
-                           end),
           Block => TagWriter.create(nil, self),
           Newpage => newpage_writer,
           Inline =>TagWriter.create(nil, self, trailer: ''),
