@@ -6,7 +6,7 @@ module NoraMark
       rename 'arti', 'article'
       rename 'sec', 'section'
       rename 'sect', 'section'
-      rename 's', 'span'
+      rename 'sp', 'span'
 
       modify /\A(l|link)\Z/ do
         @node.name = 'a'

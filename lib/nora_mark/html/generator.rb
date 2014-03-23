@@ -43,13 +43,11 @@ module NoraMark
         @writers = {
           Paragraph => paragraph_writer,
           ParagraphGroup => paragraph_writer,
+          Inline =>TagWriter.create(nil, self, trailer: ''),
           Block => TagWriter.create(nil, self),
           Newpage => newpage_writer,
-          Inline =>TagWriter.create(nil, self, trailer: ''),
           Document =>  abstract_node_writer,
           Page =>  abstract_node_writer,
-
-          # frontmatter
           Frontmatter =>  frontmatter_writer,
           }
       end

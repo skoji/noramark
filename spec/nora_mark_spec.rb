@@ -596,7 +596,7 @@ describe NoraMark::Document do
       end
 
       it 'handle span' do
-        text = "p.custom: this text is in [s.keyword{custom}] class."
+        text = "p.custom: this text is in [sp.keyword{custom}] class."
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
@@ -1006,7 +1006,7 @@ EOF
       it 'convert preformatted text with caption' do
         text = <<EOF
 normal line.
-  pre(caption [s.the-text{text}]) {//
+  pre(caption [sp.the-text{text}]) {//
 d {
    this will not converted to div or p or pgroup.
 line_command: this will be not converted too.

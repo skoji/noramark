@@ -66,7 +66,7 @@ An example of markup text (text is in english, but the paragraph style is japane
 
         d.column {
             This block will produce div.column.
-            Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [s.strong{this}] is available.
+            Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [sp.strong{this}] is available.
         }
     }
 
@@ -116,7 +116,7 @@ Another example of markup text in non-japanese (paragraph style is default)
 
         d.column {
             This block will produce div.column.
-            Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [s.strong{this}] is available.
+            Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [sp.strong{this}] is available.
         }
     }
 
