@@ -7,8 +7,6 @@ rule(/\.kpeg\.rb/ => proc {|task_name| task_name.sub(/kpeg\.rb$/, 'kpeg')}) do
   system "kpeg -f #{t.prerequisites[0]}"
 end
 
-RSpec::Core::RakeTask.new(:spec)
+RSpec::Core::RakeTask.new(:spec => ["lib/nora_mark/parser.kpeg.rb"])
 
-desc "run rspec"
-task :test => ["lib/nora_mark/parser.kpeg.rb", :spec]
 
