@@ -36,9 +36,9 @@ module NoraMark
             ParagraphGroup =>
           TagWriter.create("p", @generator,
                            node_preprocessor: proc do |node|
-                             node.children = node.children.inject([]) do |memo, node|
-                               memo << inline('br', body_empty: true, line_no: memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && node.kind_of?(Paragraph)
-                               memo << node
+                             node.children = node.children.inject([]) do |memo, n|
+                               memo << inline('br', body_empty: true, line_no: memo.last.line_no) if !memo.last.nil? && memo.last.kind_of?(Paragraph) && n.kind_of?(Paragraph)
+                               memo << n
                              end
                              node
                            end

@@ -8,7 +8,7 @@ module NoraMark
       rename 'sect', 'section'
       rename 'sp', 'span'
 
-      modify /\A(l|link)\Z/ do
+      modify(/\A(l|link)\Z/) do
         @node.name = 'a'
         (@node.attrs ||= {}).merge!({href: [@node.paramtext[0]]})
       end

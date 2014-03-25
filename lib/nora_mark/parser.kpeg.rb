@@ -544,7 +544,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Word = < /[\w0-9]/ ("-" | /[\w0-9]/)* > { text }
+  # Word = < /[\w]/ ("-" | /[\w]/)* > { text }
   def _Word
 
     _save = self.pos
@@ -553,7 +553,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = scan(/\A(?-mix:[\w0-9])/)
+        _tmp = scan(/\A(?-mix:[\w])/)
         unless _tmp
           self.pos = _save1
           break
@@ -565,7 +565,7 @@ class NoraMark::Parser < KPeg::CompiledParser
             _tmp = match_string("-")
             break if _tmp
             self.pos = _save3
-            _tmp = scan(/\A(?-mix:[\w0-9])/)
+            _tmp = scan(/\A(?-mix:[\w])/)
             break if _tmp
             self.pos = _save3
             break
@@ -4633,7 +4633,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_EmptyLine] = rule_info("EmptyLine", "/^/ - (Nl | Comment | EofComment)")
   Rules[:_Nl] = rule_info("Nl", "/\\r?\\n/")
   Rules[:_Le] = rule_info("Le", "(Nl | Eof)")
-  Rules[:_Word] = rule_info("Word", "< /[\\w0-9]/ (\"-\" | /[\\w0-9]/)* > { text }")
+  Rules[:_Word] = rule_info("Word", "< /[\\w]/ (\"-\" | /[\\w]/)* > { text }")
   Rules[:_Num] = rule_info("Num", "< [0-9]+ > { text.to_i }")
   Rules[:_ClassName] = rule_info("ClassName", "\".\" Word:classname { classname }")
   Rules[:_ClassNames] = rule_info("ClassNames", "ClassName*:classnames { classnames }")

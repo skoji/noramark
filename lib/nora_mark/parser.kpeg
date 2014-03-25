@@ -37,7 +37,7 @@ EmptyLine = /^/ - (Nl | Comment | EofComment)
 
 Nl = /\r?\n/
 Le = Nl | Eof
-Word  = < /[\w0-9]/ ( '-' | /[\w0-9]/ )* >  { text }
+Word  = < /[\w]/ ( '-' | /[\w]/ )* >  { text }
 Num = < [0-9]+ > { text.to_i }
 
 #common syntax

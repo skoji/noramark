@@ -37,8 +37,8 @@ module NoraMark
     def match?(selector)
       selector = build_selector(selector)
       selector.inject(true) {
-        |result, selector|
-        result && selector.call(self)
+        |result, s|
+        result && s.call(self)
       }
     end
 
