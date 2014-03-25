@@ -868,8 +868,8 @@ EOF
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title') do
           |nora|
           nora.preprocessor do
-            |text|
-            text.gsub('pre-preprocess', 'post-process')
+            |t|
+            t.gsub('pre-preprocess', 'post-process')
           end
         end
         converted = noramark.html
@@ -1226,7 +1226,7 @@ EOF
         text = "some text"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         noramark.html.write_as_files(directory: @basedir)
-        expect(File.basename(Dir.glob(File.join(@basedir, '*.xhtml'))[0])).to match /noramark_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_00001.xhtml/
+        expect(File.basename(Dir.glob(File.join(@basedir, '*.xhtml'))[0])).to match(/noramark_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_00001.xhtml/)
       end
       it 'should create named file' do
         text = "some text\nnewpage:\nnext page"
@@ -1245,7 +1245,7 @@ EOF
       }
       after { Dir.glob(File.join(@basedir, '*.xhtml')) { |file| File.delete file } }
       it 'should create valid html5' do
-        noramark = NoraMark::Document.parse(File.open(File.join(@exampledir, 'noramark-reference-ja.nora')).read, document_name: 'noramark-reference-ja')
+        noramark = NoraMark::Document.parse(File.open(File.join(@exampledir, 'noramark-reference-ja.nora'), 'rb:UTF-8').read, document_name: 'noramark-reference-ja')
         noramark.html.write_as_files(directory: @exampledir)
         jar = File.join(@here, 'jing-20091111/bin/jing.jar')
         schema = File.join(@here, 'epub30-schemas/epub-xhtml-30.rnc')

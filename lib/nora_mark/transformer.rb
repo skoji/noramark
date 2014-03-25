@@ -8,10 +8,10 @@ module NoraMark
 
     def transform(node)
       node.all_nodes.each do 
-        |node|
-        if match_rule = @rules.find { |rule| node.match?(rule[0]) }
-          selector, action, p = match_rule
-          @node = node
+        |n|
+        if match_rule = @rules.find { |rule| n.match?(rule[0]) }
+          action, p = match_rule[1,2]
+          @node = n
           send(action, &p)
         end 
       end
@@ -19,11 +19,11 @@ module NoraMark
     end
 
     def modify(&block)
-      instance_eval &block
+      instance_eval(&block)
     end
 
     def replace(&block)
-      new_node = instance_eval &block
+      new_node = instance_eval(&block)
       @node.replace new_node if new_node
     end
 
@@ -40,7 +40,7 @@ module NoraMark
         if text
           instance_eval text
         else
-          instance_eval &block
+          instance_eval(&block)
         end
         Transformer.new(@rules, @options)
       end
