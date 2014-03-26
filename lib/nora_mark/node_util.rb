@@ -17,7 +17,7 @@ module NoraMark
         end
         node.parameters = parameters if parameters.size > 0
         node.named_parameters = named_parameters if named_parameters.size > 0
-        node.content = children_arg if !children_arg.nil?
+        node.children = children_arg if !children_arg.nil?
         node.attrs = template.attrs || attrs || {}
       else
         node = klass.new(name, ids, classes || [], parameters, named_parameters, children_arg, 0)

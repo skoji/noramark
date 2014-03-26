@@ -11,13 +11,13 @@ class NoraMark::Parser < KPeg::CompiledParser
   module ::NoraMark
     class Node; end
     class Block < Node
-      def initialize(name, ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(name, ids, classes, parameters, named_parameters, raw_content, line_no)
         @name = name
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :name
@@ -25,7 +25,7 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class Breakline < Node
@@ -35,35 +35,35 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :line_no
     end
     class DefinitionList < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class DLItem < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class Frontmatter < Node
@@ -75,25 +75,25 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :line_no
     end
     class HeadedSection < Node
-      def initialize(level, heading, content, line_no)
+      def initialize(level, heading, raw_content, line_no)
         @level = level
         @heading = heading
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :level
       attr_reader :heading
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class Inline < Node
-      def initialize(name, ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(name, ids, classes, parameters, named_parameters, raw_content, line_no)
         @name = name
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :name
@@ -101,95 +101,95 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class Newpage < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class OlItem < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class OrderedList < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class Page < Node
-      def initialize(content, line_no)
-        @content = content
+      def initialize(raw_content, line_no)
+        @raw_content = raw_content
         @line_no = line_no
       end
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class Paragraph < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class ParagraphGroup < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class PreformattedBlock < Node
@@ -213,10 +213,10 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :line_no
     end
     class Root < Node
-      def initialize(content)
-        @content = content
+      def initialize(raw_content)
+        @raw_content = raw_content
       end
-      attr_reader :content
+      attr_reader :raw_content
     end
     class Text < Node
       def initialize(content, line_no)
@@ -227,92 +227,92 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :line_no
     end
     class UlItem < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
     class UnorderedList < Node
-      def initialize(ids, classes, parameters, named_parameters, content, line_no)
+      def initialize(ids, classes, parameters, named_parameters, raw_content, line_no)
         @ids = ids
         @classes = classes
         @parameters = parameters
         @named_parameters = named_parameters
-        @content = content
+        @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :ids
       attr_reader :classes
       attr_reader :parameters
       attr_reader :named_parameters
-      attr_reader :content
+      attr_reader :raw_content
       attr_reader :line_no
     end
   end
   module ::NoraMarkConstruction
-    def block(name, ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::Block.new(name, ids, classes, parameters, named_parameters, content, line_no)
+    def block(name, ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::Block.new(name, ids, classes, parameters, named_parameters, raw_content, line_no)
     end
     def br(line_no)
       ::NoraMark::Breakline.new(line_no)
     end
-    def definition_list(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::DefinitionList.new(ids, classes, parameters, named_parameters, content, line_no)
+    def definition_list(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::DefinitionList.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def dl_item(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::DLItem.new(ids, classes, parameters, named_parameters, content, line_no)
+    def dl_item(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::DLItem.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
     def frontmatter(content, line_no)
       ::NoraMark::Frontmatter.new(content, line_no)
     end
-    def h_section(level, heading, content, line_no)
-      ::NoraMark::HeadedSection.new(level, heading, content, line_no)
+    def h_section(level, heading, raw_content, line_no)
+      ::NoraMark::HeadedSection.new(level, heading, raw_content, line_no)
     end
-    def inline(name, ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::Inline.new(name, ids, classes, parameters, named_parameters, content, line_no)
+    def inline(name, ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::Inline.new(name, ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def newpage(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::Newpage.new(ids, classes, parameters, named_parameters, content, line_no)
+    def newpage(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::Newpage.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def ol_item(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::OlItem.new(ids, classes, parameters, named_parameters, content, line_no)
+    def ol_item(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::OlItem.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def ordered_list(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::OrderedList.new(ids, classes, parameters, named_parameters, content, line_no)
+    def ordered_list(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::OrderedList.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def page(content, line_no)
-      ::NoraMark::Page.new(content, line_no)
+    def page(raw_content, line_no)
+      ::NoraMark::Page.new(raw_content, line_no)
     end
-    def paragraph(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::Paragraph.new(ids, classes, parameters, named_parameters, content, line_no)
+    def paragraph(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::Paragraph.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def paragraph_group(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::ParagraphGroup.new(ids, classes, parameters, named_parameters, content, line_no)
+    def paragraph_group(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::ParagraphGroup.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
     def preformatted_block(name, ids, classes, parameters, named_parameters, codelanguage, content, line_no)
       ::NoraMark::PreformattedBlock.new(name, ids, classes, parameters, named_parameters, codelanguage, content, line_no)
     end
-    def root(content)
-      ::NoraMark::Root.new(content)
+    def root(raw_content)
+      ::NoraMark::Root.new(raw_content)
     end
     def text(content, line_no)
       ::NoraMark::Text.new(content, line_no)
     end
-    def ul_item(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::UlItem.new(ids, classes, parameters, named_parameters, content, line_no)
+    def ul_item(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::UlItem.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
-    def unordered_list(ids, classes, parameters, named_parameters, content, line_no)
-      ::NoraMark::UnorderedList.new(ids, classes, parameters, named_parameters, content, line_no)
+    def unordered_list(ids, classes, parameters, named_parameters, raw_content, line_no)
+      ::NoraMark::UnorderedList.new(ids, classes, parameters, named_parameters, raw_content, line_no)
     end
   end
   include ::NoraMarkConstruction

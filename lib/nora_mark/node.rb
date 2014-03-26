@@ -3,7 +3,7 @@ require 'yaml'
 module NoraMark
   class Node
     include Enumerable
-    attr_accessor :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no, :raw_text
+    attr_accessor :raw_content, :content, :ids, :classes, :no_tag, :attrs, :name, :body_empty, :line_no, :raw_text
     attr_accessor :parent, :first_child, :last_child, :prev, :next, :holders
 
     def raw_text?
@@ -99,19 +99,19 @@ module NoraMark
         end
       end
 
-      return if @content.nil? || raw_text
+      return if @raw_content.nil? || raw_text
 
-      @content.each {|node| node.remove }
-      @first_child = @content.first
-      @last_child = @content.last
-      @content.inject(nil) do |prev, child_node|
+      @raw_content.each {|node| node.remove }
+      @first_child = @raw_content.first
+      @last_child = @raw_content.last
+      @raw_content.inject(nil) do |prev, child_node|
         child_node.prev = prev
         prev.next = child_node if !prev.nil?
         child_node.parent = self
         child_node.reparent 
         child_node
       end
-      @content = nil
+      @raw_content = nil
       @children = nil
     end
 
@@ -121,7 +121,7 @@ module NoraMark
     end
 
     def children=(x)
-      @content = x.to_ary
+      @raw_content = x.to_ary
       reparent
     end
 
@@ -214,7 +214,7 @@ module NoraMark
       node.remove
       node.reparent
       if self.children.size == 0
-        @content = [ node ]
+        @raw_content = [ node ]
         reparent
       else
         @first_child.prev = node
@@ -229,7 +229,7 @@ module NoraMark
       node.remove
       node.reparent
       if self.children.size == 0
-        @content = [ node ]
+        @raw_content = [ node ]
         reparent
       else
         @last_child.next = node 
@@ -263,8 +263,8 @@ module NoraMark
     end
     
     def clone
-      @content = nil
-      all_nodes.each { |node| @content = nil }
+      @raw_content = nil
+      all_nodes.each { |node| @raw_content = nil }
       Marshal.restore Marshal.dump self
     end
 
@@ -331,7 +331,7 @@ module NoraMark
   end
   class Text < Node
     def reparent
-      # do nothing.
+      # do nothing
     end
 
     def get_text
@@ -356,7 +356,7 @@ module NoraMark
   
   class Frontmatter < Node
     def reparent
-      # do nothing.
+      # do nothing
     end
 
     def get_text
