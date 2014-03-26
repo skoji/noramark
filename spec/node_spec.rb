@@ -136,7 +136,7 @@ EOF
       noramark.add_transformer(generator: :html) do
         modify 'foobar' do
           @node.name = 'section'
-          @node.prepend_child block("h#{@node.named_parameters[:level]}", @node.parameters[0])
+          @node.prepend_child block("h#{@node.n[:level]}", @node.p[0])
         end
       end
       body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
@@ -158,7 +158,7 @@ EOF
         replace 'foobar' do
           block('section',
                 [
-                 block( "h#{@node.named_parameters[:level]}", @node.parameters[0]),
+                 block( "h#{@node.named_params[:level]}", @node.params[0]),
                 ] + @node.children)
         end
       end
@@ -215,7 +215,7 @@ EOF
       noramark.add_transformer(generator: :html) do
         modify "speak" do
           @node.name = 'p'
-          @node.prepend_child inline('span', @node.parameters[0], classes: ['speaker'])
+          @node.prepend_child inline('span', @node.params[0], classes: ['speaker'])
         end
       end
       body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')

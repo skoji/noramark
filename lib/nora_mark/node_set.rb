@@ -2,6 +2,7 @@ module NoraMark
   class NodeSet
     include Enumerable
     def initialize(list = [])
+      list = list.to_ary if list.is_a? NodeSet
       @list = list
     end
 
@@ -27,6 +28,10 @@ module NoraMark
 
     def last
       @list.last
+    end
+
+    def text
+      @list.inject('') {|r,n| r << n.get_text }
     end
   end
 end

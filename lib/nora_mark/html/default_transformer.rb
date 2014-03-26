@@ -10,12 +10,12 @@ module NoraMark
 
       modify(/\A(l|link)\Z/) do
         @node.name = 'a'
-        (@node.attrs ||= {}).merge!({href: [@node.paramtext[0]]})
+        (@node.attrs ||= {}).merge!({href: [@node.params[0].text]})
       end
 
       modify 'ruby' do
         @node.append_child inline 'rp', '('
-        @node.append_child inline 'rt', escape_html(@node.paramtext[0].strip)
+        @node.append_child inline 'rt', escape_html(@node.params[0].text.strip)
         @node.append_child inline 'rp', ')'
       end
 
@@ -26,18 +26,18 @@ module NoraMark
 
       modify 'img' do
         @node.body_empty = true
-        (@node.attrs ||= {}).merge!({src: [@node.paramtext[0] ]})        
-        @node.attrs.merge!({alt: [ escape_html(@node.paramtext[1].strip)]}) if (@node.parameters.size > 1 && @node.paramtext[1].size > 0)
+        (@node.attrs ||= {}).merge!({src: [@node.params[0].text ]})        
+        @node.attrs.merge!({alt: [ escape_html(@node.params[1].text.strip)]}) if (@node.p.size > 1 && @node.params[1].text.size > 0)
       end
 
       replace 'image' do
         newnode = block('figure',
                         class_if_empty:'img-wrap',
                         ids: @node.ids,
-                        children: [ inline('img', nil, attrs: {src: [ @node.paramtext[0].strip],  alt: [ (@node.paramtext[1] ||'').strip ] }) ],
+                        children: [ inline('img', nil, attrs: {src: [ @node.params[0].text.strip],  alt: [ (@node.params[1].text ||'').strip ] }) ],
                         template: @node)
         if !@node.children_empty?
-          if @node.named_parameters[:caption_before] 
+          if @node.n[:caption_before] 
             newnode.prepend_child inline('figcaption', @node.children)
           else
             newnode.append_child inline('figcaption', @node.children)
@@ -68,7 +68,7 @@ module NoraMark
 
       replace({type: :DLItem}) do
         [
-         block('dt', @node.parameters[0], named_parameters: {chop_last_space: true}),
+         block('dt', @node.p[0], n: {chop_last_space: true}),
          block('dd', @node.children)
         ]
       end
@@ -80,7 +80,7 @@ module NoraMark
       end
 
       replace({type: :HeadedSection}) do
-        block('section', [ block("h#{@node.level}", @node.heading, ids: @node.named_parameters[:heading_id], named_parameters: {chop_last_space: true}) ] + @node.children, template: @node)
+        block('section', [ block("h#{@node.level}", @node.heading, ids: @node.n[:heading_id], n: {chop_last_space: true}) ] + @node.children, template: @node)
       end
 
       replace ({type: :PreformattedBlock}) do
@@ -95,9 +95,9 @@ module NoraMark
         else
           new_node.children = [ text(@node.content.join("\n")) ]
         end
-        if (@node.parameters || []).size> 0
-          method = @node.named_parameters[:caption_after] ? :prepend : :append
-          new_node = new_node.wrap block('div', classes: ['pre'], children: [ block('p', children: @node.parameters.shift, classes: ['caption']) ]), method
+        if (@node.p || []).size> 0
+          method = @node.n[:caption_after] ? :prepend : :append
+          new_node = new_node.wrap block('div', classes: ['pre'], children: [ block('p', children: @node.p.shift, classes: ['caption']) ]), method
         end
         new_node
       end

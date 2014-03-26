@@ -74,7 +74,7 @@ module NoraMark
 
       def write(node)
         @node_preprocessors.each { |x| node = instance_exec node.dup, &x }
-        @context.enable_pgroup, saved_ep = !((node.paramtext || []).include?('wo-pgroup') || !@context.enable_pgroup), @context.enable_pgroup
+        @context.enable_pgroup, saved_ep = !(node.params.map(&:text).include?('wo-pgroup') || !@context.enable_pgroup), @context.enable_pgroup
         tag_start node
         write_body node unless node.body_empty
         tag_end node unless node.body_empty
@@ -87,7 +87,7 @@ module NoraMark
           return if instance_exec(node, &x) == :done
         }
         write_children node
-        @generator.context.chop_last_space if node.named_parameters[:chop_last_space]
+        @generator.context.chop_last_space if node.n[:chop_last_space]
       end
 
       def write_children(node)

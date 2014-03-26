@@ -10,21 +10,24 @@ module NoraMark
       @raw_text
     end
     
-    def named_parameters=(named_parameters)
-      @named_parameters = named_parameters
+    def named_params=(named_params)
+      @named_params = named_params
     end
 
-    def named_parameters
-      @named_parameters ||= {}
+    def named_params
+      @named_params ||= {}
     end
 
-    def parameters=(parameters)
-      @parameters = parameters
+    def params=(params)
+      @params = params.map { |param| NodeSet.new param }
     end
     
-    def parameters
-      @parameters ||= []
+    def params
+      @params
     end
+
+    alias p params
+    alias n named_params
 
     def each
       node = self
@@ -85,18 +88,18 @@ module NoraMark
     end
 
     def reparent
-      if !@parameters.nil? 
-        @parameters.each do
-          |node_array|
-          node_array.inject(nil) do
-            |prev, child_node|
-            child_node.prev = prev
-            prev.next = child_node if !prev.nil?
-            child_node.parent = self
-            child_node.reparent 
-            child_node
-          end
+      @params ||= []
+      @params = @params.map do
+        |node_array|
+        node_array.inject(nil) do
+          |prev, child_node|
+          child_node.prev = prev
+          prev.next = child_node if !prev.nil?
+          child_node.parent = self
+          child_node.reparent 
+          child_node
         end
+        NodeSet.new node_array
       end
 
       return if @raw_content.nil? || raw_text
@@ -242,8 +245,8 @@ module NoraMark
 
     def all_nodes
       r = [] 
-      if !@parameters.nil?
-        @parameters.each do
+      if !@params.nil?
+        @params.each do
           |node_array|
           r = node_array[0].inject([]) do
             |result, node|
@@ -275,12 +278,6 @@ module NoraMark
       end
     end
 
-    def paramtext
-      (@parameters ||[]).map do
-        |param|
-        param.inject('') {|r,n| r << n.get_text }
-      end
-    end
   end
 
   class Root < Node
@@ -293,7 +290,7 @@ module NoraMark
 
   class DLItem < Node
     def get_text
-      @parameters[0].inject('') do
+      @params[0].inject('') do
         |result, node|
         result << node.get_text
       end << super
