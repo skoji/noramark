@@ -94,7 +94,7 @@
   :group 'noramark-faces)
 
 (defconst noramark-regex-command-param
-  "\\(\\#[[:alpha:][:digit:]-_]+\\)?\\(\\.[[:alpha:][:digit:]-_]+\\)?\\(.*?)\\)?\\(\\[.*\\]\\)?"
+  "\\(\\#[[:alpha:][:digit:]-_]+\\)*\\(\\.[[:alpha:][:digit:]-_]+\\)*\\(.*?)\\)?\\(\\[.*\\]\\)?"
   "Regular expression for a #id.class(parameter)[namedparameter]
 Group 1 matchs the id.
 Group 2 matchs the class
