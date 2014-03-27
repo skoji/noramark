@@ -113,6 +113,12 @@ Group 6 matches the named parameter.")
 (defconst noramark-regex-pre-c-tail
   "^[[:space:]]*\\(//}\\)[[:space:]]*$")
 
+(defconst noramark-regex-fence-head
+  "^\\(```\\)\\([A-Za-z0-9-_]+\\)?[[:space:]]*$")
+
+(defconst noramark-regex-fence-tail
+  "^\\(```\\)[[:space:]]*$")
+
 (defconst noramark-regex-header
   "^[ \t]*[\#]+.*$"
   "Regexp identifying NoraMark headers.")
@@ -128,6 +134,11 @@ Group 6 matches the named parameter.")
          '((1 'font-lock-keyword-face)
           (2 'font-lock-comment-face nil t)
           (3 'font-lock-keyword-face)))
+   (cons 'noramark-match-fence
+         '((1 'noramark-command-face)
+           (2 'font-lock-keyword-face nil t)
+           (3 'noramark-pre-face nil t)
+           (4 'noramark-command-face)))
    (cons 'noramark-match-pre-command-complex
          '((1 'noramark-command-face nil t) ; cmd
            (2 'font-lock-keyword-face nil t) ; id
@@ -288,6 +299,25 @@ Group 6 matches the named parameter.")
                  (t nil)))
           (t nil))))
 
+(defun noramark-match-fence (last)
+  "Match Noramark fence command from point to LAST."
+  (let (open lang body close all)
+    (cond ((search-forward-regexp noramark-regex-fence-head last t)
+           (beginning-of-line)
+           (setq open (list (match-beginning 1) (match-end 1))
+                 lang (list (match-beginning 2) (match-end 2)))
+           (forward-line)
+           (setq body (list (point)))
+           (cond ((search-forward-regexp noramark-regex-fence-tail last t)
+                  (setq body (reverse (cons (1- (match-beginning 0)) body))
+                        close (list (match-beginning 0) (match-end 0))
+                        all (list (car open) (match-end 0)))
+                  (set-match-data (append all open lang body close))
+                  t)
+                 (t nil)))
+          (t nil))))
+
+
 (defun noramark-match-pre-command-complex (last)
   "Match Noramark pre command from point to LAST."
   (let (cmd id class param nparam open lang body close all)
@@ -308,7 +338,6 @@ Group 6 matches the named parameter.")
                         close (list (match-beginning 0) (match-end 0))
                         all (list (car cmd) (match-end 0)))
                   (set-match-data (append all cmd id class param nparam open lang body close))
-
                   t)
                  (t nil)))
           (t nil))))
@@ -360,6 +389,22 @@ Group 6 matches the named parameter.")
                     t)
                    (t nil))))
           (t nil))))
+
+(defun noramark-font-lock-extend-region-fence ()
+  (eval-when-compile (defvar font-lock-beg) (defvar font-lock-end))
+  (save-excursion
+    (goto-char font-lock-beg)
+    (beginning-of-line)
+    (cond ((re-search-backward noramark-regex-fence-head nil t)
+           (let ((found (point)))
+             (goto-char font-lock-beg)
+             (beginning-of-line)
+             (cond ((re-search-forward noramark-regex-fence-tail nil t)
+                    (setq font-lock-end (max (match-end 0) font-lock-end))
+                    (setq font-lock-beg (min found font-lock-beg))
+                    t)
+                   (t nil))))
+          (t nil))))
       
           
 
@@ -385,7 +430,10 @@ Group 6 matches the named parameter.")
   (add-hook 'font-lock-extend-region-functions
             'noramark-font-lock-extend-region-pre-c)
   (add-hook 'font-lock-extend-region-functions
-            'noramark-font-lock-extend-region-frontmatter))
+            'noramark-font-lock-extend-region-frontmatter)
+  (add-hook 'font-lock-extend-region-functions
+            'noramark-font-lock-extend-region-fence))
+
 
 ;;;###autoload(add-to-list 'auto-mode-alist '("\\.nora\\'" . noramark-mode))
 
