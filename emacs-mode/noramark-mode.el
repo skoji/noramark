@@ -101,6 +101,12 @@ Group 2 matchs the class
 Group 3 matches the parameter.
 Group 4 matches the named parameter.")
 
+(defconst noramark-regex-pre-head
+  (concat "^[[:space:]]*\\(pre\\|code\\)" noramark-regex-command-param "[[:space:]]*\\({\\)[[:space:]]*?\n"))
+
+(defconst noramark-regex-pre-tail
+  "^[[:space:]]*\\(}\\)[[:space:]]*$")
+
 (defconst noramark-regex-header
   "^[ \t]*[\#]+.*$"
   "Regexp identifying NoraMark headers.")
@@ -196,7 +202,6 @@ Group 4 matches the named parameter.")
   (let (all open delimiter) 
     (cond ((search-forward-regexp "^[ \t]*\\(;:\\)[^:]*?\\(:\\)[[:space:]]" last t)
            (beginning-of-line)
-           (message "match %s" (match-string 0))
            (setq open (list (match-beginning 1) (match-end 1))
                  delimiter (list (match-beginning 2) (match-end 2))
                  all (list (match-beginning 0) (match-end 0)))
@@ -209,7 +214,6 @@ Group 4 matches the named parameter.")
   (let (all open delimiter) 
     (cond ((search-forward-regexp "^[ \t]*\\(;:\\)[^{]*?\\({\\)[[:space:]]*?\n" last t)
            (beginning-of-line)
-           (message "match %s" (match-string 0))
            (setq open (list (match-beginning 1) (match-end 1))
                  delimiter (list (match-beginning 2) (match-end 2))
                  all (list (match-beginning 0) (match-end 0)))
@@ -241,7 +245,7 @@ Group 4 matches the named parameter.")
   "Match Noramark pre command from point to LAST."
   (let (cmd id class param nparam open cm lang body close all)
     (cond ((search-forward-regexp
-            (concat "^[[:space:]]*\\(pre\\|code\\)" noramark-regex-command-param "[[:space:]]*\\({\\)[[:space:]]*?\n") last t)
+            noramark-regex-pre-head last t)
            (beginning-of-line)
            (setq cmd (list (match-beginning 1) (match-end 1))
                  id (list (match-beginning 2) (match-end 2))
@@ -250,7 +254,7 @@ Group 4 matches the named parameter.")
                  nparam (list (match-beginning 5) (match-end 5))
                  open (list (match-beginning 6) (match-end 6)))
            (setq body (list (point)))
-           (cond ((search-forward-regexp (concat "^[[:space:]]*\\(}\\)[[:space:]]*$") last t)
+           (cond ((search-forward-regexp noramark-regex-pre-tail last t)
                   (forward-line)
                   (setq body (reverse (cons (1- (match-beginning 0)) body))
                         close (list (match-beginning 0) (match-end 0))
@@ -294,8 +298,20 @@ Group 4 matches the named parameter.")
   "Check settings, update font-lock keywords, and re-fontify buffer."
   (interactive)
   (when (eq major-mode 'noramark-mode)
+    (setq noramark-mode-font-lock-keywords
+          noramark-mode-font-lock-keywords-basic)
     (setq font-lock-defaults '(noramark-mode-font-lock-keywords))
     (font-lock-refresh-defaults)))
+
+(defun noramark-font-lock-extend-region-pre ()
+  (eval-when-compile (defvar font-lock-beg) (defvar font-lock-end))
+  (save-excursion
+    (goto-char font-lock-beg)
+    (let ((found (or (re-search-backward noramark-regex-pre-head nil t) (point-min))))
+      (goto-char font-lock-end)
+      (when (re-search-forward noramark-regex-pre-tail nil t)
+        (setq font-lock-end (match-beginning 0))
+        (setq font-lock-beg found)))))
 
 ;;; Syntax Table ==============================================================
 
@@ -309,7 +325,12 @@ Group 4 matches the named parameter.")
 (define-derived-mode noramark-mode text-mode "NoraMark"
   "Major mode for editing NoraMark files."
   ;; Font lock.
-  (setq font-lock-defaults '(noramark-mode-font-lock-keywords-basic)))
+  (set (make-local-variable 'noramark-mode-font-lock-keywords) nil)
+  (set (make-local-variable 'font-lock-multiline) t)
+  (noramark-reload-extensions)
+  (add-hook 'font-lock-extend-region-functions
+            'noramark-font-lock-extend-region-pre))
+
 
 ;;;###autoload(add-to-list 'auto-mode-alist '("\\.nora\\'" . noramark-mode))
 
