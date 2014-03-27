@@ -227,9 +227,43 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </div>
 </section>
 <section><h4 id='heading_index_15'>定義リスト</h4>
+<div class='pgroup'><p>定義リストには、二種類の書き方があります。</p>
+</div>
 <section><h5 id='heading_index_16'>1行の定義</h5>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>;: それがし : 名前がわからない，または名前を隠して人や物事をさす語。
+;: それがしかれがし : 不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;dl&gt;
+&lt;dt&gt;それがし&lt;/dt&gt;
+&lt;dd&gt;名前がわからない，または名前を隠して人や物事をさす語。&lt;/dd&gt;
+&lt;dt&gt;それがしかれがし&lt;/dt&gt;
+&lt;dd&gt;不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。&lt;/dd&gt;
+&lt;/dl&gt;</code>
+</pre>
+</div>
 </section>
 <section><h5 id='heading_index_17'>複数行の定義</h5>
+<div class='pgroup'><p>説明が長い場合は、複数行の形式で書けます。この場合、説明部分は段落になります。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>;: それがし {
+ 名前がわからない，または名前を隠して人や物事をさす語。
+}
+;: それがしかれがし {
+ 不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。
+}</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;dl&gt;
+&lt;dt&gt;それがし&lt;/dt&gt;
+&lt;dd&gt;&lt;div class=&quot;pgroup&quot;&gt;&lt;p&gt;名前がわからない，または名前を隠して人や物事をさす語。&lt;/p&gt;&lt;/div&gt;&lt;/dd&gt;
+&lt;dt&gt;それがしかれがし&lt;/dt&gt;
+&lt;dd&gt;&lt;div class=&quot;pgroup&quot;&gt;&lt;p&gt;不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。&lt;/p&gt;&lt;/div&gt;&lt;/dd&gt;
+&lt;/dl&gt;</code>
+</pre>
+</div>
 </section>
 </section>
 </section>
