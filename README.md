@@ -45,7 +45,7 @@ I am planning to release nora2epub and other external tools.
 
 ## Markup
 
-An example of markup text (text is in english, but the paragraph style is japanese)
+An example of markup text (text is in English, but the paragraph style is Japanese)
 
     // line begins with // is a comment.
     // you don't need to indent noramark text.
@@ -271,7 +271,6 @@ document.add_transformer(generator: :html) do
   end
 end
 puts document.html[0]
-
 ```
 
 Rendered XHTML
@@ -355,8 +354,6 @@ https://github.com/skoji/noramark/blob/master/emacs-mode/noramark-mode.el
 (setq auto-mode-alist (cons '("\\.nora$" . noramark-mode) auto-mode-alist))
 (setq auto-mode-alist (cons '("-nora\\.txt$" . noramark-mode) auto-mode-alist))
 ```
-
-Offiial noramark file extension is `.nora`
 
 ## Contributing
 
