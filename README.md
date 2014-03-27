@@ -346,15 +346,17 @@ Experimental implementation of noramark major mode is available here.
 
 https://github.com/skoji/noramark/blob/master/emacs-mode/noramark-mode.el
 
-1. Download the file and place it somewhere like site-lisp.
-2. in your ~/.emacs.d/init.d
+1. Download the file 
+2. Place it somewhere in the load-path
+2. Edit your `~/.emacs.d/init.el` like this
 
 ```emacs-lisp
-(add-to-list 'load-path (expand-file-name "/path/to/the/directory"))
 (require 'noramark-mode)
 (setq auto-mode-alist (cons '("\\.nora$" . noramark-mode) auto-mode-alist))
 (setq auto-mode-alist (cons '("-nora\\.txt$" . noramark-mode) auto-mode-alist))
 ```
+
+Offiial noramark file extension is `.nora`
 
 ## Contributing
 
