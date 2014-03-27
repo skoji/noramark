@@ -145,6 +145,18 @@ Group 4 matches the named parameter.")
    '("^[ \t]*[[:digit:]]+\\.[ \t]" . noramark-list-face)
    ; headings
    '("^[ \t]*[\#]+.*$" . noramark-header-face)
+   ; headings: hN
+   '("^[ \t]*h[1-6]:.*$" . noramark-header-face)
+
+   ; definition-list short
+   (cons 'noramark-match-definition-list-short
+         '((1 'noramark-command-face)
+           (2 'noramark-command-face)))
+   ; definition-list long
+   (cons 'noramark-match-definition-list-long
+         '((1 'noramark-command-face)
+           (2 'noramark-command-face)))
+
    (cons 'noramark-match-line-command
          '((1 'noramark-command-face)
            (2 'font-lock-keyword-face nil t)
@@ -180,6 +192,34 @@ Group 4 matches the named parameter.")
            t)
           (t nil))))
 
+(defun noramark-match-definition-list-short (last)
+  (let (all open delimiter) 
+    (cond ((search-forward-regexp "^[ \t]*\\(;:\\)[^:]*?\\(:\\)[[:space:]]" last t)
+           (beginning-of-line)
+           (message "match %s" (match-string 0))
+           (setq open (list (match-beginning 1) (match-end 1))
+                 delimiter (list (match-beginning 2) (match-end 2))
+                 all (list (match-beginning 0) (match-end 0)))
+           (forward-line)
+           (set-match-data (append all open delimiter))
+           t)
+          (t nil))))
+
+(defun noramark-match-definition-list-long (last)
+  (let (all open delimiter) 
+    (cond ((search-forward-regexp "^[ \t]*\\(;:\\)[^{]*?\\({\\)[[:space:]]*?\n" last t)
+           (beginning-of-line)
+           (message "match %s" (match-string 0))
+           (setq open (list (match-beginning 1) (match-end 1))
+                 delimiter (list (match-beginning 2) (match-end 2))
+                 all (list (match-beginning 0) (match-end 0)))
+           (forward-line)
+           (set-match-data (append all open delimiter))
+           t)
+          (t nil))))
+                 
+
+
 (defun noramark-match-inline-command (last)
   (let (cmd id class param nparam open close)
     (cond ((search-forward-regexp (concat "\\(\\[[A-Za-z0-9-_]+\\)" noramark-regex-command-param "\\({\\).*?\\(}]\\)") last t)
@@ -192,7 +232,7 @@ Group 4 matches the named parameter.")
                  open (list (match-beginning 6) (match-end 6))
                  close (list (match-beginning 7) (match-end 7))
                  all (list (match-beginning 0) (match-end 0)))
-           (forward-line)
+           (goto-char (1+ (match-end 0)))
            (set-match-data (append all cmd id class param nparam open close))
            t)
           (t nil))))
