@@ -295,7 +295,7 @@ text = <<EOF
 ---
 lang: ja
 ---
- 
+
 # 見出し
  
 パラグラフ。
@@ -339,6 +339,22 @@ Result.
 ### HTML generator default transformer
 
 [HTML generator default transformer](https://github.com/skoji/noramark/blob/master/lib/nora_mark/html/default_transformer.rb) is a good example of transformer.
+
+## noramark-mode.el
+
+Experimental implementation of noramark major mode is available here.
+
+https://github.com/skoji/noramark/blob/master/emacs-mode/noramark-mode.el
+
+1. Download the file and place it somewhere like site-lisp.
+2. in your ~/.emacs.d/init.d
+
+```emacs-lisp
+(add-to-list 'load-path (expand-file-name "/path/to/the/directory"))
+(require 'noramark-mode)
+(setq auto-mode-alist (cons '("\\.nora$" . noramark-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("-nora\\.txt$" . noramark-mode) auto-mode-alist))
+```
 
 ## Contributing
 
