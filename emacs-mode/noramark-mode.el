@@ -1,7 +1,7 @@
 ;; experiment: noramark mode
 
 (defconst noramark-mode-version "0.1"
-  "NoraMrk mode version number.")
+  "NoraMark mode version number.")
 
 ;;; Customizable Variables ====================================================
 
@@ -120,7 +120,7 @@ Group 6 matches the named parameter.")
   "^[[:space:]]*\\(//}\\)[[:space:]]*$")
 
 (defconst noramark-regex-fence-head
-  "^\\(```\\)\\([A-Za-z0-9-_]+\\)?[[:space:]]*$")
+  "^\\(```\\)\\([A-Za-z0-9-_]+\\)?\\((.*?)\\)?\\(\\[.*?\\]\\)?[[:space:]]*$")
 
 (defconst noramark-regex-fence-tail
   "^\\(```\\)[[:space:]]*$")
@@ -143,9 +143,11 @@ Group 6 matches the named parameter.")
    ; fence
    (cons 'noramark-match-fence
          '((1 'noramark-command-face)
-           (2 'font-lock-keyword-face nil t)
-           (3 'noramark-pre-face nil t)
-           (4 'noramark-command-face)))
+           (2 'font-lock-keyword-face nil t) ; language
+           (3 'font-lock-string-face nil t) ; param
+           (4 'font-lock-string-face nil t) ; named param
+           (5 'noramark-pre-face nil t)
+           (6 'noramark-command-face)))
    ; pre/code
    (cons 'noramark-match-pre-command-complex
          '((1 'noramark-command-face nil t) ; cmd
@@ -311,18 +313,20 @@ Group 6 matches the named parameter.")
 
 (defun noramark-match-fence (last)
   "Match Noramark fence command from point to LAST."
-  (let (open lang body close all)
+  (let (open lang param nparam body close all)
     (cond ((search-forward-regexp noramark-regex-fence-head last t)
            (beginning-of-line)
            (setq open (list (match-beginning 1) (match-end 1))
-                 lang (list (match-beginning 2) (match-end 2)))
+                 lang (list (match-beginning 2) (match-end 2))
+				 param (list (match-beginning 3) (match-end 3))
+				 nparam (list (match-beginning 4) (match-end 4)))
            (forward-line)
            (setq body (list (point)))
            (cond ((search-forward-regexp noramark-regex-fence-tail last t)
                   (setq body (reverse (cons (1- (match-beginning 0)) body))
                         close (list (match-beginning 0) (match-end 0))
                         all (list (car open) (match-end 0)))
-                  (set-match-data (append all open lang body close))
+                  (set-match-data (append all open lang param nparam body close))
                   t)
                  (t nil)))
           (t nil))))
