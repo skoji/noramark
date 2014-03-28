@@ -154,26 +154,23 @@ code(変換結果) {//html
 
 整形済みブロックは、次のように指定します。
 
-形式 1
-```noramark
+code(形式1){//
 pre {
   format 1 : 整形済みの内容
 }
-```
+//}
 
-形式 2
-```noramark
+code(形式2) {
 pre {//
   format 2: 整形済みの内容
 //}
-```
+}
 
-形式 3
-code {//noramark
+code(形式3) {
 ```
   format 3: 整形済みの内容
 ```
-//}
+}
 
 形式1と2は、<pre>タグに変換されます。形式3は、<pre><code>に変換されます。
 整形済みの内容は、NoraMarkのテキストとしては解釈されません。
@@ -214,8 +211,52 @@ code(変換結果) {//html
 
 code languageの指定をすることができます。
 
+形式 2
+```
+code {//ruby
+puts "Hello, World."
+//}
+```
+形式 3
+code {
+```ruby
+puts "Hello, World."
+```
+}
+
+code(変換結果) {//html
+<pre class='code-ruby' data-code-language='ruby'><code >
+puts "Hello, World."
+</code></pre>			   
+//}
+
 ##### キャプションの指定
 
+pre(原稿) {//
+code(ソースコードはこちら) {
+puts 'Hello, World'
+}
+//}
+
+または、こんな書き方もできます。
+
+pre(原稿) {//
+```(ソースコードはこちら) {
+puts 'Hello, World'
+```
+//}
+
+こんな風になります。
+code(変換結果) {//html
+<div class='pre'>
+<p class='caption'>原稿はこちら</p>
+<pre>
+<code>
+puts 'Hello, World'
+</code>
+</pre>
+</div>
+//}
 
 ### インラインコマンド
 
@@ -379,7 +420,6 @@ code(変換結果) {//html
 ### 木構造の操作
 
 ## XML生成
-
 
 
 
