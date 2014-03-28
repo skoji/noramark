@@ -10,13 +10,13 @@ title: NoraMark Manual
 
 NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。
 
-* プレーンテキストの原稿を邪魔しない最小限の記述
-* しかしマークアップ部分は、通常のテキストと「違って」見える。
-* ブロック・ライン・インラインごとの基本記法を原則として固定。憶える記法は少なくてすむはず。
-* 生のHTML記法なしで、多くのタグを記述できる
-* マークアップに独自コマンドの追加ができる
-* 文書構造に対する処理を追加できる
-* パース結果をXMLとして取得できる
+* Markdownと同じように、プレーンテキストの原稿を邪魔しない最小限の記法です。
+* しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを「壊して」しまうことを避けるためのデザインです。
+* ブロック・ライン・インラインごとの基本記法を原則として固定。ただし、使用頻度の高いものは短く記述できるようにしているものもあります。
+* 生のHTML記法なしで、多くのタグを記述できます。
+* マークアップに独自コマンドの追加ができる、柔軟なカスタマイズを用意しています。
+* パースした文書構造に対する後処理を追加できます。
+* パース結果をXMLとして取得できます。
 
 ## 必要なもの
 
@@ -55,7 +55,8 @@ code {
 $ nora2html --kconv < source.nora > output.xhtml
 }
 
-[s.strong{nora2htmlは、newpageコマンドを<hr />タグに置き換え、すべてのページをひとつのxhtmlとして出力します}]
+[strong{nora2htmlは、newpageコマンドを<hr />タグに置き換え、すべてのページをひとつのxhtmlとして出力します}]
+
 ### コードから
 code {//ruby
 require 'nora_mark'
@@ -63,6 +64,19 @@ require 'nora_mark'
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
 document.html.write_as_files
 //}
+
+### Emacs Lisp noramark-mode
+
+Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能のみ提供しています。
+
+1. normark-mode.elをEmacsのload-pathが通った場所に配置してください。
+2. あなたの[code{~/.emacs.d/init.el}]に次の記述をしてください。
+
+```emacs-lisp
+(require 'noramark-mode)
+(setq auto-mode-alist (cons '("\\.nora$" . noramark-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("-nora\\.txt$" . noramark-mode) auto-mode-alist))
+```
 
 ## マークアップ
 

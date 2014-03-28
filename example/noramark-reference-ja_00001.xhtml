@@ -11,13 +11,13 @@
 </div>
 <div class='pgroup'><p>NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。</p>
 </div>
-<ul><li>プレーンテキストの原稿を邪魔しない最小限の記述</li>
-<li>しかしマークアップ部分は、通常のテキストと「違って」見える。</li>
-<li>ブロック・ライン・インラインごとの基本記法を原則として固定。憶える記法は少なくてすむはず。</li>
-<li>生のHTML記法なしで、多くのタグを記述できる</li>
-<li>マークアップに独自コマンドの追加ができる</li>
-<li>文書構造に対する処理を追加できる</li>
-<li>パース結果をXMLとして取得できる</li>
+<ul><li>Markdownと同じように、プレーンテキストの原稿を邪魔しない最小限の記法です。</li>
+<li>しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを「壊して」しまうことを避けるためのデザインです。</li>
+<li>ブロック・ライン・インラインごとの基本記法を原則として固定。ただし、使用頻度の高いものは短く記述できるようにしているものもあります。</li>
+<li>生のHTML記法なしで、多くのタグを記述できます。</li>
+<li>マークアップに独自コマンドの追加ができる、柔軟なカスタマイズを用意しています。</li>
+<li>パースした文書構造に対する後処理を追加できます。</li>
+<li>パース結果をXMLとして取得できます。</li>
 </ul>
 <section><h2 id='heading_index_2'>必要なもの</h2>
 <ul><li>ruby 2.0以上</li>
@@ -45,7 +45,7 @@
 </div>
 <pre><code>$ nora2html --kconv &lt; source.nora &gt; output.xhtml</code>
 </pre>
-<div class='pgroup'><p><s class='strong'>nora2htmlは、newpageコマンドを&lt;hr /&gt;タグに置き換え、すべてのページをひとつのxhtmlとして出力します</s></p>
+<div class='pgroup'><p><strong>nora2htmlは、newpageコマンドを&lt;hr /&gt;タグに置き換え、すべてのページをひとつのxhtmlとして出力します</strong></p>
 </div>
 </section>
 <section><h3 id='heading_index_6'>コードから</h3>
@@ -55,9 +55,20 @@ document = NoraMark::Document.parse(string_or_io, lang: 'ja')
 document.html.write_as_files</code>
 </pre>
 </section>
+<section><h3 id='heading_index_7'>Emacs Lisp noramark-mode</h3>
+<div class='pgroup'><p>Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能のみ提供しています。</p>
+</div>
+<ol><li>normark-mode.elをEmacsのload-pathが通った場所に配置してください。</li>
+<li>あなたの<code>~/.emacs.d/init.el</code>に次の記述をしてください。</li>
+</ol>
+<pre class='code-emacs-lisp' data-code-language='emacs-lisp'><code>(require 'noramark-mode)
+(setq auto-mode-alist (cons '(&quot;\\.nora$&quot; . noramark-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '(&quot;-nora\\.txt$&quot; . noramark-mode) auto-mode-alist))</code>
+</pre>
 </section>
-<section><h2 id='heading_index_7'>マークアップ</h2>
-<section><h3 id='heading_index_8'>通常のテキスト</h3>
+</section>
+<section><h2 id='heading_index_8'>マークアップ</h2>
+<section><h3 id='heading_index_9'>通常のテキスト</h3>
 <div class='pgroup'><p>単なるテキストもHTMLに変換されます。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -95,7 +106,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </pre>
 </div>
 </section>
-<section><h3 id='heading_index_9'>明示的なブロック</h3>
+<section><h3 id='heading_index_10'>明示的なブロック</h3>
 <div class='pgroup'><p>NoraMarkでは、&lt;コマンド&gt; { ではじまり、} のみの行で終わる範囲を明示的なブロックとみなします。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -139,7 +150,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;/blockquote&gt;</code>
 </pre>
 </div>
-<section><h4 id='heading_index_10'>Preformat block</h4>
+<section><h4 id='heading_index_11'>Preformat block</h4>
 <div class='pgroup'><p>整形済みブロックは、次のように指定します。</p>
 </div>
 <div class='pre'><p class='caption'>形式1</p>
@@ -193,7 +204,7 @@ code {//
 &lt;/code&gt;&lt;/pre&gt;</code>
 </pre>
 </div>
-<section><h5 id='heading_index_11'>code languageの指定</h5>
+<section><h5 id='heading_index_12'>code languageの指定</h5>
 <div class='pgroup'><p>code languageの指定をすることができます。</p>
 </div>
 <div class='pre'><p class='caption'>形式2</p>
@@ -215,7 +226,7 @@ puts &quot;Hello, World.&quot;
 </pre>
 </div>
 </section>
-<section><h5 id='heading_index_12'>キャプションの指定</h5>
+<section><h5 id='heading_index_13'>キャプションの指定</h5>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>code(ソースコードはこちら) {
 puts 'Hello, World'
@@ -242,7 +253,7 @@ puts 'Hello, World'
 </section>
 </section>
 </section>
-<section><h3 id='heading_index_13'>インラインコマンド</h3>
+<section><h3 id='heading_index_14'>インラインコマンド</h3>
 <div class='pgroup'><p>インラインコマンドは、次の形式をしています。</p>
 </div>
 <pre>[&lt;コマンド&gt;{内容}]</pre>
@@ -275,7 +286,7 @@ puts 'Hello, World'
 </dd>
 </dl>
 </section>
-<section><h3 id='heading_index_14'>行コマンド</h3>
+<section><h3 id='heading_index_15'>行コマンド</h3>
 <div class='pgroup'><p>行コマンドは1行を占有し、次の形式をしています。</p>
 </div>
 <pre>&lt;コマンド&gt;:内容</pre>
@@ -298,8 +309,8 @@ puts 'Hello, World'
 </dd>
 </dl>
 </section>
-<section><h3 id='heading_index_15'>リスト</h3>
-<section><h4 id='heading_index_16'>箇条書き</h4>
+<section><h3 id='heading_index_16'>リスト</h3>
+<section><h4 id='heading_index_17'>箇条書き</h4>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>* *ではじまる行は、箇条書きになる。  
 * 空行があくまで、箇条書きがつづく。
@@ -315,7 +326,7 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_17'>番号つきリスト</h4>
+<section><h4 id='heading_index_18'>番号つきリスト</h4>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>1. 数字.ではじまる行は、番号つきリストになる。
 2. 空行があくまで、リストがつづく。
@@ -333,10 +344,10 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_18'>定義リスト</h4>
+<section><h4 id='heading_index_19'>定義リスト</h4>
 <div class='pgroup'><p>定義リストには、二種類の書き方があります。</p>
 </div>
-<section><h5 id='heading_index_19'>1行の定義</h5>
+<section><h5 id='heading_index_20'>1行の定義</h5>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>;: それがし : 名前がわからない，または名前を隠して人や物事をさす語。
 ;: それがしかれがし : 不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。</pre>
@@ -351,7 +362,7 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h5 id='heading_index_20'>複数行の定義</h5>
+<section><h5 id='heading_index_21'>複数行の定義</h5>
 <div class='pgroup'><p>説明が長い場合は、複数行の形式で書けます。この場合、説明部分は段落になります。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -374,22 +385,22 @@ puts 'Hello, World'
 </section>
 </section>
 </section>
-<section><h3 id='heading_index_21'>見出し</h3>
-<section><h4 id='heading_index_22'>単独の見出し</h4>
+<section><h3 id='heading_index_22'>見出し</h3>
+<section><h4 id='heading_index_23'>単独の見出し</h4>
 </section>
-<section><h4 id='heading_index_23'>セクションを生成する見出し</h4>
-</section>
-</section>
-<section><h3 id='heading_index_24'>Frontmatter</h3>
+<section><h4 id='heading_index_24'>セクションを生成する見出し</h4>
 </section>
 </section>
-<section><h2 id='heading_index_25'>カスタマイズ</h2>
-<section><h3 id='heading_index_26'>生成ルール追加</h3>
-</section>
-<section><h3 id='heading_index_27'>木構造の操作</h3>
+<section><h3 id='heading_index_25'>Frontmatter</h3>
 </section>
 </section>
-<section><h2 id='heading_index_28'>XML生成</h2>
+<section><h2 id='heading_index_26'>カスタマイズ</h2>
+<section><h3 id='heading_index_27'>生成ルール追加</h3>
+</section>
+<section><h3 id='heading_index_28'>木構造の操作</h3>
+</section>
+</section>
+<section><h2 id='heading_index_29'>XML生成</h2>
 </section>
 </section>
 </body>
