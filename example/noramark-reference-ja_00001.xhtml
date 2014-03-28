@@ -50,6 +50,7 @@
 </section>
 <section><h3 id='heading_index_6'>コードから</h3>
 <pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
+
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
 document.html.write_as_files</code>
 </pre>
@@ -64,6 +65,7 @@ document.html.write_as_files</code>
 どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
 ＜中略＞
 この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。
+
 ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
@@ -82,8 +84,9 @@ document.html.write_as_files</code>
 <p>言語が日本語(ja)以外の場合は、次のようになります。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
-<pre>Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+<pre>Lorem ipsum dolor sit amet, consectetur adipisicing elit, 
+sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+
 Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
@@ -298,8 +301,9 @@ puts 'Hello, World'
 <section><h3 id='heading_index_15'>リスト</h3>
 <section><h4 id='heading_index_16'>箇条書き</h4>
 <div class='pre'><p class='caption'>原稿</p>
-<pre>* *ではじまる行は、箇条書きになる。
+<pre>* *ではじまる行は、箇条書きになる。  
 * 空行があくまで、箇条書きがつづく。
+
 * 空行があくと、あらたな箇条書きになる。</pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
@@ -315,6 +319,7 @@ puts 'Hello, World'
 <div class='pre'><p class='caption'>原稿</p>
 <pre>1. 数字.ではじまる行は、番号つきリストになる。
 2. 空行があくまで、リストがつづく。
+
 3. 空行があくと、あらたなリストになる。
 10. 先頭の数字にかかわらず、1から順に番号がふられる。</pre>
 </div>
@@ -340,7 +345,7 @@ puts 'Hello, World'
 <pre class='code-html' data-code-language='html'><code>&lt;dl&gt;
 &lt;dt&gt;それがし&lt;/dt&gt;
 &lt;dd&gt;名前がわからない，または名前を隠して人や物事をさす語。&lt;/dd&gt;
-&lt;dt&gt;それがしかれがし&lt;/dt&gt;
+&lt;dt&gt;それがしかれがし&lt;/dt&gt; 
 &lt;dd&gt;不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。&lt;/dd&gt;
 &lt;/dl&gt;</code>
 </pre>
@@ -361,7 +366,7 @@ puts 'Hello, World'
 <pre class='code-html' data-code-language='html'><code>&lt;dl&gt;
 &lt;dt&gt;それがし&lt;/dt&gt;
 &lt;dd&gt;&lt;div class=&quot;pgroup&quot;&gt;&lt;p&gt;名前がわからない，または名前を隠して人や物事をさす語。&lt;/p&gt;&lt;/div&gt;&lt;/dd&gt;
-&lt;dt&gt;それがしかれがし&lt;/dt&gt;
+&lt;dt&gt;それがしかれがし&lt;/dt&gt; 
 &lt;dd&gt;&lt;div class=&quot;pgroup&quot;&gt;&lt;p&gt;不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。&lt;/p&gt;&lt;/div&gt;&lt;/dd&gt;
 &lt;/dl&gt;</code>
 </pre>

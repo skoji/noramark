@@ -890,9 +890,11 @@ normal line.
   pre {//
 d {
    this will not converted to div or p or pgroup.
+
 line_command: this will be not converted too.
 }
   //}
+normal line again.
 EOF
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
@@ -900,7 +902,9 @@ EOF
         expect(body.element_children[0].selector_and_children)
           .to eq(["div.pgroup", ["p", "normal line."]])
         expect(body.element_children[1].selector_and_children)
-          .to eq(["pre", "d {\n   this will not converted to div or p or pgroup.\nline_command: this will be not converted too.\n}"])
+          .to eq(["pre", "d {\n   this will not converted to div or p or pgroup.\n\nline_command: this will be not converted too.\n}"])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
       end
 
       it 'should convert preformatted code' do

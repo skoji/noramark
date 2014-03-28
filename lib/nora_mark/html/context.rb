@@ -32,7 +32,7 @@ module NoraMark
       end
       
       def chop_last_space
-        @pages.last.sub!(/[[:space:]]+$/, '')
+        @pages.last.sub!(/[[:space:]]+\Z/, '')
       end
 
       def paragraph_style=(style)
