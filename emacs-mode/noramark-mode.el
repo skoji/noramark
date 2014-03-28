@@ -1,7 +1,7 @@
 ;; experiment: noramark mode
 
 (defconst noramark-mode-version "0.1"
-  "Markdown mode version number.")
+  "NoraMrk mode version number.")
 
 ;;; Customizable Variables ====================================================
 
@@ -97,7 +97,7 @@
   :group 'noramark-faces)
 
 (defconst noramark-regex-command-param
-  "\\(\\(\\#[[:alpha:][:digit:]-_]+\\)*\\)\\(\\(\\.[[:alpha:][:digit:]-_]+\\)*\\)\\(.*?)\\)?\\(\\[.*\\]\\)?"
+  "\\(\\(\\#[[:alpha:][:digit:]-_]+\\)*\\)\\(\\(\\.[[:alpha:][:digit:]-_]+\\)*\\)\\((.*?)\\)?\\(\\[.*\\]\\)?"
   "Regular expression for #id.class(parameter)[namedparameter]
 Group 1 matchs the id.
 Group 3 matchs the class
