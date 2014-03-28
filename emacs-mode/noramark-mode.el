@@ -1,5 +1,8 @@
 ;; experiment: noramark mode
 
+(defconst noramark-mode-version "0.1"
+  "Markdown mode version number.")
+
 ;;; Customizable Variables ====================================================
 
 (defvar noramark-mode-hook nil
@@ -95,20 +98,23 @@
 
 (defconst noramark-regex-command-param
   "\\(\\(\\#[[:alpha:][:digit:]-_]+\\)*\\)\\(\\(\\.[[:alpha:][:digit:]-_]+\\)*\\)\\(.*?)\\)?\\(\\[.*\\]\\)?"
-  "Regular expression for a #id.class(parameter)[namedparameter]
+  "Regular expression for #id.class(parameter)[namedparameter]
 Group 1 matchs the id.
 Group 3 matchs the class
 Group 5 matches the parameter.
 Group 6 matches the named parameter.")
 
 (defconst noramark-regex-pre-head
-  (concat "^[[:space:]]*\\(pre\\|code\\)" noramark-regex-command-param "[[:space:]]*\\({\\)[[:space:]]*?\n"))
+  (concat "^[[:space:]]*\\(pre\\|code\\)" noramark-regex-command-param "[[:space:]]*\\({\\)[[:space:]]*?\n")
+  "Regular expression for pre or code head block like pre.class(param) {")
 
 (defconst noramark-regex-pre-tail
   "^[[:space:]]*\\(}\\)[[:space:]]*$")
 
+
 (defconst noramark-regex-pre-c-head
-  (concat "^[[:space:]]*\\(pre\\|code\\)" noramark-regex-command-param "[[:space:]]*\\({//\\)\\([A-Za-z-_]*?\\)?[[:space:]]*?\n"))
+  (concat "^[[:space:]]*\\(pre\\|code\\)" noramark-regex-command-param "[[:space:]]*\\({//\\)\\([A-Za-z-_]*?\\)?[[:space:]]*?\n")
+  "Regular expression for pre or code head block like code.class(param) {//language ")
 
 (defconst noramark-regex-pre-c-tail
   "^[[:space:]]*\\(//}\\)[[:space:]]*$")
@@ -125,7 +131,7 @@ Group 6 matches the named parameter.")
 
 (defconst noramark-regex-frontmatter
   "^\\(---\\)[[:space:]]*?$"
-  "Regular expression for frontmatter;")
+  "Regular expression for frontmatter separator.")
 
 (defvar noramark-mode-font-lock-keywords-basic
   (list
@@ -134,11 +140,13 @@ Group 6 matches the named parameter.")
          '((1 'font-lock-keyword-face)
           (2 'font-lock-comment-face nil t)
           (3 'font-lock-keyword-face)))
+   ; fence
    (cons 'noramark-match-fence
          '((1 'noramark-command-face)
            (2 'font-lock-keyword-face nil t)
            (3 'noramark-pre-face nil t)
            (4 'noramark-command-face)))
+   ; pre/code
    (cons 'noramark-match-pre-command-complex
          '((1 'noramark-command-face nil t) ; cmd
            (2 'font-lock-keyword-face nil t) ; id
@@ -149,6 +157,7 @@ Group 6 matches the named parameter.")
            (7 'font-lock-keyword-face nil t) ; language
            (8 'noramark-pre-face nil t) ; body of pre
            (9 'noramark-command-face nil t))) ; close
+   ; pre/code
    (cons 'noramark-match-pre-command
          '((1 'noramark-command-face nil t) ; cmd
            (2 'font-lock-keyword-face nil t) ;id 
@@ -170,16 +179,16 @@ Group 6 matches the named parameter.")
    '("^[ \t]*[\#]+.*$" . noramark-header-face)
    ; headings: hN
    '("^[ \t]*h[1-6]:.*$" . noramark-header-face)
-
    ; definition-list short
    (cons 'noramark-match-definition-list-short
          '((1 'noramark-list-face)
            (2 'noramark-list-face)))
+
    ; definition-list long
    (cons 'noramark-match-definition-list-long
          '((1 'noramark-list-face)
            (2 'noramark-command-face)))
-
+   ; line-command
    (cons 'noramark-match-line-command
          '((1 'noramark-command-face)
            (2 'font-lock-keyword-face nil t)
@@ -187,6 +196,7 @@ Group 6 matches the named parameter.")
            (4 'font-lock-string-face nil t)
            (5 'font-lock-string-face nil t)
            (6 'noramark-command-face)))
+   ; inline-command
    (cons 'noramark-match-inline-command
          '((1 'noramark-command-face)
            (2 'font-lock-keyword-face nil t)
@@ -406,9 +416,6 @@ Group 6 matches the named parameter.")
                    (t nil))))
           (t nil))))
       
-          
-
-             
 
 ;;; Syntax Table ==============================================================
 
@@ -437,7 +444,6 @@ Group 6 matches the named parameter.")
 
 ;;;###autoload(add-to-list 'auto-mode-alist '("\\.nora\\'" . noramark-mode))
 
-
 
 (provide 'noramark-mode)
 
