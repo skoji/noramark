@@ -211,23 +211,23 @@ code(変換結果) {//html
 
 code languageの指定をすることができます。
 
-形式 2
-```
+
+```(形式2)
 code {//ruby
 puts "Hello, World."
 //}
 ```
-形式 3
-code {
+
+code(形式3) {
 ```ruby
 puts "Hello, World."
 ```
 }
 
 code(変換結果) {//html
-<pre class='code-ruby' data-code-language='ruby'><code >
+<pre class='code-ruby' data-code-language='ruby'><code>
 puts "Hello, World."
-</code></pre>			   
+</code></pre>
 //}
 
 ##### キャプションの指定
@@ -250,11 +250,9 @@ puts 'Hello, World'
 code(変換結果) {//html
 <div class='pre'>
 <p class='caption'>原稿はこちら</p>
-<pre>
-<code>
+<pre><code>
 puts 'Hello, World'
-</code>
-</pre>
+</code></pre>
 </div>
 //}
 

@@ -136,8 +136,110 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;/blockquote&gt;</code>
 </pre>
 </div>
+<section><h4 id='heading_index_10'>Preformat block</h4>
+<div class='pgroup'><p>整形済みブロックは、次のように指定します。</p>
+</div>
+<div class='pre'><p class='caption'>形式1</p>
+<pre><code>pre {
+  format 1 : 整形済みの内容
+}</code>
+</pre>
+</div>
+<div class='pre'><p class='caption'>形式2</p>
+<pre><code>pre {//
+  format 2: 整形済みの内容
+//}</code>
+</pre>
+</div>
+<div class='pre'><p class='caption'>形式3</p>
+<pre><code>```
+  format 3: 整形済みの内容
+```</code>
+</pre>
+</div>
+<div class='pgroup'><p>形式1と2は、&lt;pre&gt;タグに変換されます。形式3は、&lt;pre&gt;&lt;code&gt;に変換されます。</p>
+<p>整形済みの内容は、NoraMarkのテキストとしては解釈されません。</p>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;pre&gt;
+format 1 : 整形済みの内容
+&lt;/pre&gt;
+&lt;pre&gt;
+format 2 : 整形済みの内容
+&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;
+format 3 : 整形済みの内容
+&lt;/code&gt;&lt;/pre&gt;</code>
+</pre>
+</div>
+<div class='pgroup'><p>また、次のように書くことで整形済みコードを作ることもできます。</p>
+</div>
+<pre><code>code {
+整形済みコード
+}
+code {//
+整形済みコード
+//}</code>
+</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;pre&gt;&lt;/code&gt;
+整形済みコード
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;
+整形済みコード
+&lt;/code&gt;&lt;/pre&gt;</code>
+</pre>
+</div>
+<section><h5 id='heading_index_11'>code languageの指定</h5>
+<div class='pgroup'><p>code languageの指定をすることができます。</p>
+</div>
+<div class='pre'><p class='caption'>形式2</p>
+<pre><code>code {//ruby
+puts &quot;Hello, World.&quot;
+//}</code>
+</pre>
+</div>
+<div class='pre'><p class='caption'>形式3</p>
+<pre><code>```ruby
+puts &quot;Hello, World.&quot;
+```</code>
+</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;pre class='code-ruby' data-code-language='ruby'&gt;&lt;code&gt;
+puts &quot;Hello, World.&quot;
+&lt;/code&gt;&lt;/pre&gt;</code>
+</pre>
+</div>
 </section>
-<section><h3 id='heading_index_10'>インラインコマンド</h3>
+<section><h5 id='heading_index_12'>キャプションの指定</h5>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>code(ソースコードはこちら) {
+puts 'Hello, World'
+}</pre>
+</div>
+<div class='pgroup'><p>または、こんな書き方もできます。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>```(ソースコードはこちら) {
+puts 'Hello, World'
+```</pre>
+</div>
+<div class='pgroup'><p>こんな風になります。</p>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;div class='pre'&gt;
+&lt;p class='caption'&gt;原稿はこちら&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+puts 'Hello, World'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;</code>
+</pre>
+</div>
+</section>
+</section>
+</section>
+<section><h3 id='heading_index_13'>インラインコマンド</h3>
 <div class='pgroup'><p>インラインコマンドは、次の形式をしています。</p>
 </div>
 <pre>[&lt;コマンド&gt;{内容}]</pre>
@@ -170,7 +272,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </dd>
 </dl>
 </section>
-<section><h3 id='heading_index_11'>行コマンド</h3>
+<section><h3 id='heading_index_14'>行コマンド</h3>
 <div class='pgroup'><p>行コマンドは1行を占有し、次の形式をしています。</p>
 </div>
 <pre>&lt;コマンド&gt;:内容</pre>
@@ -193,8 +295,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </dd>
 </dl>
 </section>
-<section><h3 id='heading_index_12'>リスト</h3>
-<section><h4 id='heading_index_13'>箇条書き</h4>
+<section><h3 id='heading_index_15'>リスト</h3>
+<section><h4 id='heading_index_16'>箇条書き</h4>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>* *ではじまる行は、箇条書きになる。
 * 空行があくまで、箇条書きがつづく。
@@ -209,7 +311,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_14'>番号つきリスト</h4>
+<section><h4 id='heading_index_17'>番号つきリスト</h4>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>1. 数字.ではじまる行は、番号つきリストになる。
 2. 空行があくまで、リストがつづく。
@@ -226,10 +328,10 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_15'>定義リスト</h4>
+<section><h4 id='heading_index_18'>定義リスト</h4>
 <div class='pgroup'><p>定義リストには、二種類の書き方があります。</p>
 </div>
-<section><h5 id='heading_index_16'>1行の定義</h5>
+<section><h5 id='heading_index_19'>1行の定義</h5>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>;: それがし : 名前がわからない，または名前を隠して人や物事をさす語。
 ;: それがしかれがし : 不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。</pre>
@@ -244,7 +346,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </pre>
 </div>
 </section>
-<section><h5 id='heading_index_17'>複数行の定義</h5>
+<section><h5 id='heading_index_20'>複数行の定義</h5>
 <div class='pgroup'><p>説明が長い場合は、複数行の形式で書けます。この場合、説明部分は段落になります。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -267,22 +369,22 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </section>
 </section>
 </section>
-<section><h3 id='heading_index_18'>見出し</h3>
-<section><h4 id='heading_index_19'>単独の見出し</h4>
+<section><h3 id='heading_index_21'>見出し</h3>
+<section><h4 id='heading_index_22'>単独の見出し</h4>
 </section>
-<section><h4 id='heading_index_20'>セクションを生成する見出し</h4>
-</section>
-</section>
-<section><h3 id='heading_index_21'>Frontmatter</h3>
+<section><h4 id='heading_index_23'>セクションを生成する見出し</h4>
 </section>
 </section>
-<section><h2 id='heading_index_22'>カスタマイズ</h2>
-<section><h3 id='heading_index_23'>生成ルール追加</h3>
-</section>
-<section><h3 id='heading_index_24'>木構造の操作</h3>
+<section><h3 id='heading_index_24'>Frontmatter</h3>
 </section>
 </section>
-<section><h2 id='heading_index_25'>XML生成</h2>
+<section><h2 id='heading_index_25'>カスタマイズ</h2>
+<section><h3 id='heading_index_26'>生成ルール追加</h3>
+</section>
+<section><h3 id='heading_index_27'>木構造の操作</h3>
+</section>
+</section>
+<section><h2 id='heading_index_28'>XML生成</h2>
 </section>
 </section>
 </body>
