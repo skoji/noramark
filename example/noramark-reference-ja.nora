@@ -150,6 +150,73 @@ code(変換結果) {//html
 </blockquote>
 //}
 
+#### Preformat block
+
+整形済みブロックは、次のように指定します。
+
+形式 1
+```noramark
+pre {
+  format 1 : 整形済みの内容
+}
+```
+
+形式 2
+```noramark
+pre {//
+  format 2: 整形済みの内容
+//}
+```
+
+形式 3
+code {//noramark
+```
+  format 3: 整形済みの内容
+```
+//}
+
+形式1と2は、<pre>タグに変換されます。形式3は、<pre><code>に変換されます。
+整形済みの内容は、NoraMarkのテキストとしては解釈されません。
+
+code(変換結果) {//html
+<pre>
+format 1 : 整形済みの内容
+</pre>
+<pre>
+format 2 : 整形済みの内容
+</pre>
+<pre><code>
+format 3 : 整形済みの内容
+</code></pre>
+//}
+
+また、次のように書くことで整形済みコードを作ることもできます。
+
+```
+code {
+整形済みコード
+}
+code {//
+整形済みコード
+//}
+```
+
+code(変換結果) {//html
+<pre></code>
+整形済みコード
+</code></pre>
+<pre><code>
+整形済みコード
+</code></pre>
+//}
+
+##### code languageの指定
+
+code languageの指定をすることができます。
+
+##### キャプションの指定
+
+
 ### インラインコマンド
 
 インラインコマンドは、次の形式をしています。
