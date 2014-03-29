@@ -133,6 +133,10 @@ Group 6 matches the named parameter.")
   "^\\(---\\)[[:space:]]*?$"
   "Regular expression for frontmatter separator.")
 
+(defconst noramark-regex-code
+  "\\(\\`\\|[^\\]\\)\\(\\(`+\\)\\(\\(.\\)*?[^`]\\)\\3\\)\\([^`]\\|\\'\\)"
+  "Regular expression for matching inline code fragments.")
+
 (defvar noramark-mode-font-lock-keywords-basic
   (list
    ; frontmatter
@@ -169,6 +173,8 @@ Group 6 matches the named parameter.")
            (6 'noramark-command-face nil t) ; open
            (7 'noramark-pre-face nil t) ; body
            (8 'noramark-command-face nil t))) ;close
+   ; inline code
+   (cons 'noramark-match-inline-code '((0 noramark-inline-code-face)))
    ; block-end
    '("^[ \t]*}[ \t]*\n" . noramark-command-face)
    ; comment
@@ -227,6 +233,17 @@ Group 6 matches the named parameter.")
                   t)
                  (t nil)))
           (t nil))))
+
+(defun noramark-match-inline-code (last)
+  "Match inline code from the point to LAST."
+  (unless (bobp)
+    (backward-char 1))
+  (cond ((re-search-forward noramark-regex-code last t)
+         (set-match-data (list (match-beginning 2) (match-end 2)
+                               (match-beginning 4) (match-end 4)))
+         (goto-char (match-end 0))
+         t)
+        (t (forward-char 2) nil)))
 
 (defun noramark-match-line-command (last)
   (let (cmd id class param nparam comma)
