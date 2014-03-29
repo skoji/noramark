@@ -207,13 +207,13 @@ code {//
 <section><h5 id='heading_index_12'>code languageの指定</h5>
 <div class='pgroup'><p>code languageの指定をすることができます。</p>
 </div>
-<div class='pre'><p class='caption'>形式2</p>
+<div class='pre'><p class='caption'>形式1</p>
 <pre><code>code {//ruby
 puts &quot;Hello, World.&quot;
 //}</code>
 </pre>
 </div>
-<div class='pre'><p class='caption'>形式3</p>
+<div class='pre'><p class='caption'>形式2</p>
 <pre><code>```ruby
 puts &quot;Hello, World.&quot;
 ```</code>
@@ -387,8 +387,67 @@ puts 'Hello, World'
 </section>
 <section><h3 id='heading_index_22'>見出し</h3>
 <section><h4 id='heading_index_23'>単独の見出し</h4>
+<div class='pgroup'><p>h1からh6が用意されています。そのまま、&lt;h1&gt; タグに変換されます。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>h1: 単独の見出し
+ここに本文</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;h1&gt;単独の見出し&lt;/h1&gt;
+&lt;div class='pgroup'&gt;
+&lt;p&gt;ここに本文&lt;/p&gt;
+&lt;/div&gt;</code>
+</pre>
+</div>
 </section>
 <section><h4 id='heading_index_24'>セクションを生成する見出し</h4>
+<div class='pgroup'><p>Markdown風の # をつかった見出しも使えます。この見出しは、sectionを生成します。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre># 見出し
+本文</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;section&gt;
+&lt;h1&gt;見出し&lt;/h1&gt;
+&lt;div class='pgroup'&gt;
+&lt;p&gt;本文&lt;/p&gt;
+&lt;/div&gt;
+&lt;/section&gt;</code>
+</pre>
+</div>
+<div class='pgroup'><p>入れ子にもできます。sectionの範囲は適切に判断されます。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre># 見出し
+本文
+## 小見出し
+次の本文
+# 新しい章
+新しい章の本文</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;section&gt;
+  &lt;h1&gt;見出し&lt;/h1&gt;
+  &lt;div class='pgroup'&gt;
+    &lt;p&gt;本文&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;section&gt;
+    &lt;h2&gt;小見出し&lt;/h2&gt;
+      &lt;div class='pgroup'&gt;
+        &lt;p&gt;次の本文&lt;/p&gt;
+      &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/section&gt;
+&lt;section&gt;
+  &lt;h1&gt;新しい章&lt;/h1&gt;
+  &lt;div class='pgroup'&gt;
+    &lt;p&gt;新しい章の本文&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code>
+</pre>
+</div>
 </section>
 </section>
 <section><h3 id='heading_index_25'>Frontmatter</h3>

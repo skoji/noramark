@@ -225,14 +225,13 @@ code(変換結果) {//html
 
 code languageの指定をすることができます。
 
-
-```(形式2)
+```(形式1)
 code {//ruby
 puts "Hello, World."
 //}
 ```
 
-code(形式3) {
+code(形式2){
 ```ruby
 puts "Hello, World."
 ```
@@ -420,10 +419,70 @@ code(変換結果) {//html
 //}
 
 ### 見出し
-
 #### 単独の見出し
 
+h1からh6が用意されています。そのまま、<h1> タグに変換されます。
+
+pre(原稿) {
+h1: 単独の見出し
+ここに本文
+}
+code(変換結果){//html
+<h1>単独の見出し</h1>
+<div class='pgroup'>
+<p>ここに本文</p>
+</div>
+//}
+
 #### セクションを生成する見出し
+
+Markdown風の # をつかった見出しも使えます。この見出しは、sectionを生成します。
+
+pre(原稿) {
+# 見出し
+本文
+}
+
+code(変換結果) {//html
+<section>
+<h1>見出し</h1>
+<div class='pgroup'>
+<p>本文</p>
+</div>
+</section>
+//}
+
+入れ子にもできます。sectionの範囲は適切に判断されます。
+
+pre(原稿) {
+# 見出し
+本文
+## 小見出し
+次の本文
+# 新しい章
+新しい章の本文
+}
+
+code(変換結果) {//html
+<section>
+  <h1>見出し</h1>
+  <div class='pgroup'>
+    <p>本文</p>
+  </div>
+  <section>
+    <h2>小見出し</h2>
+      <div class='pgroup'>
+        <p>次の本文</p>
+      </div>
+  </section>
+</section>
+<section>
+  <h1>新しい章</h1>
+  <div class='pgroup'>
+    <p>新しい章の本文</p>
+  </div>
+</section>
+//}
 
 ### Frontmatter
 
