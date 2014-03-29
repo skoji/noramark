@@ -1,4 +1,5 @@
 ;; experiment: noramark mode
+(require 'outline)
 
 (defconst noramark-mode-version "0.1"
   "NoraMark mode version number.")
@@ -126,7 +127,7 @@ Group 6 matches the named parameter.")
   "^\\(```\\)[[:space:]]*$")
 
 (defconst noramark-regex-header
-  "^[ \t]*[\#]+.*$"
+  "^[ \t]*\\(#+\\).*$"
   "Regexp identifying NoraMark headers.")
 
 (defconst noramark-regex-frontmatter
@@ -184,7 +185,7 @@ Group 6 matches the named parameter.")
    ; ol
    '("^[ \t]*[[:digit:]]+\\.[ \t]" . noramark-list-face)
    ; headings
-   '("^[ \t]*[\#]+.*$" . noramark-header-face)
+   (cons noramark-regex-header '((0 noramark-header-face)))
    ; headings: hN
    '("^[ \t]*h[1-6]:.*$" . noramark-header-face)
    ; definition-list short
@@ -373,7 +374,13 @@ Group 6 matches the named parameter.")
                  (t nil)))
           (t nil))))
 
-
+
+;;; Outline
+(defun noramark-outline-level ()
+  "Return the depth to which a statement is nested in the outline."
+  (let ((mz (match-string 0)) (mo (match-string 1)))
+    (message "zero : %s one : %s" mz mo)
+    (- (match-end 1) (match-beginning 1))))
 
 (defun noramark-reload-extensions ()
   "Check settings, update font-lock keywords, and re-fontify buffer."
@@ -453,6 +460,12 @@ Group 6 matches the named parameter.")
   (set (make-local-variable 'noramark-mode-font-lock-keywords) nil)
   (set (make-local-variable 'font-lock-multiline) t)
   (noramark-reload-extensions)
+  ;; Outline mode
+  (make-local-variable 'outline-regexp)
+  (setq outline-regexp noramark-regex-header)
+  (make-local-variable 'outline-level)
+  (setq outline-level 'noramark-outline-level)
+  ;; hooks
   (add-hook 'font-lock-extend-region-functions
             'noramark-font-lock-extend-region-pre)
   (add-hook 'font-lock-extend-region-functions
