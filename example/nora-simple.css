@@ -26,6 +26,18 @@ pre {
     border-radius: 0.5em;
 }
 
+code {
+    background: #dddddd;
+    margin: 0.4em;
+    border-radius: 0.1em;
+    border: 1px solid #aaaaaa;
+}
+
+pre code {
+    margin: 0;
+    border: 0;
+}
+
 .pre {
     margin: 1em auto;
 }
@@ -42,10 +54,6 @@ pre {
     margin: 0 auto;
 }
 
-
-pre.code-html {
-    background: #efefef;
-}
 
 h1 {
     border-bottom: 1px solid #444444;

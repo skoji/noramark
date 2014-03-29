@@ -70,7 +70,7 @@ document.html.write_as_files
 Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能のみ提供しています。
 
 1. normark-mode.elをEmacsのload-pathが通った場所に配置してください。
-2. あなたの[code{~/.emacs.d/init.el}]に次の記述をしてください。
+2. あなたの`~/.emacs.d/init.el`に次の記述をしてください。
 
 ```emacs-lisp
 (require 'noramark-mode)
@@ -105,7 +105,7 @@ code(変換結果) {//html
 </div>
 //}
 
-改行ごとに<p>要素がつくられます。空行で区切られると、<div class='pgroup'>がつくられます。
+改行ごとに`<p>`要素がつくられます。空行で区切られると、`<div class='pgroup'>`がつくられます。
 言語が日本語(ja)以外の場合は、次のようになります。
 
 pre(原稿) {
@@ -122,7 +122,7 @@ code(変換結果) {//html
 
 ### 明示的なブロック
 
-NoraMarkでは、<コマンド> { ではじまり、} のみの行で終わる範囲を明示的なブロックとみなします。
+NoraMarkでは、`<コマンド> {` ではじまり、`}` のみの行で終わる範囲を明示的なブロックとみなします。
 
 pre(原稿) {//
 d.column {
@@ -186,7 +186,7 @@ code(形式3) {
 ```
 }
 
-形式1と2は、<pre>タグに変換されます。形式3は、<pre><code>に変換されます。
+形式1と2は、`<pre>`タグに変換されます。形式3は、`<pre><code>`に変換されます。
 整形済みの内容は、NoraMarkのテキストとしては解釈されません。
 
 code(変換結果) {//html
