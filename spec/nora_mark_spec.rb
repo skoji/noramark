@@ -688,14 +688,14 @@ describe NoraMark::Document do
                  ])
       end
       it 'handle code inline (long format)' do
-        text = "[code{this is inside code and `backquote will not be parsed`}]. you see?"
+        text = "[code.the-class{this is inside code and `backquote will not be parsed`}]. you see?"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html        
         body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
         expect(body.element_children[0].selector_and_children)
           .to eq(
                  ['div.pgroup', 
-                  ['p', ['code', 'this is inside code and `backquote will not be parsed`'], '. you see?']
+                  ['p', ['code.the-class', 'this is inside code and `backquote will not be parsed`'], '. you see?']
                  ])
       end
     end

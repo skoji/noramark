@@ -84,7 +84,7 @@ module NoraMark
       end
 
       replace ({type: :CodeInline}) do
-        inline('code', @node.content, line_no: @node.line_no)
+        inline('code', @node.content, line_no: @node.line_no, template: @node)
       end
       
       replace ({type: :PreformattedBlock}) do
