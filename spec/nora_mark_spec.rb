@@ -664,6 +664,29 @@ describe NoraMark::Document do
                   ['p', ['span.tcy', '10'], '年前のことだった']
                  ])
       end
+
+      it 'handle code inline' do
+        text = "`this is inside code and [s{will not parsed}]`. you see?"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html        
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', ['code', 'this is inside code and [s{will not parsed}]'], '. you see?']
+                 ])
+      end
+      it 'handle code escaped inline' do
+        text = "\\`this is not inside code and [strong{will be parsed}]\\`. you see?"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html        
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', '`this is not inside code and ', ['strong', 'will be parsed'], '`. you see?']
+                 ])
+      end
     end
     describe 'list' do
       it 'handle ordered list ' do

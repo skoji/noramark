@@ -336,6 +336,19 @@ module NoraMark
     end
   end
 
+  class CodeInline < Node
+    def raw_text
+      true
+    end
+    
+    def raw_text?
+      true
+    end
+
+    def get_text
+      @content
+    end
+  end
 
   class PreformattedBlock < Node
     def raw_text

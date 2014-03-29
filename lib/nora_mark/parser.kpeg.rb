@@ -34,6 +34,14 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       attr_reader :line_no
     end
+    class CodeInline < Node
+      def initialize(content, line_no)
+        @content = content
+        @line_no = line_no
+      end
+      attr_reader :content
+      attr_reader :line_no
+    end
     class DefinitionList < Node
       def initialize(ids, classes, params, named_params, raw_content, line_no)
         @ids = ids
@@ -265,6 +273,9 @@ class NoraMark::Parser < KPeg::CompiledParser
     end
     def br(line_no)
       ::NoraMark::Breakline.new(line_no)
+    end
+    def code_inline(content, line_no)
+      ::NoraMark::CodeInline.new(content, line_no)
     end
     def definition_list(ids, classes, params, named_params, raw_content, line_no)
       ::NoraMark::DefinitionList.new(ids, classes, params, named_params, raw_content, line_no)
@@ -2559,15 +2570,21 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Inline = (ImgInline | CommonInline)
+  # Inline = (EscapedChar | ImgInline | CommonInline | CodeInline)
   def _Inline
 
     _save = self.pos
     while true # choice
+      _tmp = apply(:_EscapedChar)
+      break if _tmp
+      self.pos = _save
       _tmp = apply(:_ImgInline)
       break if _tmp
       self.pos = _save
       _tmp = apply(:_CommonInline)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_CodeInline)
       break if _tmp
       self.pos = _save
       break
@@ -2685,6 +2702,82 @@ class NoraMark::Parser < KPeg::CompiledParser
     end # end sequence
 
     set_failed_rule :_ImgInline unless _tmp
+    return _tmp
+  end
+
+  # CodeInline = "`" ln:ln CharStringExcept('`'):content "`" {code_inline(content, ln)}
+  def _CodeInline
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("`")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply_with_args(:_CharStringExcept, '`')
+      content = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("`")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; code_inline(content, ln); end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_CodeInline unless _tmp
+    return _tmp
+  end
+
+  # EscapedChar = "\\" < /[`]/ > ln:ln {text(text, ln)}
+  def _EscapedChar
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("\\")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _text_start = self.pos
+      _tmp = scan(/\A(?-mix:[`])/)
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_ln)
+      ln = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; text(text, ln); end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_EscapedChar unless _tmp
     return _tmp
   end
 
@@ -4106,13 +4199,23 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # CharStringExcept = < CharExcept(e) > { text }
+  # CharStringExcept = < CharExcept(e)+ > { text }
   def _CharStringExcept(e)
 
     _save = self.pos
     while true # sequence
       _text_start = self.pos
+      _save1 = self.pos
       _tmp = apply_with_args(:_CharExcept, e)
+      if _tmp
+        while true
+          _tmp = apply_with_args(:_CharExcept, e)
+          break unless _tmp
+        end
+        _tmp = true
+      else
+        self.pos = _save1
+      end
       if _tmp
         text = get_text(_text_start)
       end
@@ -4672,10 +4775,12 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "- PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])}")
   Rules[:_PreformattedBlockFence] = rule_info("PreformattedBlockFence", "- ln:ln PreformattedFence:c (!\"```\" CharString Nl)+:content - \"```\" - Le EmptyLine* {preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln)}")
   Rules[:_PreformattedBlock] = rule_info("PreformattedBlock", "(PreformattedBlockComplex | PreformattedBlockSimple | PreformattedBlockFence)")
-  Rules[:_Inline] = rule_info("Inline", "(ImgInline | CommonInline)")
+  Rules[:_Inline] = rule_info("Inline", "(EscapedChar | ImgInline | CommonInline | CodeInline)")
   Rules[:_CommonInline] = rule_info("CommonInline", "\"[\" Command:c \"{\" - DocumentContentExcept('}'):content \"}\" \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_ImgCommand] = rule_info("ImgCommand", "Command:c &{ c[:name] == 'img' && c[:args].size == 2}")
   Rules[:_ImgInline] = rule_info("ImgInline", "\"[\" ImgCommand:c \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])}")
+  Rules[:_CodeInline] = rule_info("CodeInline", "\"`\" ln:ln CharStringExcept('`'):content \"`\" {code_inline(content, ln)}")
+  Rules[:_EscapedChar] = rule_info("EscapedChar", "\"\\\\\" < /[`]/ > ln:ln {text(text, ln)}")
   Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
   Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])}")
@@ -4706,7 +4811,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_Char] = rule_info("Char", "< /[[:print:]]/ > { text }")
   Rules[:_CharString] = rule_info("CharString", "< Char* > { text }")
   Rules[:_CharExcept] = rule_info("CharExcept", "Char:c &{ e.is_a?(Regexp) ? e !~ c : e != c }")
-  Rules[:_CharStringExcept] = rule_info("CharStringExcept", "< CharExcept(e) > { text }")
+  Rules[:_CharStringExcept] = rule_info("CharStringExcept", "< CharExcept(e)+ > { text }")
   Rules[:_DocumentTextExcept] = rule_info("DocumentTextExcept", "< (!Inline CharExcept(e))+ > ln:ln {text(text, ln)}")
   Rules[:_DocumentContentExcept] = rule_info("DocumentContentExcept", "(Inline | DocumentTextExcept(e))+:content { content }")
   Rules[:_DocumentText] = rule_info("DocumentText", "< (!Inline Char)+ > ln:ln {text(text, ln)}")

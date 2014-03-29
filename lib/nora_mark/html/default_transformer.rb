@@ -83,6 +83,10 @@ module NoraMark
         block('section', [ block("h#{@node.level}", @node.heading, ids: @node.n[:heading_id], n: {chop_last_space: true}) ] + @node.children, template: @node)
       end
 
+      replace ({type: :CodeInline}) do
+        inline('code', @node.content, line_no: @node.line_no)
+      end
+      
       replace ({type: :PreformattedBlock}) do
         new_node = block('pre')
         if @node.codelanguage

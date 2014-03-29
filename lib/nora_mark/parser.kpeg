@@ -4,6 +4,7 @@
 }
 %% ast-location = ::NoraMark
 %% text = ast Text(content, line_no)
+%% code_inline = ast CodeInline(content, line_no)
 %% paragraph = ast Paragraph(ids, classes, params, named_params, raw_content, line_no)
 %% paragraph_group = ast ParagraphGroup(ids, classes, params,named_params,  raw_content, line_no)
 %% br = ast Breakline(line_no)
@@ -147,7 +148,7 @@ PreformattedBlock = PreformattedBlockComplex |
                     PreformattedBlockFence
 
 # inline command
-Inline = ImgInline | CommonInline
+Inline = EscapedChar | ImgInline | CommonInline | CodeInline
 CommonInline =  '[' Command:c
                   '{' - DocumentContentExcept('}'):content '}'
                 ']'
@@ -156,6 +157,11 @@ CommonInline =  '[' Command:c
 ImgCommand = Command:c &{ c[:name] == 'img' && c[:args].size == 2}
 ImgInline =  '[' ImgCommand:c  ']'
              ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])
+
+CodeInline =  '`' ln:ln CharStringExcept('`'):content '`' ~code_inline(content, ln)
+
+EscapedChar = "\\" < /[`]/ > ln:ln ~text(text, ln)
+
 
 # special line commands
 CommandNameForSpecialLineCommand = NewpageCommand | ExplicitParagraphCommand
@@ -278,7 +284,7 @@ Frontmatter = FrontmatterSeparator ln:ln
 Char = < /[[:print:]]/ > { text }
 CharString = < Char* > { text }
 CharExcept(e) = Char:c &{ e.is_a?(Regexp) ? e !~ c : e != c }
-CharStringExcept(e) = < CharExcept(e) > { text }
+CharStringExcept(e) = < CharExcept(e)+ > { text }
 DocumentTextExcept(e) = < (!Inline CharExcept(e))+ > ln:ln ~text(text, ln)
 DocumentContentExcept(e) = (Inline | DocumentTextExcept(e))+:content { content } 
 DocumentText = < (!Inline Char)+ > ln:ln ~text(text, ln)
