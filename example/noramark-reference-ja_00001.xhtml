@@ -254,7 +254,7 @@ puts 'Hello, World'
 </section>
 </section>
 <section><h3 id='heading_index_14'>インラインコマンド</h3>
-<div class='pgroup'><p>インラインコマンドは、次の形式をしています。</p>
+<div class='pgroup'><p>インラインコマンドは、原則として次の形式をしています。</p>
 </div>
 <pre>[&lt;コマンド&gt;{内容}]</pre>
 <div class='pgroup'><p>定義済みのインラインコマンドには、次のものがあります。</p>
@@ -263,28 +263,63 @@ puts 'Hello, World'
 <dd><div class='pgroup'><p>リンクを定義する。</p>
 </div>
 <pre>[l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>  &lt;a href='http://github.com/skoji/noramark'&gt;NoraMarkのレポジトリ&lt;/a&gt;</code>
+</pre>
+</div>
 </dd>
-<dt>s</dt>
+<dt>sp</dt>
 <dd><div class='pgroup'><p>spanを定義する。おもにクラスを設定するときに利用する。</p>
 </div>
-<pre>[s.note{spanの中にはいる}]</pre>
+<pre>[sp.note{spanの中にはいる}]</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>  &lt;span class='note&quot;&gt;spanの中に入る&lt;/span&gt;</code>
+</pre>
+</div>
 </dd>
 <dt>img</dt>
 <dd><div class='pgroup'><p>画像を定義する。このコマンドにはブレースのセクションがない。</p>
 </div>
 <pre>[img(img/some_image.jpg,alternate text)]</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>  &lt;img src='img/some_image.jpg' alt='alternate text' /&gt;</code>
+</pre>
+</div>
 </dd>
 <dt>tcy</dt>
 <dd><div class='pgroup'><p>class tcyのspanを定義する。縦書きにおける縦中横のスタイルをあてることを想定している。</p>
 </div>
 <pre>FM TOWNSが登場してからすでに[tcy{25}]年がたった。</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;FM TOWNSが登場してからすでに&lt;span class='tcy'&gt;25&lt;/span&gt;年がたった。&lt;/p&gt;</code>
+</pre>
+</div>
 </dd>
 <dt>ruby</dt>
 <dd><div class='pgroup'><p>ルビをマークアップする。</p>
 </div>
 <pre>[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;&lt;ruby&gt;蜻蛉&lt;rp&gt;(&lt;/rp&gt;&lt;rt&gt;とんぼ&lt;/rt&gt;&lt;rp&gt;)&lt;/rp&gt;&lt;/ruby&gt;の&lt;ruby&gt;眼鏡&lt;rp&gt;(&lt;/rp&gt;&lt;rt&gt;めがね&lt;/rt&gt;&lt;rp&gt;)&lt;/rp&gt;&lt;/ruby&gt;はみずいろめがね&lt;/p&gt;</code>
+</pre>
+</div>
+</dd>
+<dt>code</dt>
+<dd><div class='pgroup'><p>インラインでコードをマークアップする。中はMarkupとして解釈しない。</p>
+</div>
+<pre>  `puts &quot;Hello, World.&quot;` and  [code{puts &quot;Hello, World.&quot;}]</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;&lt;code&gt;puts &quot;Hello, World.&lt;/code&gt; and &lt;code&gt;puts &quot;Hello, World.&lt;/code&gt; &lt;/p&gt;</code>
+</pre>
+</div>
 </dd>
 </dl>
+<div class='pgroup'><p>ただし<code>[code{}]</code>の形式ではたとえば</p>
+</div>
+<pre><code>[code{ [ruby(とんぼ){蜻蛉}] }]</code>
+</pre>
+<div class='pgroup'><p>と書くと、蜻蛉の後ろにある<code>}]</code>でcodeコマンドは終了してしまうため、通常のインラインコマンドを書くことはできない。</p>
+</div>
 </section>
 <section><h3 id='heading_index_15'>行コマンド</h3>
 <div class='pgroup'><p>行コマンドは1行を占有し、次の形式をしています。</p>

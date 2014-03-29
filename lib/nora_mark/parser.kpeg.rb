@@ -35,10 +35,18 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :line_no
     end
     class CodeInline < Node
-      def initialize(content, line_no)
+      def initialize(ids, classes, params, named_params, content, line_no)
+        @ids = ids
+        @classes = classes
+        @params = params
+        @named_params = named_params
         @content = content
         @line_no = line_no
       end
+      attr_reader :ids
+      attr_reader :classes
+      attr_reader :params
+      attr_reader :named_params
       attr_reader :content
       attr_reader :line_no
     end
@@ -274,8 +282,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     def br(line_no)
       ::NoraMark::Breakline.new(line_no)
     end
-    def code_inline(content, line_no)
-      ::NoraMark::CodeInline.new(content, line_no)
+    def code_inline(ids, classes, params, named_params, content, line_no)
+      ::NoraMark::CodeInline.new(ids, classes, params, named_params, content, line_no)
     end
     def definition_list(ids, classes, params, named_params, raw_content, line_no)
       ::NoraMark::DefinitionList.new(ids, classes, params, named_params, raw_content, line_no)
@@ -2570,7 +2578,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Inline = (EscapedChar | ImgInline | CommonInline | CodeInline)
+  # Inline = (EscapedChar | ImgInline | CodeInline | CommonInline | FenceInline)
   def _Inline
 
     _save = self.pos
@@ -2581,10 +2589,13 @@ class NoraMark::Parser < KPeg::CompiledParser
       _tmp = apply(:_ImgInline)
       break if _tmp
       self.pos = _save
+      _tmp = apply(:_CodeInline)
+      break if _tmp
+      self.pos = _save
       _tmp = apply(:_CommonInline)
       break if _tmp
       self.pos = _save
-      _tmp = apply(:_CodeInline)
+      _tmp = apply(:_FenceInline)
       break if _tmp
       self.pos = _save
       break
@@ -2705,8 +2716,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # CodeInline = "`" ln:ln CharStringExcept('`'):content "`" {code_inline(content, ln)}
-  def _CodeInline
+  # FenceInline = "`" ln:ln CharStringExcept('`'):content "`" {code_inline([], [], [], {}, content, ln)}
+  def _FenceInline
 
     _save = self.pos
     while true # sequence
@@ -2732,7 +2743,85 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; code_inline(content, ln); end
+      @result = begin; code_inline([], [], [], {}, content, ln); end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_FenceInline unless _tmp
+    return _tmp
+  end
+
+  # CodeCommand = Command:c &{ c[:name] == 'code' }
+  def _CodeCommand
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_Command)
+      c = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  c[:name] == 'code' ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_CodeCommand unless _tmp
+    return _tmp
+  end
+
+  # CodeInline = "[" CodeCommand:c "{" - CharStringExcept('}'):content "}" "]" {code_inline(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln])}
+  def _CodeInline
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("[")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_CodeCommand)
+      c = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("{")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply_with_args(:_CharStringExcept, '}')
+      content = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("}")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("]")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; code_inline(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -4775,11 +4864,13 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "- PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])}")
   Rules[:_PreformattedBlockFence] = rule_info("PreformattedBlockFence", "- ln:ln PreformattedFence:c (!\"```\" CharString Nl)+:content - \"```\" - Le EmptyLine* {preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln)}")
   Rules[:_PreformattedBlock] = rule_info("PreformattedBlock", "(PreformattedBlockComplex | PreformattedBlockSimple | PreformattedBlockFence)")
-  Rules[:_Inline] = rule_info("Inline", "(EscapedChar | ImgInline | CommonInline | CodeInline)")
+  Rules[:_Inline] = rule_info("Inline", "(EscapedChar | ImgInline | CodeInline | CommonInline | FenceInline)")
   Rules[:_CommonInline] = rule_info("CommonInline", "\"[\" Command:c \"{\" - DocumentContentExcept('}'):content \"}\" \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_ImgCommand] = rule_info("ImgCommand", "Command:c &{ c[:name] == 'img' && c[:args].size == 2}")
   Rules[:_ImgInline] = rule_info("ImgInline", "\"[\" ImgCommand:c \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])}")
-  Rules[:_CodeInline] = rule_info("CodeInline", "\"`\" ln:ln CharStringExcept('`'):content \"`\" {code_inline(content, ln)}")
+  Rules[:_FenceInline] = rule_info("FenceInline", "\"`\" ln:ln CharStringExcept('`'):content \"`\" {code_inline([], [], [], {}, content, ln)}")
+  Rules[:_CodeCommand] = rule_info("CodeCommand", "Command:c &{ c[:name] == 'code' }")
+  Rules[:_CodeInline] = rule_info("CodeInline", "\"[\" CodeCommand:c \"{\" - CharStringExcept('}'):content \"}\" \"]\" {code_inline(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln])}")
   Rules[:_EscapedChar] = rule_info("EscapedChar", "\"\\\\\" < /[`]/ > ln:ln {text(text, ln)}")
   Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")

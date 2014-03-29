@@ -271,43 +271,91 @@ puts 'Hello, World'
 
 ### インラインコマンド
 
-インラインコマンドは、次の形式をしています。
+インラインコマンドは、原則として次の形式をしています。
 pre{//
 [<コマンド>{内容}]
 //}
 
 定義済みのインラインコマンドには、次のものがあります。
 
+
 ;:l {
   リンクを定義する。
   pre {//
 [l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]
   //}
-}
-;:s {
-  spanを定義する。おもにクラスを設定するときに利用する。
-  pre {//
-[s.note{spanの中にはいる}]
+
+  code(変換結果) {//html
+  <a href='http://github.com/skoji/noramark'>NoraMarkのレポジトリ</a>
   //}
 }
+
+;:sp {
+  spanを定義する。おもにクラスを設定するときに利用する。
+  pre {//
+[sp.note{spanの中にはいる}]
+  //}
+
+  code(変換結果) {//html
+  <span class='note">spanの中に入る</span>
+  //}
+}
+
 ;:img {
   画像を定義する。このコマンドにはブレースのセクションがない。
   pre {//
 [img(img/some_image.jpg,alternate text)]
   //}
+
+  code(変換結果) {//html
+  <img src='img/some_image.jpg' alt='alternate text' />
+  //}
+
 }
 ;:tcy {
   class tcyのspanを定義する。縦書きにおける縦中横のスタイルをあてることを想定している。
   pre {//
 FM TOWNSが登場してからすでに[tcy{25}]年がたった。
   //}
+
+  code(変換結果) {//html
+<p>FM TOWNSが登場してからすでに<span class='tcy'>25</span>年がたった。</p>
+  //}
+
+
 }
+
 ;:ruby {
   ルビをマークアップする。
   pre {//
 [ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね
   //}
+
+  code(変換結果) {//html
+<p><ruby>蜻蛉<rp>(</rp><rt>とんぼ</rt><rp>)</rp></ruby>の<ruby>眼鏡<rp>(</rp><rt>めがね</rt><rp>)</rp></ruby>はみずいろめがね</p>
+  //}
+
 }
+
+;:code {
+インラインでコードをマークアップする。中はMarkupとして解釈しない。
+
+pre {//
+  `puts "Hello, World."` and  [code{puts "Hello, World."}]
+//}
+
+  code(変換結果) {//html
+<p><code>puts "Hello, World.</code> and <code>puts "Hello, World.</code> </p>
+  //}
+}
+
+ただし`[code{}]`の形式ではたとえば
+
+code {
+[code{ [ruby(とんぼ){蜻蛉}] }]
+}
+
+と書くと、蜻蛉の後ろにある`}]`でcodeコマンドは終了してしまうため、通常のインラインコマンドを書くことはできない。
 
 ### 行コマンド
 
