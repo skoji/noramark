@@ -444,6 +444,18 @@ Group 6 matches the named parameter.")
                    (t nil))))
           (t nil))))
       
+;;; Keymap
+
+(defvar noramark-mode-map
+  (let ((map (make-keymap)))
+    ;; header navigation
+    (define-key map (kbd "C-c C-n") 'outline-next-visible-heading)
+    (define-key map (kbd "C-c C-p") 'outline-previous-visible-heading)
+    (define-key map (kbd "C-c C-f") 'outline-forward-same-level)
+    (define-key map (kbd "C-c C-b") 'outline-backward-same-level)
+    (define-key map (kbd "C-c C-u") 'outline-up-heading)
+    map)
+  "Keymap for NoraMark major mode.")
 
 ;;; Syntax Table ==============================================================
 
@@ -482,5 +494,4 @@ Group 6 matches the named parameter.")
 (provide 'noramark-mode)
 
 ;;; noramark-mode.el ends here
-
 
