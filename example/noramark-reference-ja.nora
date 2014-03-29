@@ -11,11 +11,10 @@ title: NoraMark Manual
 NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。
 
 * Markdownと同じように、プレーンテキストの原稿を邪魔しない最小限の記法です。
-* しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを「壊して」しまうことを避けるためのデザインです。
-* ブロック・ライン・インラインごとの基本記法を原則として固定しています。
-* 生のHTML記法なしで、多くのタグを記述できます。
+* しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを壊してしまうことを避けるためのデザインです。
 * マークアップに独自コマンドの追加ができる柔軟なカスタマイズ機能を用意しています。
 * パースした文書構造に対する後処理を追加できます。
+* 生のHTML記法なしで、多くのタグを記述できます。
 * パース結果をXMLとして取得できます。
 
 ## 必要なもの
@@ -24,6 +23,7 @@ NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップ
 
 ## インストール方法
 
+### Gemfile
 Gemfileに次のように書きます
 
 code {
@@ -35,7 +35,7 @@ code {
 $ bundle
 }
 
-または
+### 直接インストール
 
 code {
 gem install nora_mark
@@ -55,7 +55,7 @@ code {
 $ nora2html --kconv < source.nora > output.xhtml
 }
 
-[strong{nora2htmlは、newpageコマンドを<hr />タグに置き換え、すべてのページをひとつのxhtmlとして出力します}]
+[strong{nora2htmlは、newpageコマンドを`<hr />`タグに置き換え、すべてのページをひとつのxhtmlとして出力します}]
 
 ### コードから
 code {//ruby
@@ -67,7 +67,7 @@ document.html.write_as_files
 
 ### Emacs Lisp noramark-mode
 
-Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能のみ提供しています。
+Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能と、outline-minor-modeのサポートを提供しています。
 
 1. normark-mode.elをEmacsのload-pathが通った場所に配置してください。
 2. あなたの`~/.emacs.d/init.el`に次の記述をしてください。
@@ -370,7 +370,11 @@ code {
 [code{ [ruby(とんぼ){蜻蛉}] }]
 }
 
-と書くと、蜻蛉の後ろにある`}]`でcodeコマンドは終了してしまうため、通常のインラインコマンドを書くことはできない。
+と書くと、蜻蛉の後ろにある`}]`でcodeコマンドは終了してしまうため、次のような変換結果となります。
+
+code {//html
+<p><code>[ruby(とんぼ){蜻蛉</code>}]</p>
+//}
 
 ### 行コマンド
 

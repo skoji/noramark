@@ -341,7 +341,7 @@ Result.
 
 ## noramark-mode.el
 
-Experimental implementation of noramark major mode is available here. It only provides font-lock for NoraMark syntax and support for outline-minor-mode for the present. 
+Experimental implementation of noramark major mode is available here. It provides font-lock for NoraMark syntax and supports outline-minor-mode for the present.
 
 https://github.com/skoji/noramark/blob/master/emacs-mode/noramark-mode.el
 
