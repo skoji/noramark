@@ -94,10 +94,10 @@ module NoraMark
           new_node.classes =  (@node.classes ||[]) << "code-#{@node.codelanguage}"
         end
         if @node.name == 'code'
-          code = block('code', text(@node.content.join("\n")))
+          code = block('code', text(@node.content.join("\n"), raw_text: true))
           new_node.children = [ code ]
         else
-          new_node.children = [ text(@node.content.join("\n")) ]
+          new_node.children = [ text(@node.content.join("\n"), raw_text: true) ]
         end
         if (@node.p || []).size> 0
           method = @node.n[:caption_after] ? :prepend : :append

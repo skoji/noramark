@@ -41,8 +41,10 @@ module NoraMark
       _node(Inline, *args)
     end
 
-    def text value
-      Text.new(value, 0)
+    def text value, raw_text: nil
+      text = Text.new(value, 0)
+      text.raw_text = raw_text
+      text
     end
 
   end
