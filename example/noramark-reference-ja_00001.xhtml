@@ -12,11 +12,10 @@
 <div class='pgroup'><p>NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。</p>
 </div>
 <ul><li>Markdownと同じように、プレーンテキストの原稿を邪魔しない最小限の記法です。</li>
-<li>しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを「壊して」しまうことを避けるためのデザインです。</li>
-<li>ブロック・ライン・インラインごとの基本記法を原則として固定。ただし、使用頻度の高いものは短く記述できるようにしているものもあります。</li>
-<li>生のHTML記法なしで、多くのタグを記述できます。</li>
-<li>マークアップに独自コマンドの追加ができる、柔軟なカスタマイズを用意しています。</li>
+<li>しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを壊してしまうことを避けるためのデザインです。</li>
+<li>マークアップに独自コマンドの追加ができる柔軟なカスタマイズ機能を用意しています。</li>
 <li>パースした文書構造に対する後処理を追加できます。</li>
+<li>生のHTML記法なしで、多くのタグを記述できます。</li>
 <li>パース結果をXMLとして取得できます。</li>
 </ul>
 <section><h2 id='heading_index_2'>必要なもの</h2>
@@ -24,6 +23,7 @@
 </ul>
 </section>
 <section><h2 id='heading_index_3'>インストール方法</h2>
+<section><h3 id='heading_index_4'>Gemfile</h3>
 <div class='pgroup'><p>Gemfileに次のように書きます</p>
 </div>
 <pre><code>gem 'nora_mark' </code>
@@ -32,34 +32,35 @@
 </div>
 <pre><code>$ bundle</code>
 </pre>
-<div class='pgroup'><p>または</p>
-</div>
+</section>
+<section><h3 id='heading_index_5'>直接インストール</h3>
 <pre><code>gem install nora_mark</code>
 </pre>
 </section>
-<section><h2 id='heading_index_4'>使い方</h2>
-<section><h3 id='heading_index_5'>コマンドラインから</h3>
+</section>
+<section><h2 id='heading_index_6'>使い方</h2>
+<section><h3 id='heading_index_7'>コマンドラインから</h3>
 <pre><code>$ nora2html &lt; source.nora &gt; output.xhtml</code>
 </pre>
 <div class='pgroup'><p>入力はutf-8のみ受け付けます。日本語のテキストであれば、kconvオプションでうまくうごくかもしれません。</p>
 </div>
 <pre><code>$ nora2html --kconv &lt; source.nora &gt; output.xhtml</code>
 </pre>
-<div class='pgroup'><p><strong>nora2htmlは、newpageコマンドを&lt;hr /&gt;タグに置き換え、すべてのページをひとつのxhtmlとして出力します</strong></p>
+<div class='pgroup'><p><strong>nora2htmlは、newpageコマンドを<code>&lt;hr /&gt;</code>タグに置き換え、すべてのページをひとつのxhtmlとして出力します</strong></p>
 </div>
 </section>
-<section><h3 id='heading_index_6'>コードから</h3>
+<section><h3 id='heading_index_8'>コードから</h3>
 <pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
 
 document = NoraMark::Document.parse(string_or_io, lang: 'ja')
 document.html.write_as_files</code>
 </pre>
 </section>
-<section><h3 id='heading_index_7'>Emacs Lisp noramark-mode</h3>
-<div class='pgroup'><p>Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能のみ提供しています。</p>
+<section><h3 id='heading_index_9'>Emacs Lisp noramark-mode</h3>
+<div class='pgroup'><p>Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能と、outline-minor-modeのサポートを提供しています。</p>
 </div>
 <ol><li>normark-mode.elをEmacsのload-pathが通った場所に配置してください。</li>
-<li>あなたの<code>~/.emacs.d/init.el</code>に次の記述をしてください。</li>
+<li><code>~/.emacs.d/init.el</code>に次の記述をしてください。</li>
 </ol>
 <pre class='code-emacs-lisp' data-code-language='emacs-lisp'><code>(require 'noramark-mode)
 (setq auto-mode-alist (cons '(&quot;\\.nora$&quot; . noramark-mode) auto-mode-alist))
@@ -67,23 +68,8 @@ document.html.write_as_files</code>
 </pre>
 </section>
 </section>
-<section><h2 id='heading_index_8'>NoraMarkの基本的な構造</h2>
-<div class='pgroup'><p>NoraMarkは、3つの主要なコンポーネントで構成されています。</p>
-</div>
-<ol><li>パーサ</li>
-<li>ジェネレータ</li>
-<li>トランスフォーマ</li>
-</ol>
-<div class='pgroup'><p>パーサはNoraMark原稿をパースして、原稿のマークアップ構造にほぼ一対一で対応する抽象構文木を生成します。</p>
-</div>
-<div class='pgroup'><p>ジェネレータは、抽象構文木を最終的な出力形式に変換します。現状では、XHTMLを生成するジェネレーターのみ用意しています。</p>
-</div>
-<div class='pgroup'><p>トランスフォーマは、抽象構文木を操作し変形します。標準のXHTMLジェネレーターは、HTMLの抽象度にあわせて構文木を変形するトランスフォーマを含んでいます。トランスフォーマの入力と出力は同じ型の抽象構文木なので、複数のトランスフォーマを連続で使用することができます。</p>
-<p>NoraMarkでの「マークアップのカスタマイズ」は、主にユーザが用意したトランスフォーマによって実現することを想定しています。</p>
-</div>
-</section>
-<section><h2 id='heading_index_9'>マークアップ</h2>
-<section><h3 id='heading_index_10'>通常のテキスト</h3>
+<section><h2 id='heading_index_10'>マークアップ</h2>
+<section><h3 id='heading_index_11'>通常のテキスト</h3>
 <div class='pgroup'><p>単なるテキストもHTMLに変換されます。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -121,7 +107,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </pre>
 </div>
 </section>
-<section><h3 id='heading_index_11'>明示的なブロック</h3>
+<section><h3 id='heading_index_12'>明示的なブロック</h3>
 <div class='pgroup'><p>NoraMarkでは、<code>&lt;コマンド&gt; {</code> ではじまり、<code>}</code> のみの行で終わる範囲を明示的なブロックとみなします。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -136,6 +122,24 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;/div&gt;
 &lt;/div&gt;</code>
 </pre>
+</div>
+<div class='pgroup'><p>このように、コマンドにはclassを指定することができます。</p>
+<p>同じように、idの指定も可能です。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre>d#the_column.column {
+この部分は、divで囲まれます。
+}</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;div id=&quot;the_column&quot; class=&quot;column&quot;&gt;
+&lt;div class=&quot;pgroup&quot;&gt;
+&lt;p&gt;この部分は、divで囲まれます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code>
+</pre>
+</div>
+<div class='pgroup'><p>クラス・IDの指定は、多くのコマンドで同じように利用できます。</p>
 </div>
 <div class='pgroup'><p>定義済みの明示的ブロックのコマンドは、次のものがあります。</p>
 </div>
@@ -165,7 +169,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 &lt;/blockquote&gt;</code>
 </pre>
 </div>
-<section><h4 id='heading_index_12'>Preformat block</h4>
+<section><h4 id='heading_index_13'>Preformat block</h4>
 <div class='pgroup'><p>整形済みブロックは、次のように指定します。</p>
 </div>
 <div class='pre'><p class='caption'>形式1</p>
@@ -180,46 +184,42 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 //}</code>
 </pre>
 </div>
-<div class='pre'><p class='caption'>形式3</p>
-<pre><code>```
-  format 3: 整形済みの内容
-```</code>
-</pre>
-</div>
-<div class='pgroup'><p>形式1と2は、<code>&lt;pre&gt;</code>タグに変換されます。形式3は、<code>&lt;pre&gt;&lt;code&gt;</code>に変換されます。</p>
-<p>整形済みの内容は、NoraMarkのテキストとしては解釈されません。</p>
-</div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;pre&gt;
 format 1 : 整形済みの内容
 &lt;/pre&gt;
 &lt;pre&gt;
 format 2 : 整形済みの内容
-&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;
-format 3 : 整形済みの内容
-&lt;/code&gt;&lt;/pre&gt;</code>
+&lt;/pre&gt;</code>
 </pre>
 </div>
 <div class='pgroup'><p>また、次のように書くことで整形済みコードを作ることもできます。</p>
 </div>
+<div class='pre'><p class='caption'>形式1</p>
 <pre><code>code {
 整形済みコード
-}
-code {//
+}</code>
+</pre>
+</div>
+<div class='pre'><p class='caption'>形式2</p>
+<pre><code>code {//
 整形済みコード
 //}</code>
 </pre>
+</div>
+<div class='pre'><p class='caption'>形式3</p>
+<pre><code>```
+  整形済みコード
+```</code>
+</pre>
+</div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;pre&gt;&lt;/code&gt;
-整形済みコード
-&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;
 整形済みコード
 &lt;/code&gt;&lt;/pre&gt;</code>
 </pre>
 </div>
-<section><h5 id='heading_index_13'>code languageの指定</h5>
+<section><h5 id='heading_index_14'>code languageの指定</h5>
 <div class='pgroup'><p>code languageの指定をすることができます。</p>
 </div>
 <div class='pre'><p class='caption'>形式1</p>
@@ -241,7 +241,7 @@ puts &quot;Hello, World.&quot;
 </pre>
 </div>
 </section>
-<section><h5 id='heading_index_14'>キャプションの指定</h5>
+<section><h5 id='heading_index_15'>キャプションの指定</h5>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>code(ソースコードはこちら) {
 puts 'Hello, World'
@@ -268,41 +268,41 @@ puts 'Hello, World'
 </section>
 </section>
 </section>
-<section><h3 id='heading_index_15'>インラインコマンド</h3>
+<section><h3 id='heading_index_16'>インラインコマンド</h3>
 <div class='pgroup'><p>インラインコマンドは、原則として次の形式をしています。</p>
 </div>
 <pre>[&lt;コマンド&gt;{内容}]</pre>
 <div class='pgroup'><p>定義済みのインラインコマンドには、次のものがあります。</p>
 </div>
 <dl><dt>l</dt>
-<dd><div class='pgroup'><p>リンクを定義する。</p>
+<dd><div class='pgroup'><p>リンクを定義します。</p>
 </div>
 <pre>[l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>  &lt;a href='http://github.com/skoji/noramark'&gt;NoraMarkのレポジトリ&lt;/a&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;a href='http://github.com/skoji/noramark'&gt;NoraMarkのレポジトリ&lt;/a&gt;</code>
 </pre>
 </div>
 </dd>
 <dt>sp</dt>
-<dd><div class='pgroup'><p>spanを定義する。おもにクラスを設定するときに利用する。</p>
+<dd><div class='pgroup'><p>spanを定義します。</p>
 </div>
 <pre>[sp.note{spanの中にはいる}]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>  &lt;span class='note&quot;&gt;spanの中に入る&lt;/span&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;span class='note&quot;&gt;spanの中に入る&lt;/span&gt;</code>
 </pre>
 </div>
 </dd>
 <dt>img</dt>
-<dd><div class='pgroup'><p>画像を定義する。このコマンドにはブレースのセクションがない。</p>
+<dd><div class='pgroup'><p>画像を定義します。このコマンドにはブレースのセクションがありません。</p>
 </div>
 <pre>[img(img/some_image.jpg,alternate text)]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>  &lt;img src='img/some_image.jpg' alt='alternate text' /&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;img src='img/some_image.jpg' alt='alternate text' /&gt;</code>
 </pre>
 </div>
 </dd>
 <dt>tcy</dt>
-<dd><div class='pgroup'><p>class tcyのspanを定義する。縦書きにおける縦中横のスタイルをあてることを想定している。</p>
+<dd><div class='pgroup'><p>class tcyのspanを定義します。縦書きにおける縦中横のスタイルをあてることを想定しています。</p>
 </div>
 <pre>FM TOWNSが登場してからすでに[tcy{25}]年がたった。</pre>
 <div class='pre'><p class='caption'>変換結果</p>
@@ -311,7 +311,7 @@ puts 'Hello, World'
 </div>
 </dd>
 <dt>ruby</dt>
-<dd><div class='pgroup'><p>ルビをマークアップする。</p>
+<dd><div class='pgroup'><p>ルビをマークアップします。</p>
 </div>
 <pre>[ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね</pre>
 <div class='pre'><p class='caption'>変換結果</p>
@@ -320,9 +320,9 @@ puts 'Hello, World'
 </div>
 </dd>
 <dt>code</dt>
-<dd><div class='pgroup'><p>インラインでコードをマークアップする。中はMarkupとして解釈しない。</p>
+<dd><div class='pgroup'><p>インラインでコードをマークアップします。中はMarkupとして解釈しません。</p>
 </div>
-<pre>  `puts &quot;Hello, World.&quot;` and  [code{puts &quot;Hello, World.&quot;}]</pre>
+<pre>`puts &quot;Hello, World.&quot;` and  [code{puts &quot;Hello, World.&quot;}]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;p&gt;&lt;code&gt;puts &quot;Hello, World.&lt;/code&gt; and &lt;code&gt;puts &quot;Hello, World.&lt;/code&gt; &lt;/p&gt;</code>
 </pre>
@@ -333,34 +333,46 @@ puts 'Hello, World'
 </div>
 <pre><code>[code{ [ruby(とんぼ){蜻蛉}] }]</code>
 </pre>
-<div class='pgroup'><p>と書くと、蜻蛉の後ろにある<code>}]</code>でcodeコマンドは終了してしまうため、通常のインラインコマンドを書くことはできない。</p>
+<div class='pgroup'><p>と書くと、蜻蛉の後ろにある<code>}]</code>でcodeコマンドは終了してしまうため、次のような変換結果となります。</p>
 </div>
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;&lt;code&gt;[ruby(とんぼ){蜻蛉&lt;/code&gt;}]&lt;/p&gt;</code>
+</pre>
 </section>
-<section><h3 id='heading_index_16'>行コマンド</h3>
+<section><h3 id='heading_index_17'>行コマンド</h3>
 <div class='pgroup'><p>行コマンドは1行を占有し、次の形式をしています。</p>
 </div>
 <pre>&lt;コマンド&gt;:内容</pre>
 <div class='pgroup'><p>定義済みの行コマンドには、次のものがあります。</p>
 </div>
-<dl><dt>p</dt>
-<dd><div class='pgroup'><p>パラグラフをマークアップする。主に、クラスやIDを付加する目的で使う。</p>
+<div class='pgroup'><p>;: p {</p>
+<p>パラグラフをマークアップします。クラスやIDを付加する目的で使うことを想定しています。</p>
 </div>
 <pre>p.caution: 用量に注意してご利用ください。</pre>
-</dd>
-<dt>image</dt>
-<dd><div class='pgroup'><p>divでラップされたimgをマークアップする。</p>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;p class='caution'&gt;用量に注意してご利用ください。&lt;/p&gt;</code>
+</pre>
 </div>
-<pre>image(./path-to-image/img.jpg, 代替テキスト): イメージのキャプション</pre>
+<dl><dt>image</dt>
+<dd><div class='pgroup'><p>figureでラップされたimgをマークアップします。</p>
+</div>
+<pre>image(path-to-image/img.jpg, 代替テキスト): イメージのキャプション</pre>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;figure class='img-wrap'&gt;
+&lt;img src='path-to-image/img.jpg' alt='代替テキスト' /&gt;
+&lt;figcaption&gt;イメージのキャプション&lt;/figcaption&gt;
+&lt;/figure&gt;</code>
+</pre>
+</div>
 </dd>
 <dt>newpage</dt>
-<dd><div class='pgroup'><p>新規ページを作成する。通常は、あらたなXHTMLファイルが生成される。</p>
+<dd><div class='pgroup'><p>新規ページを作成します。ここでXHTMLファイルが区切られ、新たなXHTMLが生成されます。</p>
 </div>
 <pre>newpage:</pre>
 </dd>
 </dl>
 </section>
-<section><h3 id='heading_index_17'>リスト</h3>
-<section><h4 id='heading_index_18'>箇条書き</h4>
+<section><h3 id='heading_index_18'>リスト</h3>
+<section><h4 id='heading_index_19'>箇条書き</h4>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>* *ではじまる行は、箇条書きになる。  
 * 空行があくまで、箇条書きがつづく。
@@ -376,7 +388,7 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_19'>番号つきリスト</h4>
+<section><h4 id='heading_index_20'>番号つきリスト</h4>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>1. 数字.ではじまる行は、番号つきリストになる。
 2. 空行があくまで、リストがつづく。
@@ -394,10 +406,10 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_20'>定義リスト</h4>
+<section><h4 id='heading_index_21'>定義リスト</h4>
 <div class='pgroup'><p>定義リストには、二種類の書き方があります。</p>
 </div>
-<section><h5 id='heading_index_21'>1行の定義</h5>
+<section><h5 id='heading_index_22'>1行の定義</h5>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>;: それがし : 名前がわからない，または名前を隠して人や物事をさす語。
 ;: それがしかれがし : 不定称。二人以上の人に対し，名を知らなかったり，名を省略していうときに用いる語。</pre>
@@ -412,7 +424,7 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h5 id='heading_index_22'>複数行の定義</h5>
+<section><h5 id='heading_index_23'>複数行の定義</h5>
 <div class='pgroup'><p>説明が長い場合は、複数行の形式で書けます。この場合、説明部分は段落になります。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -435,8 +447,8 @@ puts 'Hello, World'
 </section>
 </section>
 </section>
-<section><h3 id='heading_index_23'>見出し</h3>
-<section><h4 id='heading_index_24'>単独の見出し</h4>
+<section><h3 id='heading_index_24'>見出し</h3>
+<section><h4 id='heading_index_25'>単独の見出し</h4>
 <div class='pgroup'><p>h1からh6が用意されています。そのまま、&lt;h1&gt; タグに変換されます。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -451,7 +463,7 @@ puts 'Hello, World'
 </pre>
 </div>
 </section>
-<section><h4 id='heading_index_25'>セクションを生成する見出し</h4>
+<section><h4 id='heading_index_26'>セクションを生成する見出し</h4>
 <div class='pgroup'><p>Markdown風の # をつかった見出しも使えます。この見出しは、sectionを生成します。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
@@ -500,18 +512,41 @@ puts 'Hello, World'
 </div>
 </section>
 </section>
-<section><h3 id='heading_index_26'>Frontmatter</h3>
+<section><h3 id='heading_index_27'>Frontmatter</h3>
 <div class='pgroup'><p>各ページごとにYAML frontmatterでメタデータを記載できます。</p>
 </div>
 </section>
 </section>
-<section><h2 id='heading_index_27'>カスタマイズ</h2>
-<section><h3 id='heading_index_28'>生成ルール追加</h3>
+<section><h2 id='heading_index_28'>カスタマイズ</h2>
+<section><h3 id='heading_index_29'>生成ルール追加</h3>
 </section>
-<section><h3 id='heading_index_29'>木構造の操作</h3>
+<section><h3 id='heading_index_30'>木構造の操作</h3>
+</section>
+<section><h3 id='heading_index_31'>コマンドの書式</h3>
+<div class='pgroup'><p><span class='note'>(加筆修正予定)</span></p>
+</div>
+<div class='pre'><p class='caption'>コマンド</p>
+<pre>コマンド名[id][class][パラメータ][名前付きパラメータ]</pre>
+</div>
+<div class='pgroup'><p>具体的には、たとえば次のような形をしています。</p>
+</div>
+<div class='pre'><p class='caption'>具体例</p>
+<pre>div#id1#id2.class1.class2(parameter1, parameter2)[named_parameter: 1, named_parameter 2]</pre>
+</div>
+<div class='pgroup'><p>コマンド名は英字ではじまり、英数字とハイフン、アンダースコアからなります。</p>
+<p>idは、#からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。</p>
+<p>classは、.からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。</p>
+</div>
+<div class='pgroup'><p>パラメータは<code>()</code>で囲まれています。カンマで区切られた領域ごとに、独立したパラメータになります。</p>
+<p>パラメータの内容は、NoraMarkのマークアップとしてパースされます。</p>
+</div>
+<div class='pgroup'><p>名前付きパラメータは<code>[]</code>で囲まれていて、カンマで区切られた次の形式をしています。</p>
+<p>名前: パラメータ</p>
+<p>名前は英字ではじまり、英数字とハイフン、アンダースコアからなります。名前付きパラメータの内容は、NoraMarkのマークアップとしてはパースされません。</p>
+</div>
 </section>
 </section>
-<section><h2 id='heading_index_30'>XML生成</h2>
+<section><h2 id='heading_index_32'>XML生成</h2>
 </section>
 </section>
 </body>

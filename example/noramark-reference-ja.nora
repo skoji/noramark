@@ -70,28 +70,13 @@ document.html.write_as_files
 Emacs用のメジャーモードを提供するnoramark-mode.elを用意しています。現在のところ、font-lockによるsyntax highlight機能と、outline-minor-modeのサポートを提供しています。
 
 1. normark-mode.elをEmacsのload-pathが通った場所に配置してください。
-2. あなたの`~/.emacs.d/init.el`に次の記述をしてください。
+2. `~/.emacs.d/init.el`に次の記述をしてください。
 
 ```emacs-lisp
 (require 'noramark-mode)
 (setq auto-mode-alist (cons '("\\.nora$" . noramark-mode) auto-mode-alist))
 (setq auto-mode-alist (cons '("-nora\\.txt$" . noramark-mode) auto-mode-alist))
 ```
-
-## NoraMarkの基本的な構造
-
-NoraMarkは、3つの主要なコンポーネントで構成されています。
-
-1. パーサ
-2. ジェネレータ
-3. トランスフォーマ
-
-パーサはNoraMark原稿をパースして、原稿のマークアップ構造にほぼ一対一で対応する抽象構文木を生成します。
-
-ジェネレータは抽象構文木を最終的な出力形式に変換します。現状では、XHTMLを生成するジェネレーターのみ用意しています。XMLジェネレータも用意する予定です。
-
-トランスフォーマは、抽象構文木を操作し変形します。標準のXHTMLジェネレーターは、HTMLの抽象度にあわせて構文木を変形するトランスフォーマを含んでいます。トランスフォーマの入力と出力は同じ型の抽象構文木なので、複数のトランスフォーマを連続で使用することができます。
-NoraMarkでの「マークアップのカスタマイズ」は、主にユーザが用意したトランスフォーマによって実現することを想定しています。
 
 ## マークアップ
 
@@ -135,6 +120,8 @@ code(変換結果) {//html
 <p>Ut enim ad minim veniam, quis nostrud exercitation</p>
 //}
 
+
+
 ### 明示的なブロック
 
 NoraMarkでは、`<コマンド> {` ではじまり、`}` のみの行で終わる範囲を明示的なブロックとみなします。
@@ -152,6 +139,25 @@ code(変換結果) {//html
 </div>
 </div>
 //}
+
+このように、コマンドにはclassを指定することができます。
+同じように、idの指定も可能です。
+
+pre(原稿) {//
+d#the_column.column {
+この部分は、divで囲まれます。
+}
+//}
+
+code(変換結果) {//html
+<div id="the_column" class="column">
+<div class="pgroup">
+<p>この部分は、divで囲まれます。</p>
+</div>
+</div>
+//}
+
+クラス・IDの指定は、多くのコマンドで同じように利用できます。
 
 定義済みの明示的ブロックのコマンドは、次のものがあります。
 
@@ -195,15 +201,6 @@ pre {//
 //}
 }
 
-code(形式3) {
-```
-  format 3: 整形済みの内容
-```
-}
-
-形式1と2は、`<pre>`タグに変換されます。形式3は、`<pre><code>`に変換されます。
-整形済みの内容は、NoraMarkのテキストとしては解釈されません。
-
 code(変換結果) {//html
 <pre>
 format 1 : 整形済みの内容
@@ -211,27 +208,30 @@ format 1 : 整形済みの内容
 <pre>
 format 2 : 整形済みの内容
 </pre>
-<pre><code>
-format 3 : 整形済みの内容
-</code></pre>
 //}
 
 また、次のように書くことで整形済みコードを作ることもできます。
 
-```
+```(形式1)
 code {
 整形済みコード
 }
+```
+
+```(形式2)
 code {//
 整形済みコード
 //}
 ```
 
+code(形式3) {
+```
+  整形済みコード
+```
+}
+
 code(変換結果) {//html
 <pre></code>
-整形済みコード
-</code></pre>
-<pre><code>
 整形済みコード
 </code></pre>
 //}
@@ -295,40 +295,40 @@ pre{//
 
 
 ;:l {
-  リンクを定義する。
+  リンクを定義します。
   pre {//
 [l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]
   //}
 
   code(変換結果) {//html
-  <a href='http://github.com/skoji/noramark'>NoraMarkのレポジトリ</a>
+<a href='http://github.com/skoji/noramark'>NoraMarkのレポジトリ</a>
   //}
 }
 
 ;:sp {
-  spanを定義する。おもにクラスを設定するときに利用する。
+  spanを定義します。
   pre {//
 [sp.note{spanの中にはいる}]
   //}
 
   code(変換結果) {//html
-  <span class='note">spanの中に入る</span>
+<span class='note">spanの中に入る</span>
   //}
 }
 
 ;:img {
-  画像を定義する。このコマンドにはブレースのセクションがない。
+  画像を定義します。このコマンドにはブレースのセクションがありません。
   pre {//
 [img(img/some_image.jpg,alternate text)]
   //}
 
   code(変換結果) {//html
-  <img src='img/some_image.jpg' alt='alternate text' />
+<img src='img/some_image.jpg' alt='alternate text' />
   //}
 
 }
 ;:tcy {
-  class tcyのspanを定義する。縦書きにおける縦中横のスタイルをあてることを想定している。
+  class tcyのspanを定義します。縦書きにおける縦中横のスタイルをあてることを想定しています。
   pre {//
 FM TOWNSが登場してからすでに[tcy{25}]年がたった。
   //}
@@ -341,7 +341,7 @@ FM TOWNSが登場してからすでに[tcy{25}]年がたった。
 }
 
 ;:ruby {
-  ルビをマークアップする。
+  ルビをマークアップします。
   pre {//
 [ruby(とんぼ){蜻蛉}]の[ruby(めがね){眼鏡}]はみずいろめがね
   //}
@@ -353,10 +353,10 @@ FM TOWNSが登場してからすでに[tcy{25}]年がたった。
 }
 
 ;:code {
-インラインでコードをマークアップする。中はMarkupとして解釈しない。
+インラインでコードをマークアップします。中はMarkupとして解釈しません。
 
 pre {//
-  `puts "Hello, World."` and  [code{puts "Hello, World."}]
+`puts "Hello, World."` and  [code{puts "Hello, World."}]
 //}
 
   code(変換結果) {//html
@@ -386,21 +386,32 @@ pre{//
 定義済みの行コマンドには、次のものがあります。
 
 ;: p {
- パラグラフをマークアップする。主に、クラスやIDを付加する目的で使う。
+ パラグラフをマークアップします。クラスやIDを付加する目的で使うことを想定しています。
  pre{//
 p.caution: 用量に注意してご利用ください。
  //}
-}
+
+ code(変換結果) {//html
+<p class='caution'>用量に注意してご利用ください。</p>
+ //}
 
 ;: image {
- divでラップされたimgをマークアップする。
+ figureでラップされたimgをマークアップします。
  pre{//
-image(./path-to-image/img.jpg, 代替テキスト): イメージのキャプション
+image(path-to-image/img.jpg, 代替テキスト): イメージのキャプション
  //}
+
+ code(変換結果) {//html
+<figure class='img-wrap'>
+<img src='path-to-image/img.jpg' alt='代替テキスト' />
+<figcaption>イメージのキャプション</figcaption>
+</figure>
+ //}
+
 }
 
 ;: newpage {
- 新規ページを作成する。通常は、あらたなXHTMLファイルが生成される。
+ 新規ページを作成します。ここでXHTMLファイルが区切られ、新たなXHTMLが生成されます。
  pre{//
 newpage:
  //}
@@ -557,8 +568,33 @@ code(変換結果) {//html
 
 
 ## カスタマイズ
+
 ### 生成ルール追加
 ### 木構造の操作
+
+### コマンドの書式
+[span.note{(加筆修正予定)}]
+
+pre(コマンド) {//
+コマンド名[id][class][パラメータ][名前付きパラメータ]
+//}
+
+具体的には、たとえば次のような形をしています。
+
+pre(具体例) {//
+div#id1#id2.class1.class2(parameter1, parameter2)[named_parameter: 1, named_parameter 2]
+//}
+
+コマンド名は英字ではじまり、英数字とハイフン、アンダースコアからなります。
+idは、#からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。
+classは、.からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。
+
+パラメータは`()`で囲まれています。カンマで区切られた領域ごとに、独立したパラメータになります。
+パラメータの内容は、NoraMarkのマークアップとしてパースされます。
+
+名前付きパラメータは`[]`で囲まれていて、カンマで区切られた次の形式をしています。
+名前: パラメータ
+名前は英字ではじまり、英数字とハイフン、アンダースコアからなります。名前付きパラメータの内容は、NoraMarkのマークアップとしてはパースされません。
 
 ## XML生成
 
