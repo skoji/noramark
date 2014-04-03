@@ -377,13 +377,16 @@ puts 'Hello, World'
 <pre>* *ではじまる行は、箇条書きになる。  
 * 空行があくまで、箇条書きがつづく。
 
-* 空行があくと、あらたな箇条書きになる。</pre>
+* 空行があくと、あらたな箇条書きになる。
+** *を続けるとネストされる。</pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;ul&gt;&lt;li&gt;*ではじまる行は、箇条書きになる。&lt;/li&gt;
 &lt;li&gt;空行があくまで、箇条書きがつづく。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになる。&lt;/li&gt;
+&lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになる。
+&lt;ul&gt; &lt;li&gt;*を続けるとネストされる。&lt;/li&gt;
+&lt;/li&gt;
 &lt;/ul&gt;</code>
 </pre>
 </div>
@@ -578,11 +581,10 @@ paragraph_style: default
 <ul><li>パラメータは<code>()</code>で囲まれています。カンマで区切られた領域ごとに、独立したパラメータになります。</li>
 <li>パラメータの内容は、NoraMarkのマークアップとしてパースされます。</li>
 </ul>
-<ul><li>名前付きパラメータは<code>[]</code>で囲まれていて、カンマで区切られた次の形式をしています。</li>
+<ul><li>名前付きパラメータは<code>[]</code>で囲まれていて、カンマで区切られた次の形式をしています。<ul><li>名前: パラメータ</li>
 </ul>
-<div class='pgroup'><p>** 名前: パラメータ</p>
-</div>
-<ul><li>名前は英字ではじまり、英数字とハイフン、アンダースコアからなります。名前付きパラメータの内容は、NoraMarkのマークアップとしてはパースされません。</li>
+</li>
+<li>名前は英字ではじまり、英数字とハイフン、アンダースコアからなります。名前付きパラメータの内容は、NoraMarkのマークアップとしてはパースされません。</li>
 </ul>
 </section>
 </section>

@@ -2972,6 +2972,43 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
+  # UnorderedStart = /^/ - < /\*+/ > &{ text.length == n && text.size < 5 }
+  def _UnorderedStart(n)
+
+    _save = self.pos
+    while true # sequence
+      _tmp = scan(/\A(?-mix:^)/)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _text_start = self.pos
+      _tmp = scan(/\A(?-mix:\*+)/)
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  text.length == n && text.size < 5 ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_UnorderedStart unless _tmp
+    return _tmp
+  end
+
   # UnorderedList = ln:ln UnorderedItem(n)+:items {unordered_list([],[],[],{}, items, ln)}
   def _UnorderedList(n)
 
@@ -3015,12 +3052,12 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # UnorderedItem = - ln:ln "*"+:stars &{ stars.length == n } - DocumentContent:content Le {ul_item([], [], [], {}, content, ln)}
+  # UnorderedItem = UnorderedStart(n) ln:ln - UnorderedItemBody(n):content {ul_item([], [], [], {}, content, ln)}
   def _UnorderedItem(n)
 
     _save = self.pos
     while true # sequence
-      _tmp = apply(:__hyphen_)
+      _tmp = apply_with_args(:_UnorderedStart, n)
       unless _tmp
         self.pos = _save
         break
@@ -3031,45 +3068,13 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _save1 = self.pos
-      _ary = []
-      _tmp = match_string("*")
-      if _tmp
-        _ary << @result
-        while true
-          _tmp = match_string("*")
-          _ary << @result if _tmp
-          break unless _tmp
-        end
-        _tmp = true
-        @result = _ary
-      else
-        self.pos = _save1
-      end
-      stars = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _save2 = self.pos
-      _tmp = begin;  stars.length == n ; end
-      self.pos = _save2
-      unless _tmp
-        self.pos = _save
-        break
-      end
       _tmp = apply(:__hyphen_)
       unless _tmp
         self.pos = _save
         break
       end
-      _tmp = apply(:_DocumentContent)
+      _tmp = apply_with_args(:_UnorderedItemBody, n)
       content = @result
-      unless _tmp
-        self.pos = _save
-        break
-      end
-      _tmp = apply(:_Le)
       unless _tmp
         self.pos = _save
         break
@@ -3083,6 +3088,90 @@ class NoraMark::Parser < KPeg::CompiledParser
     end # end sequence
 
     set_failed_rule :_UnorderedItem unless _tmp
+    return _tmp
+  end
+
+  # UnorderedItemBody = (DocumentContent:content Nl - &UnorderedStart(n + 1) ln:ln UnorderedList(n + 1):sub_ul { content << sub_ul } | DocumentContent:content Le { content })
+  def _UnorderedItemBody(n)
+
+    _save = self.pos
+    while true # choice
+
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_DocumentContent)
+        content = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_Nl)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _save2 = self.pos
+        _tmp = apply_with_args(:_UnorderedStart, n + 1)
+        self.pos = _save2
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_ln)
+        ln = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply_with_args(:_UnorderedList, n + 1)
+        sub_ul = @result
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        @result = begin;  content << sub_ul ; end
+        _tmp = true
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
+
+      break if _tmp
+      self.pos = _save
+
+      _save3 = self.pos
+      while true # sequence
+        _tmp = apply(:_DocumentContent)
+        content = @result
+        unless _tmp
+          self.pos = _save3
+          break
+        end
+        _tmp = apply(:_Le)
+        unless _tmp
+          self.pos = _save3
+          break
+        end
+        @result = begin;  content ; end
+        _tmp = true
+        unless _tmp
+          self.pos = _save3
+        end
+        break
+      end # end sequence
+
+      break if _tmp
+      self.pos = _save
+      break
+    end # end choice
+
+    set_failed_rule :_UnorderedItemBody unless _tmp
     return _tmp
   end
 
@@ -4897,8 +4986,10 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
   Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])}")
+  Rules[:_UnorderedStart] = rule_info("UnorderedStart", "/^/ - < /\\*+/ > &{ text.length == n && text.size < 5 }")
   Rules[:_UnorderedList] = rule_info("UnorderedList", "ln:ln UnorderedItem(n)+:items {unordered_list([],[],[],{}, items, ln)}")
-  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "- ln:ln \"*\"+:stars &{ stars.length == n } - DocumentContent:content Le {ul_item([], [], [], {}, content, ln)}")
+  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "UnorderedStart(n) ln:ln - UnorderedItemBody(n):content {ul_item([], [], [], {}, content, ln)}")
+  Rules[:_UnorderedItemBody] = rule_info("UnorderedItemBody", "(DocumentContent:content Nl - &UnorderedStart(n + 1) ln:ln UnorderedList(n + 1):sub_ul { content << sub_ul } | DocumentContent:content Le { content })")
   Rules[:_OrderedList] = rule_info("OrderedList", "ln:ln OrderedItem+:items {ordered_list([],[],[], {}, items, ln)}")
   Rules[:_OrderedItem] = rule_info("OrderedItem", "- ln:ln Num \".\" - DocumentContent:content Le {ol_item([], [], [], {}, content, ln)}")
   Rules[:_DefinitionList] = rule_info("DefinitionList", "ln:ln DefinitionItem+:items {definition_list([], [], [], {}, items, ln)}")

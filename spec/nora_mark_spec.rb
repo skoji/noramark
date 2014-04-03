@@ -750,6 +750,32 @@ describe NoraMark::Document do
                  ])
       end
 
+      it 'handle nested unordered list ' do
+        text = "this is normal line.\n* for the 1st.\n** nested.\n* and last...\nthe ordered list ends."
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 3
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'this is normal line.']
+                 ])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                 ['ul', 
+                  ['li', 'for the 1st.',
+                   ['ul', 
+                    ['li', 'nested.']]],
+                  ['li', 'and last...']
+                 ])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'the ordered list ends.']
+                 ])
+      end
+
       it 'handle definition list ' do
         text = "this is normal line.\n;: 1st : this is the first definition\n;: 2nd : blah :blah.\n;: 3rd: this term is the last.\nthe list ends."
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')

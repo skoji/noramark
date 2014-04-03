@@ -180,9 +180,16 @@ Newpage = - NewpageCommand:c ':' -
 
 
 # unordered list
+UnorderedStart(n) = /^/ - < (/\*+/) > &{ text.length == n && text.size < 5 }
 UnorderedList(n) = ln:ln UnorderedItem(n)+:items ~unordered_list([],[],[],{}, items, ln)
-UnorderedItem(n) = - ln:ln '*'+:stars &{ stars.length == n } - DocumentContent:content Le ~ul_item([], [], [], {}, content, ln)
+UnorderedItem(n) = UnorderedStart(n) ln:ln -
+                   UnorderedItemBody(n):content
+                   ~ul_item([], [], [], {}, content, ln)
 
+UnorderedItemBody(n) = DocumentContent:content Nl
+                       - &UnorderedStart(n + 1) ln:ln UnorderedList(n + 1):sub_ul
+                     { content << sub_ul }
+                     | DocumentContent:content Le { content }
 # ordered list
 OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], {}, items, ln)
 OrderedItem = - ln:ln Num '.' - DocumentContent:content Le ~ol_item([], [], [], {}, content, ln)
