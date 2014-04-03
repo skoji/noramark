@@ -180,8 +180,8 @@ Newpage = - NewpageCommand:c ':' -
 
 
 # unordered list
-UnorderedList = ln:ln UnorderedItem+:items ~unordered_list([],[],[],{}, items, ln)
-UnorderedItem = - ln:ln '*' - DocumentContent:content Le ~ul_item([], [], [], {}, content, ln)
+UnorderedList(n) = ln:ln UnorderedItem(n)+:items ~unordered_list([],[],[],{}, items, ln)
+UnorderedItem(n) = - ln:ln '*'+:stars &{ stars.length == n } - DocumentContent:content Le ~ul_item([], [], [], {}, content, ln)
 
 # ordered list
 OrderedList = ln:ln OrderedItem+:items ~ordered_list([],[],[], {}, items, ln)
@@ -203,7 +203,7 @@ LongDefinitionItem = -  ln:ln ';:' -
                        BlockEnd
                        ~dl_item([], [], [term], {}, definition, ln)
 
-ItemsList = (UnorderedList
+ItemsList = (UnorderedList(1)
           | OrderedList
           | DefinitionList
           | LongDefinitionList) 

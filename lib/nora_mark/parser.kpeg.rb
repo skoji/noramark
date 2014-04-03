@@ -2972,8 +2972,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # UnorderedList = ln:ln UnorderedItem+:items {unordered_list([],[],[],{}, items, ln)}
-  def _UnorderedList
+  # UnorderedList = ln:ln UnorderedItem(n)+:items {unordered_list([],[],[],{}, items, ln)}
+  def _UnorderedList(n)
 
     _save = self.pos
     while true # sequence
@@ -2985,11 +2985,11 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       _save1 = self.pos
       _ary = []
-      _tmp = apply(:_UnorderedItem)
+      _tmp = apply_with_args(:_UnorderedItem, n)
       if _tmp
         _ary << @result
         while true
-          _tmp = apply(:_UnorderedItem)
+          _tmp = apply_with_args(:_UnorderedItem, n)
           _ary << @result if _tmp
           break unless _tmp
         end
@@ -3015,8 +3015,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # UnorderedItem = - ln:ln "*" - DocumentContent:content Le {ul_item([], [], [], {}, content, ln)}
-  def _UnorderedItem
+  # UnorderedItem = - ln:ln "*"+:stars &{ stars.length == n } - DocumentContent:content Le {ul_item([], [], [], {}, content, ln)}
+  def _UnorderedItem(n)
 
     _save = self.pos
     while true # sequence
@@ -3031,7 +3031,29 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
+      _save1 = self.pos
+      _ary = []
       _tmp = match_string("*")
+      if _tmp
+        _ary << @result
+        while true
+          _tmp = match_string("*")
+          _ary << @result if _tmp
+          break unless _tmp
+        end
+        _tmp = true
+        @result = _ary
+      else
+        self.pos = _save1
+      end
+      stars = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save2 = self.pos
+      _tmp = begin;  stars.length == n ; end
+      self.pos = _save2
       unless _tmp
         self.pos = _save
         break
@@ -3397,12 +3419,12 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ItemsList = (UnorderedList | OrderedList | DefinitionList | LongDefinitionList)
+  # ItemsList = (UnorderedList(1) | OrderedList | DefinitionList | LongDefinitionList)
   def _ItemsList
 
     _save = self.pos
     while true # choice
-      _tmp = apply(:_UnorderedList)
+      _tmp = apply_with_args(:_UnorderedList, 1)
       break if _tmp
       self.pos = _save
       _tmp = apply(:_OrderedList)
@@ -4875,15 +4897,15 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_CommandNameForSpecialLineCommand] = rule_info("CommandNameForSpecialLineCommand", "(NewpageCommand | ExplicitParagraphCommand)")
   Rules[:_NewpageCommand] = rule_info("NewpageCommand", "Command:command &{ command[:name] == 'newpage' }")
   Rules[:_Newpage] = rule_info("Newpage", "- NewpageCommand:c \":\" - DocumentContent?:content - Nl {newpage(c[:ids],c[:classes],c[:args], c[:named_args],  content,  c[:ln])}")
-  Rules[:_UnorderedList] = rule_info("UnorderedList", "ln:ln UnorderedItem+:items {unordered_list([],[],[],{}, items, ln)}")
-  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "- ln:ln \"*\" - DocumentContent:content Le {ul_item([], [], [], {}, content, ln)}")
+  Rules[:_UnorderedList] = rule_info("UnorderedList", "ln:ln UnorderedItem(n)+:items {unordered_list([],[],[],{}, items, ln)}")
+  Rules[:_UnorderedItem] = rule_info("UnorderedItem", "- ln:ln \"*\"+:stars &{ stars.length == n } - DocumentContent:content Le {ul_item([], [], [], {}, content, ln)}")
   Rules[:_OrderedList] = rule_info("OrderedList", "ln:ln OrderedItem+:items {ordered_list([],[],[], {}, items, ln)}")
   Rules[:_OrderedItem] = rule_info("OrderedItem", "- ln:ln Num \".\" - DocumentContent:content Le {ol_item([], [], [], {}, content, ln)}")
   Rules[:_DefinitionList] = rule_info("DefinitionList", "ln:ln DefinitionItem+:items {definition_list([], [], [], {}, items, ln)}")
   Rules[:_DefinitionItem] = rule_info("DefinitionItem", "- ln:ln - \";:\" - DocumentContentExcept(':'):term \":\" - DocumentContent:definition Le {dl_item([], [], [term], {}, definition, ln)}")
   Rules[:_LongDefinitionList] = rule_info("LongDefinitionList", "ln:ln LongDefinitionItem+:items {definition_list([], [], [], {}, items, ln)}")
   Rules[:_LongDefinitionItem] = rule_info("LongDefinitionItem", "- ln:ln \";:\" - DocumentContentExcept('{'):term \"{\" - Nl - BlockBody:definition - BlockEnd {dl_item([], [], [term], {}, definition, ln)}")
-  Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList | OrderedList | DefinitionList | LongDefinitionList)")
+  Rules[:_ItemsList] = rule_info("ItemsList", "(UnorderedList(1) | OrderedList | DefinitionList | LongDefinitionList)")
   Rules[:_LineCommand] = rule_info("LineCommand", "- !CommandNameForSpecialLineCommand Command:c \":\" - DocumentContent?:content - Le EmptyLine* {block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_LineBlock] = rule_info("LineBlock", "(ItemsList | LineCommand)")
   Rules[:_Block] = rule_info("Block", "(PreformattedBlock | HeadedSection | LineBlock | ExplicitBlock | ParagraphGroup):block EmptyLine* {block}")
