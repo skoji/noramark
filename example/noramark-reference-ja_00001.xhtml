@@ -250,7 +250,7 @@ puts 'Hello, World'
 <div class='pgroup'><p>または、こんな書き方もできます。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
-<pre>```(ソースコードはこちら) {
+<pre>```(ソースコードはこちら)
 puts 'Hello, World'
 ```</pre>
 </div>
@@ -472,10 +472,10 @@ puts 'Hello, World'
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;section&gt;
-&lt;h1&gt;見出し&lt;/h1&gt;
-&lt;div class='pgroup'&gt;
-&lt;p&gt;本文&lt;/p&gt;
-&lt;/div&gt;
+  &lt;h1&gt;見出し&lt;/h1&gt;
+  &lt;div class='pgroup'&gt;
+    &lt;p&gt;本文&lt;/p&gt;
+  &lt;/div&gt;
 &lt;/section&gt;</code>
 </pre>
 </div>
@@ -510,10 +510,48 @@ puts 'Hello, World'
 &lt;/section&gt;</code>
 </pre>
 </div>
+<div class='pgroup'><p>明示的に範囲を指定したセクションをつくることもできます。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre># 第一のセクション
+ここは第一のセクション
+## 第二のセクション {
+ここは第二のセクション
+}
+ここは再び第一のセクション</pre>
+</div>
+<div class='pre'><p class='caption'>変換結果</p>
+<pre class='code-html' data-code-language='html'><code>&lt;section&gt;
+  &lt;h1&gt;第一のセクション&lt;/h1&gt;
+  &lt;div class='pgroup'&gt;
+  &lt;p&gt;ここは第一のセクション&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;section&gt;第二のセクション&lt;/h1&gt;
+    &lt;div class='pgroup'&gt;
+    &lt;p&gt;ここは第二のセクション&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;div class='pgroup'&gt;
+  &lt;p&gt;ここは再び第一のセクション&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code>
+</pre>
+</div>
 </section>
 </section>
 <section><h3 id='heading_index_27'>Frontmatter</h3>
 <div class='pgroup'><p>各ページごとにYAML frontmatterでメタデータを記載できます。</p>
+</div>
+<div class='pre'><p class='caption'>Frontmatterの例</p>
+<pre><code>---
+title: ページのタイトル
+stylesheets: [reset.css, default.css]
+lang: ja
+paragraph_style: default
+---</code>
+</pre>
+</div>
+<div class='pgroup'><p><code>title</code>, <code>stylesheets</code>, <code>lang</code>はそれぞれXHTMLのheaderにかかれます。<code>paragraph_style</code>は、HTML生成時の段落スタイル指示ができます。</p>
 </div>
 </section>
 </section>
@@ -533,17 +571,17 @@ puts 'Hello, World'
 <div class='pre'><p class='caption'>具体例</p>
 <pre>div#id1#id2.class1.class2(parameter1, parameter2)[named_parameter: 1, named_parameter 2]</pre>
 </div>
-<div class='pgroup'><p>コマンド名は英字ではじまり、英数字とハイフン、アンダースコアからなります。</p>
-<p>idは、#からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。</p>
-<p>classは、.からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。</p>
-</div>
-<div class='pgroup'><p>パラメータは<code>()</code>で囲まれています。カンマで区切られた領域ごとに、独立したパラメータになります。</p>
-<p>パラメータの内容は、NoraMarkのマークアップとしてパースされます。</p>
-</div>
-<div class='pgroup'><p>名前付きパラメータは<code>[]</code>で囲まれていて、カンマで区切られた次の形式をしています。</p>
-<p>名前: パラメータ</p>
-<p>名前は英字ではじまり、英数字とハイフン、アンダースコアからなります。名前付きパラメータの内容は、NoraMarkのマークアップとしてはパースされません。</p>
-</div>
+<ul><li>コマンド名は英字ではじまり、英数字とハイフン、アンダースコアからなります。</li>
+<li>idは、#からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。</li>
+<li>classは、.からはじまり、英数字とハイフン、アンダースコアからなります。複数続けることができます。</li>
+</ul>
+<ul><li>パラメータは<code>()</code>で囲まれています。カンマで区切られた領域ごとに、独立したパラメータになります。</li>
+<li>パラメータの内容は、NoraMarkのマークアップとしてパースされます。</li>
+</ul>
+<ul><li>名前付きパラメータは<code>[]</code>で囲まれていて、カンマで区切られた次の形式をしています。</li>
+<li>* 名前: パラメータ</li>
+<li>名前は英字ではじまり、英数字とハイフン、アンダースコアからなります。名前付きパラメータの内容は、NoraMarkのマークアップとしてはパースされません。</li>
+</ul>
 </section>
 </section>
 <section><h2 id='heading_index_32'>XML生成</h2>
