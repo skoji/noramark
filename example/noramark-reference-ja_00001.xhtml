@@ -11,10 +11,9 @@
 </div>
 <div class='pgroup'><p>NoraMarkは、EPUBで利用するXHTMLを生成するためのマークアップとしてデザインされました。次のような特徴があります。</p>
 </div>
-<ul><li>Markdownと同じように、プレーンテキストの原稿を邪魔しない最小限の記法です。</li>
-<li>しかしMarkdownと異なり、マークアップ部分は通常のテキストと「違って」見えます。これは、意識せずにマークアップを壊してしまうことを避けるためのデザインです。</li>
+<ul><li>Markdownと同じように、プレーンテキストの原稿に近い最小限の記法です。</li>
+<li>Markdownと異なり、マークアップ部分は通常のテキストと「違って」見えるようにデザインしています。これは、意識せずにマークアップを壊してしまうことを避けるためです。</li>
 <li>マークアップに独自コマンドの追加ができる柔軟なカスタマイズ機能を用意しています。</li>
-<li>パースした文書構造に対する後処理を追加できます。</li>
 <li>生のHTML記法なしで、多くのタグを記述できます。</li>
 <li>パース結果をXMLとして取得できます。</li>
 </ul>
@@ -92,8 +91,9 @@ document.html.write_as_files</code>
 &lt;/div&gt;</code>
 </pre>
 </div>
-<div class='pgroup'><p>改行ごとに<code>&lt;p&gt;</code>要素がつくられます。空行で区切られると、<code>&lt;div class='pgroup'&gt;</code>がつくられます。</p>
-<p>言語が日本語(ja)以外の場合は、次のようになります。</p>
+<div class='pgroup'><p>改行ごとに<code>&lt;p&gt;</code>要素がつくられます。空行で区切られると<code>&lt;div class='pgroup'&gt;</code>がつくられます。</p>
+</div>
+<div class='pgroup'><p>言語が日本語(ja)以外の場合は、次のようになります。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>Lorem ipsum dolor sit amet, consectetur adipisicing elit, 
@@ -105,6 +105,8 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 <pre class='code-html' data-code-language='html'><code>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, &lt;br /&gt;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. &lt;/p&gt;
 &lt;p&gt;Ut enim ad minim veniam, quis nostrud exercitation&lt;/p&gt;</code>
 </pre>
+</div>
+<div class='pgroup'><p>後述のparagraph_styleでもこの振る舞いを切り替えることができます。</p>
 </div>
 </section>
 <section><h3 id='heading_index_12'>明示的なブロック</h3>
@@ -320,7 +322,7 @@ puts 'Hello, World'
 </div>
 </dd>
 <dt>code</dt>
-<dd><div class='pgroup'><p>インラインでコードをマークアップします。中はMarkupとして解釈しません。</p>
+<dd><div class='pgroup'><p>インラインでコードをマークアップします。中はMarkupとして解釈しません。<code>`</code> (バッククオート)で囲む方法と、<code>[code{}]</code>を使う方法があります。</p>
 </div>
 <pre>`puts &quot;Hello, World.&quot;` and  [code{puts &quot;Hello, World.&quot;}]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
@@ -365,7 +367,7 @@ puts 'Hello, World'
 </div>
 </dd>
 <dt>newpage</dt>
-<dd><div class='pgroup'><p>新規ページを作成します。ここでXHTMLファイルが区切られ、新たなXHTMLが生成されます。</p>
+<dd><div class='pgroup'><p>新規ページを作成します。この位置XHTMLファイルが区切られ、新たなXHTMLが生成されます。</p>
 </div>
 <pre>newpage:</pre>
 </dd>
@@ -374,18 +376,20 @@ puts 'Hello, World'
 <section><h3 id='heading_index_18'>リスト</h3>
 <section><h4 id='heading_index_19'>箇条書き</h4>
 <div class='pre'><p class='caption'>原稿</p>
-<pre>* *ではじまる行は、箇条書きになる。  
-* 空行があくまで、箇条書きがつづく。
+<pre>* *ではじまる行は、箇条書きになります
+* 空行があくまで、箇条書きがつづきます。
 
-* 空行があくと、あらたな箇条書きになる。
-** *を続けるとネストされる。</pre>
+* 空行があくと、あらたな箇条書きになります。
+* さらに、
+** *を続けるとネストされます。</pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;ul&gt;&lt;li&gt;*ではじまる行は、箇条書きになる。&lt;/li&gt;
-&lt;li&gt;空行があくまで、箇条書きがつづく。&lt;/li&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;ul&gt;&lt;li&gt;*ではじまる行は、箇条書きになります。&lt;/li&gt;
+&lt;li&gt;空行があくまで、箇条書きがつづきます。。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになる。
-&lt;ul&gt; &lt;li&gt;*を続けるとネストされる。&lt;/li&gt;
+&lt;ul&gt;&lt;li&gt;空行があくと、あらたな箇条書きになります。&lt;/li&gt;
+&lt;li&gt;さらに、
+&lt;ul&gt; &lt;li&gt;*を続けるとネストされます。&lt;/li&gt;&lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;</code>
 </pre>
@@ -406,6 +410,21 @@ puts 'Hello, World'
 &lt;ol&gt;&lt;li&gt;空行があくと、あらたなリストになる。&lt;/li&gt;
 &lt;li&gt;先頭の数字にかかわらず、1から順に番号がふられる。&lt;/li&gt;
 &lt;/ol&gt;</code>
+</pre>
+</div>
+<div class='pgroup'><p>番号つきリストのネストはサポートしていませんが、どうしてもやりたい場合は次のような方法もあります。</p>
+</div>
+<div class='pre'><p class='caption'>原稿</p>
+<pre><code>ol {
+li: 第一の要素
+li {
+  ここはネストしたい。
+  ol {
+    li: ネストします。
+  }
+li: 第三の要素  
+}
+}</code>
 </pre>
 </div>
 </section>
