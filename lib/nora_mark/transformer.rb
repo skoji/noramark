@@ -7,6 +7,8 @@ module NoraMark
     end
 
     def transform(node)
+      frontmatter_node = node.find_node :type => :Frontmatter
+      @frontmatter = frontmatter_node.yaml if frontmatter_node
       node.all_nodes.each do 
         |n|
         if match_rule = @rules.find { |rule| n.match?(rule[0]) }

@@ -1,6 +1,8 @@
 require 'coveralls'
 Coveralls.wear!
 
+require 'byebug'
+
 begin
   require 'rspec'
 rescue LoadError

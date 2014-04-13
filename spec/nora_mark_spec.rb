@@ -2,7 +2,6 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 require File.dirname(__FILE__) + '/../lib/nora_mark'
 require 'nokogiri'
-require 'byebug'
 require File.dirname(__FILE__) + '/nokogiri_test_helper.rb'
 
 describe NoraMark::Document do 

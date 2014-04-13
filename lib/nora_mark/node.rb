@@ -264,6 +264,15 @@ module NoraMark
       end
       r
     end
+
+    def find_node selector
+      return self if match? selector
+      return nil unless @first_child
+      return (@first_child.find { |n| n.match? selector } ||
+              @first_child.inject(nil) do
+                |r, n| r or n.find_node selector
+              end)
+    end
     
     def clone
       @raw_content = nil
