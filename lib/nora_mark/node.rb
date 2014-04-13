@@ -38,8 +38,11 @@ module NoraMark
     end
 
     def match?(selector)
-      selector = build_selector(selector)
-      selector.inject(true) {
+      _match? build_selector(selector)
+    end
+
+    def _match?(raw_selector)
+      raw_selector.inject(true) {
         |result, s|
         result && s.call(self)
       }
@@ -75,9 +78,10 @@ module NoraMark
 
     def ancestors(selector = {})
       result = []
+      raw_selector = build_selector selector
       node = parent
       while !node.nil?
-        result << node if node.match?(selector)
+        result << node if node._match? raw_selector
         node = node.parent
       end
       result
@@ -266,11 +270,15 @@ module NoraMark
     end
 
     def find_node selector
-      return self if match? selector
+      _find_node(build_selector selector)
+    end
+
+    def _find_node raw_selector
+      return self if _match? raw_selector
       return nil unless @first_child
-      return (@first_child.find { |n| n.match? selector } ||
+      return (@first_child.find { |n| n._match? raw_selector } ||
               @first_child.inject(nil) do
-                |r, n| r or n.find_node selector
+                |r, n| r or n._find_node raw_selector
               end)
     end
     
