@@ -9,7 +9,7 @@ opt.on('--kconv') {
 }
 
 args = opt.parse(ARGV)
-input = args.length > 0 ? File.open(args[0]).read : STDIN.read
+input = ARGF.read
 input = Kconv.toutf8(input) if auto_convert_encode
 
 puts NoraMark::Document::parse(input).render_parameter(nonpaged: true).html[0]
