@@ -255,7 +255,7 @@ module NoraMark
     end
 
     def all_nodes
-      r = [] 
+      r = []
       if !@params.nil?
         @params.each do
           |node_array|

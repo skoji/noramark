@@ -8,6 +8,23 @@ module NoraMark
       rename 'sect', 'section'
       rename 'sp', 'span'
 
+      modify({type: :Root}) do
+        if (@options[:render_parameter] ||= {})[:nonpaged]
+          first_page = @node.first_child.remove
+          @node.children.each do |node|
+            if node.class == NoraMark::Page
+              first_page.append_child block('hr', classes: ['page-break'], body_empty: true)
+              node.remove
+              node.children.each do |cn|
+                first_page.append_child cn
+              end
+            else
+              first_page.append_child node
+            end
+          end
+          @node.prepend_child first_page
+        end
+      end
       modify(/\A(l|link)\Z/) do
         @node.name = 'a'
         (@node.attrs ||= {}).merge!({href: [@node.params[0].text]})

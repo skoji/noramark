@@ -1,6 +1,7 @@
 module NoraMark
   class Transformer
     include NodeUtil
+    attr_accessor :options
     def initialize(rules, options)
       @rules = rules
       @options = options
@@ -9,7 +10,7 @@ module NoraMark
     def transform(node)
       frontmatter_node = node.find_node :type => :Frontmatter
       @frontmatter = frontmatter_node.yaml if frontmatter_node
-      node.all_nodes.each do 
+      node.all_nodes.unshift(node).each do 
         |n|
         if match_rule = @rules.find { |rule| n.match?(rule[0]) }
           action, p = match_rule[1,2]
