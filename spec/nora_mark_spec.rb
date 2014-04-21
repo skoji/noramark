@@ -1375,5 +1375,29 @@ EOF
       expect { NoraMark::Document.parse(text, lang: 'ja', title: 'foo') }.to raise_error KPeg::CompiledParser::ParseError
     end
   end
+  describe 'video' do
+    it 'should render video' do
+      text = "this text includes [video(video.mp4)[poster: poster.jpg]{alternate message}]"
+      nora = NoraMark::Document.parse(text)
+      converted = nora.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children)
+        .to eq(
+               ['p', 'this text includes ',
+                ["video[src='video.mp4'][poster='poster.jpg']", 'alternate message']]
+               )
+    end
+    it 'should render video with autoplay and controls' do
+      text = "this text includes [video(video.mp4, autoplay, controls)[poster: poster.jpg]]"
+      nora = NoraMark::Document.parse(text)
+      converted = nora.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children)
+        .to eq(
+               ['p', 'this text includes ',
+                ["video[src='video.mp4'][poster='poster.jpg'][autoplay='autoplay'][controls='controls']", '']]
+               )
+    end
+  end
 end
 

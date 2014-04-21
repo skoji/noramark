@@ -28,7 +28,11 @@ module NoraMark
         return '' if attrs.nil?
         attrs.map do
           |name, vals|
-          if vals.nil? || vals.size == 0
+          if vals.nil?
+            ''
+          elsif !vals.is_a? Array
+            " #{name}='#{name}'"
+          elsif vals.size == 0
             ''
           else
             " #{name}='#{vals.join(' ')}'"            

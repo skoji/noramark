@@ -35,7 +35,7 @@ module NoraMark
                         class_if_empty:'img-wrap',
                         ids: @node.ids,
                         children: [ inline('img', nil, attrs: {src: [ @node.params[0].text.strip],  alt: [ (@node.params[1].text ||'').strip ] }) ],
-                        template: @node)
+                        template: @node) 
         if !@node.children_empty?
           if @node.n[:caption_before] 
             newnode.prepend_child inline('figcaption', @node.children)
@@ -104,6 +104,18 @@ module NoraMark
           new_node = new_node.wrap block('div', classes: ['pre'], children: [ block('p', children: @node.p.shift, classes: ['caption']) ]), method
         end
         new_node
+      end
+
+      modify 'video' do
+        @node.attrs ||= {}
+        @node.attrs.merge!({src: [@node.p.shift.text]})
+        @node.attrs.merge!({poster: [@node.n[:poster]]}) unless @node.n[:poster].nil?
+
+        options = @node.p.map { |opt| opt.text.strip }
+        ['autoplay', 'controls', 'loop', 'muted'].each do
+          |attr|
+          @node.attrs.merge!({attr.to_sym => true}) if options.member? attr
+        end
       end
     end
     DEFAULT_TRANSFORMER.extend Util

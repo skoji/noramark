@@ -2578,7 +2578,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Inline = (EscapedChar | ImgInline | CodeInline | CommonInline | FenceInline)
+  # Inline = (EscapedChar | ImgInline | VideoInline | CodeInline | CommonInline | FenceInline)
   def _Inline
 
     _save = self.pos
@@ -2587,6 +2587,9 @@ class NoraMark::Parser < KPeg::CompiledParser
       break if _tmp
       self.pos = _save
       _tmp = apply(:_ImgInline)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_VideoInline)
       break if _tmp
       self.pos = _save
       _tmp = apply(:_CodeInline)
@@ -2713,6 +2716,98 @@ class NoraMark::Parser < KPeg::CompiledParser
     end # end sequence
 
     set_failed_rule :_ImgInline unless _tmp
+    return _tmp
+  end
+
+  # VideoCommand = Command:c &{ c[:name] == 'video' && c[:args].size > 0}
+  def _VideoCommand
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:_Command)
+      c = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  c[:name] == 'video' && c[:args].size > 0; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_VideoCommand unless _tmp
+    return _tmp
+  end
+
+  # VideoInline = "[" VideoCommand:c ("{" - DocumentContentExcept('}'):content "}")? "]" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}
+  def _VideoInline
+
+    _save = self.pos
+    while true # sequence
+      _tmp = match_string("[")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply(:_VideoCommand)
+      c = @result
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+
+      _save2 = self.pos
+      while true # sequence
+        _tmp = match_string("{")
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = apply_with_args(:_DocumentContentExcept, '}')
+        content = @result
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = match_string("}")
+        unless _tmp
+          self.pos = _save2
+        end
+        break
+      end # end sequence
+
+      unless _tmp
+        _tmp = true
+        self.pos = _save1
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = match_string("]")
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin; inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln]); end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_VideoInline unless _tmp
     return _tmp
   end
 
@@ -4975,10 +5070,12 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_PreformattedBlockComplex] = rule_info("PreformattedBlockComplex", "- PreformattedCommandHeadComplex:c (!PreformatEndComplex CharString Nl)+:content PreformatEndComplex {preformatted_block(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  c[:codelanguage], content,  c[:ln])}")
   Rules[:_PreformattedBlockFence] = rule_info("PreformattedBlockFence", "- ln:ln PreformattedFence:c (!\"```\" CharString Nl)+:content - \"```\" - Le EmptyLine* {preformatted_block('code', [], [], c[:args], c[:named_args], c[:codelanguage], content, ln)}")
   Rules[:_PreformattedBlock] = rule_info("PreformattedBlock", "(PreformattedBlockComplex | PreformattedBlockSimple | PreformattedBlockFence)")
-  Rules[:_Inline] = rule_info("Inline", "(EscapedChar | ImgInline | CodeInline | CommonInline | FenceInline)")
+  Rules[:_Inline] = rule_info("Inline", "(EscapedChar | ImgInline | VideoInline | CodeInline | CommonInline | FenceInline)")
   Rules[:_CommonInline] = rule_info("CommonInline", "\"[\" Command:c \"{\" - DocumentContentExcept('}'):content \"}\" \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_ImgCommand] = rule_info("ImgCommand", "Command:c &{ c[:name] == 'img' && c[:args].size == 2}")
   Rules[:_ImgInline] = rule_info("ImgInline", "\"[\" ImgCommand:c \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])}")
+  Rules[:_VideoCommand] = rule_info("VideoCommand", "Command:c &{ c[:name] == 'video' && c[:args].size > 0}")
+  Rules[:_VideoInline] = rule_info("VideoInline", "\"[\" VideoCommand:c (\"{\" - DocumentContentExcept('}'):content \"}\")? \"]\" {inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])}")
   Rules[:_FenceInline] = rule_info("FenceInline", "\"`\" ln:ln CharStringExcept('`'):content \"`\" {code_inline([], [], [], {}, content, ln)}")
   Rules[:_CodeCommand] = rule_info("CodeCommand", "Command:c &{ c[:name] == 'code' }")
   Rules[:_CodeInline] = rule_info("CodeInline", "\"[\" CodeCommand:c \"{\" - CharStringExcept('}'):content \"}\" \"]\" {code_inline(c[:ids], c[:classes], c[:args], c[:named_args], content, c[:ln])}")
