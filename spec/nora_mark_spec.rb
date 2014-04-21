@@ -1399,5 +1399,29 @@ EOF
                )
     end
   end
+  describe 'audio' do
+    it 'should render audio' do
+      text = "this text includes [audio(audio.mp3)[volume: 0.2]{alternate message}]"
+      nora = NoraMark::Document.parse(text)
+      converted = nora.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children)
+        .to eq(
+               ['p', 'this text includes ',
+                ["audio[src='audio.mp3'][volume='0.2']", 'alternate message']]
+               )
+    end
+    it 'should render audio with autoplay and controls' do
+      text = "this text includes [audio(audio.mp3, autoplay, controls)]"
+      nora = NoraMark::Document.parse(text)
+      converted = nora.html
+      body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+      expect(body.element_children[0].selector_and_children)
+        .to eq(
+               ['p', 'this text includes ',
+                ["audio[src='audio.mp3'][autoplay='autoplay'][controls='controls']", '']]
+               )
+    end
+  end
 end
 

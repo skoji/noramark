@@ -148,7 +148,7 @@ PreformattedBlock = PreformattedBlockComplex |
                     PreformattedBlockFence
 
 # inline command
-Inline = EscapedChar | ImgInline | VideoInline | CodeInline | CommonInline | FenceInline
+Inline = EscapedChar | ImgInline | MediaInline | CodeInline | CommonInline | FenceInline
 CommonInline =  '[' Command:c
                   '{' - DocumentContentExcept('}'):content '}'
                 ']'
@@ -158,10 +158,10 @@ ImgCommand = Command:c &{ c[:name] == 'img' && c[:args].size == 2}
 ImgInline =  '[' ImgCommand:c  ']'
              ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  nil,  c[:ln])
 
-VideoCommand
-  = Command:c &{ c[:name] == 'video' && c[:args].size > 0}
-VideoInline
-  = '[' VideoCommand:c
+MediaCommand
+  = Command:c &{ (c[:name] == 'video' || c[:name] == 'audio') && c[:args].size > 0}
+MediaInline
+  = '[' MediaCommand:c
       ('{' - DocumentContentExcept('}'):content '}')?
      ']'
       ~inline(c[:name], c[:ids], c[:classes], c[:args], c[:named_args],  content,  c[:ln])

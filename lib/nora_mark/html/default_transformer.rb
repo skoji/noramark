@@ -117,6 +117,17 @@ module NoraMark
           @node.attrs.merge!({attr.to_sym => true}) if options.member? attr
         end
       end
+
+      modify 'audio' do
+        @node.attrs ||= {}
+        @node.attrs.merge!({src: [@node.p.shift.text]})
+        @node.attrs.merge!({volume: [@node.n[:volume]]}) unless @node.n[:volume].nil?
+        options = @node.p.map { |opt| opt.text.strip }
+        ['autoplay', 'controls', 'loop', 'muted'].each do
+          |attr|
+          @node.attrs.merge!({attr.to_sym => true}) if options.member? attr
+        end
+      end
     end
     DEFAULT_TRANSFORMER.extend Util
   end
