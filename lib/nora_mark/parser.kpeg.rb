@@ -4901,7 +4901,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # Pages = (Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })
+  # Pages = (Page:page Newpage:newpage Pages:pages { pages.unshift(page) } | Page:page { [ page ] })
   def _Pages
 
     _save = self.pos
@@ -4927,7 +4927,7 @@ class NoraMark::Parser < KPeg::CompiledParser
           self.pos = _save1
           break
         end
-        @result = begin;  [ page, newpage ] + pages ; end
+        @result = begin;  pages.unshift(page) ; end
         _tmp = true
         unless _tmp
           self.pos = _save1
@@ -5119,7 +5119,7 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_DocumentContent] = rule_info("DocumentContent", "(Inline | DocumentText)+:content { content }")
   Rules[:_DocumentLine] = rule_info("DocumentLine", "DocumentContent:content Le { content }")
   Rules[:_Page] = rule_info("Page", "Frontmatter?:frontmatter - (!Newpage Block)*:blocks EmptyLine* {page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)}")
-  Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages } | Page:page { [ page ] })")
+  Rules[:_Pages] = rule_info("Pages", "(Page:page Newpage:newpage Pages:pages { pages.unshift(page) } | Page:page { [ page ] })")
   Rules[:_root] = rule_info("root", "BOM? EmptyLine* Pages:pages EofComment? Eof {root(pages)}")
   # :startdoc:
 end

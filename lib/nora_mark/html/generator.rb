@@ -18,7 +18,17 @@ module NoraMark
         frontmatter_writer = FrontmatterWriter.new self
         paragraph_writer = ParagraphWriter.new self
         abstract_node_writer = AbstractNodeWriter.new self
-          
+        page_writer = TagWriter.create('body', self,
+                                       node_preprocessor: proc do |node|
+                                         @context.end_html
+                                         if node.first_child.class == Frontmatter
+                                           frontmatter = node.first_child
+                                           frontmatter_writer.write frontmatter
+                                           frontmatter.remove
+                                         end
+                                         node
+                                       end);
+        
         newpage_writer = TagWriter.create(nil, self,
                            node_preprocessor: proc do |node|
                              node.no_tag = true
@@ -47,7 +57,7 @@ module NoraMark
           Block => TagWriter.create(nil, self),
           Newpage => newpage_writer,
           Document =>  abstract_node_writer,
-          Page =>  abstract_node_writer,
+          Page =>  page_writer,
           Frontmatter =>  frontmatter_writer,
           }
       end

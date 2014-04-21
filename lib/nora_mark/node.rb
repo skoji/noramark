@@ -108,7 +108,7 @@ module NoraMark
 
       return if @raw_content.nil? || raw_text
 
-      @raw_content.each {|node| node.remove }
+      @raw_content.each { |node| node.remove }
       @first_child = @raw_content.first
       @last_child = @raw_content.last
       @raw_content.inject(nil) do |prev, child_node|
@@ -120,11 +120,17 @@ module NoraMark
       end
       @raw_content = nil
       @children = nil
+      rebuild_children
+    end
+
+    def rebuild_children
+      @children = @first_child.nil? ? [] : NodeSet.new(@first_child.collect { |node| node })
+      @children
     end
 
     def children
       return [] if @first_child.nil?
-      return @children ||= NodeSet.new(@first_child.collect { |node| node })
+      @children ||= rebuild_children
     end
 
     def children=(x)
@@ -133,7 +139,7 @@ module NoraMark
     end
 
     def children_replaced
-      @children = nil
+      rebuild_children
     end
 
     def unlink
@@ -149,6 +155,7 @@ module NoraMark
       @prev.next = @next unless @prev.nil?
       @parent.children_replaced unless @parent.nil?
       unlink
+      self
     end
 
     def after(node)

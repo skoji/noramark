@@ -465,7 +465,7 @@ describe NoraMark::Document do
       end
 
       it 'handle page change article' do
-        text = "this is start.\nnewpage(page changed):\nthis is second page.\nnewpage:\nand the third."
+        text = "this is start.\nnewpage:\n---\ntitle: page changed\n---\n\nthis is second page.\nnewpage:\nand the third."
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
         converted = noramark.html
         expect(converted.size).to eq 3
@@ -881,6 +881,7 @@ EOF
         text = "---\ntitle: page1\n---\n\n1st page.\nnewpage:\n---\ntitle: page2\n---\nh1:2nd page"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_style: :use_paragraph_group)
         converted = noramark.html
+
         # 1st page
         head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
         expect(head.element_children[0].a).to eq ['title', 'page1']

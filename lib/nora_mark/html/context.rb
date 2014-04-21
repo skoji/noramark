@@ -68,14 +68,13 @@ module NoraMark
           page << f.call
         }
         page << "</head>\n"
-        page << "<body>\n"
         @pages << page
       end
 
       def end_html
+        return if @pages.size == 0
         page = @pages.last
         if !page.frozen?
-          page << "</body>\n"
           page << "</html>\n"
           page.freeze 
         end

@@ -318,7 +318,7 @@ Page = Frontmatter?:frontmatter -
        EmptyLine*
        ~page(([frontmatter] +  blocks).select{ |x| !x.nil?}, 1)
 
-Pages = Page:page Newpage:newpage Pages:pages { [ page, newpage ] + pages }
+Pages = Page:page Newpage:newpage Pages:pages { pages.unshift(page) }
       | Page:page { [ page ] }  
 
 #root
