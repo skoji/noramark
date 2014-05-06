@@ -13,10 +13,14 @@ class NoraMark::Document
       end
       modify type: :HeadedSection do
         if @node.level == 1
-          @node.add_attr 'data-type' => [ 'chapter' ]
+          node_type = @node.p[0] || "chapter"
+          node_type = node_type.text unless node_type.is_a? String
+          if (['chapter', 'appendix'].member? node_type)
+            @node.add_attr 'data-type' => [ node_type ]
+          end
         else
           @node.level = @node.level - 1
-          @node.add_attr 'data-type' => [ "sect#{@node.level}" ]          
+          @node.add_attr 'data-type' => [ "sect#{@node.level}" ]     
         end
       end
     end

@@ -51,4 +51,22 @@ describe 'html_book plugin' do
                  ['p', 'document.']]]]]
              )
   end
+  it 'generate appendix and section' do
+    text = "---\ntitle: the title.\n---\n#(appendix) appendix title\n## section title\ndocument."
+    parsed = NoraMark::Document.parse(text, lang: 'ja')
+    xhtml = parsed.to_html_book
+    body = Nokogiri::XML::Document.parse(xhtml).root.at_xpath('xmlns:body')    
+    expect(body.selector_and_children)
+      .to eq(
+             ["body[data-type='book']",
+              ['h1', 'the title.'],
+              ["section[data-type='appendix']",
+               ['h1', 'appendix title'],
+               ["section[data-type='sect1']",
+                ['h1', 'section title'],
+                ['div.pgroup',
+                 ['p', 'document.']]]]]
+             )
+  end
+
 end

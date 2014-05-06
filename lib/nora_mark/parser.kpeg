@@ -19,7 +19,7 @@
 %% definition_list = ast DefinitionList(ids, classes, params, named_params, raw_content, line_no)
 %% preformatted_block = ast PreformattedBlock(name, ids, classes, params, named_params, codelanguage, content, line_no)
 %% frontmatter = ast Frontmatter(content, line_no)
-%% h_section = ast HeadedSection(level, heading, raw_content, line_no)
+%% h_section = ast HeadedSection(level, heading, params, named_params, raw_content, line_no)
 %% page = ast Page(raw_content, line_no)
 %% root = ast Root(raw_content)
 
@@ -265,7 +265,7 @@ HSection(n) = HStart(n):h
               EmptyLine*
               (!HMarkupTerminator(n) Block)*:content
               EmptyLine*
-              ~h_section(h[:level], h[:heading], content, h[:ln])
+              ~h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln])
 
 BlockHStart(n) = - HStartCommand(n):hsc ln:ln -
                     DocumentContentExcept('{'):s - '{' - Nl
@@ -274,7 +274,7 @@ ExplicitHSection(n) = BlockHStart(n):h
                       EmptyLine* -
                       BlockBody:content -
                       BlockEnd
-                      ~h_section(h[:level], h[:heading], content, h[:ln])
+                      ~h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln])
 
 HeadedStart = HStart(6)
             | HStart(5)
