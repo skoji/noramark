@@ -14,6 +14,9 @@ class NoraMark::Document
       modify type: :HeadedSection do
         if @node.level == 1
           @node.add_attr 'data-type' => [ 'chapter' ]
+        else
+          @node.level = @node.level - 1
+          @node.add_attr 'data-type' => [ "sect#{@node.level}" ]          
         end
       end
     end

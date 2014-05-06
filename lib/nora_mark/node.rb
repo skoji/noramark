@@ -334,6 +334,8 @@ module NoraMark
   end
 
   class HeadedSection < Node
+    attr_accessor :level
+
     def reparent
       super
       @heading.inject(nil) do

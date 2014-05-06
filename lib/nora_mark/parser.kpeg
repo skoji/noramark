@@ -251,17 +251,25 @@ HStartMark(n) = - < '#'+ > &{ text.length == n }
 HMarkupTerminator(n) = - < '#'+ > - CharString:cs Le
                          &{ text.length <= n && !cs.strip.end_with?('{') } |
                        - Eof
+HStartCommand(n)
+          = - HStartMark(n)
+          ('(' - Parameters:args - ')')?
+          ('[' - NamedParameters:named_args - ']')?
+          { { args: args || [] , named_args: named_args || {}} }
 
-HStart(n) = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
+HStart(n) =
+          - HStartCommand(n):hsc
+          ln:ln - DocumentContent:s Le { hsc.merge({ level: n, heading: s, ln: ln}) }
+
 HSection(n) = HStart(n):h
               EmptyLine*
               (!HMarkupTerminator(n) Block)*:content
               EmptyLine*
               ~h_section(h[:level], h[:heading], content, h[:ln])
 
-BlockHStart(n) = - HStartMark(n) ln:ln -
+BlockHStart(n) = - HStartCommand(n):hsc ln:ln -
                     DocumentContentExcept('{'):s - '{' - Nl
-                    { { level: n, heading: s, ln: ln} }
+                    { hsc.merge({ level: n, heading: s, ln: ln}) }
 ExplicitHSection(n) = BlockHStart(n):h
                       EmptyLine* -
                       BlockBody:content -
