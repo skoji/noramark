@@ -291,7 +291,7 @@ module NoraMark
     
     def clone
       @raw_content = nil
-      all_nodes.each { |node| @raw_content = nil }
+      all_nodes.each { |node| node.instance_eval { @raw_content = nil } }
       Marshal.restore Marshal.dump self
     end
 
