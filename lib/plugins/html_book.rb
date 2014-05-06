@@ -15,7 +15,24 @@ class NoraMark::Document
         if @node.level == 1
           node_type = @node.p[0] || "chapter"
           node_type = node_type.text unless node_type.is_a? String
-          if (['chapter', 'appendix'].member? node_type)
+          if (['chapter',
+               'appendix',
+               'afterword',
+               'bibliography',
+               'glossary',
+               'preface',
+               'foreword',
+               'introduction',
+               'halftitlepage',
+               "titlepage",
+               "copyright-page",
+               "dedication",
+               "colophon",
+               "acknowledgments",
+               "afterword",
+               "conclusion",
+               "index",
+              ].member? node_type)
             @node.add_attr 'data-type' => [ node_type ]
           end
         else
