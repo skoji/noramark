@@ -29,6 +29,10 @@ module NoraMark
     alias p params
     alias n named_params
 
+    def add_attr attr
+      (@attrs ||= {}).merge! attr
+    end
+    
     def each
       node = self
       while !node.nil?
