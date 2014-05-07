@@ -13,6 +13,10 @@ module NoraMark
     class Generator
       include Util
       attr_reader :context
+      def self.name
+        :html
+      end
+
       def initialize(param = {})
         @context = Context.new(param)
         frontmatter_writer = FrontmatterWriter.new self
