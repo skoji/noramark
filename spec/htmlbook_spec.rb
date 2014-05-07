@@ -69,4 +69,26 @@ describe 'html_book plugin' do
              )
   end
 
+  it 'generate sidebar' do
+    text = <<EOF
+---
+title: the title.
+---
+sidebar(Amusing Digression) {
+Did you know that in Boston, they call it "soda", and in Chicago, they call it "pop"?
+}
+EOF
+    parsed = NoraMark::Document.parse(text)
+    xhtml = parsed.to_html_book
+    body = Nokogiri::XML::Document.parse(xhtml).root.at_xpath('xmlns:body')
+    expect(body.selector_and_children)
+      .to eq(
+             ["body[data-type='book']",
+              ['h1', 'the title.'],
+              ["aside[data-type='sidebar']",
+               ['h5', 'Amusing Digression'],
+               ['p', 'Did you know that in Boston, they call it "soda", and in Chicago, they call it "pop"?']]]
+             )
+  end
+
 end

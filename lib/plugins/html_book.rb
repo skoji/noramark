@@ -11,6 +11,15 @@ class NoraMark::Document
                                  ) unless title.nil?
         
       end
+
+      modify "sidebar" do
+        @node.name = "aside"
+        @node.add_attr "data-type" => ["sidebar"]
+        if !@node.p[0].nil?
+          @node.prepend_child block('h5', @node.p[0].text)
+        end
+      end
+      
       modify type: :HeadedSection do
         if @node.level == 1
           node_type = @node.p[0] || "chapter"
