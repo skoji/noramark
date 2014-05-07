@@ -299,10 +299,10 @@ module NoraMark
       Marshal.restore Marshal.dump self
     end
 
-    def get_text
+    def text
       children.inject("") do
         |result, node|
-        result << node.get_text
+        result << node.text
       end
     end
 
@@ -317,10 +317,10 @@ module NoraMark
   end
 
   class DLItem < Node
-    def get_text
+    def text
       @params[0].inject('') do
         |result, node|
-        result << node.get_text
+        result << node.text
       end << super
     end
   end
@@ -329,7 +329,7 @@ module NoraMark
     def heading_info
       @name =~ /h([1-6])/
       return {} if $1.nil?
-      {level:  $1.to_i, id: @ids[0], text: get_text }
+      {level:  $1.to_i, id: @ids[0], text: text }
     end
   end
 
@@ -348,10 +348,10 @@ module NoraMark
       end
     end
 
-    def get_text
+    def text
       @heading[0].inject('') do
         |result, node|
-        result << node.get_text
+        result << node.text
       end << super
     end
 
@@ -361,7 +361,7 @@ module NoraMark
       # do nothing
     end
 
-    def get_text
+    def text
       @content
     end
   end
@@ -375,7 +375,7 @@ module NoraMark
       true
     end
 
-    def get_text
+    def text
       @content
     end
   end
@@ -389,7 +389,7 @@ module NoraMark
       true
     end
 
-    def get_text
+    def text
       @content.join "\n"
     end
   end
@@ -399,7 +399,7 @@ module NoraMark
       # do nothing
     end
 
-    def get_text
+    def text
       @content.join "\n"
     end
 
