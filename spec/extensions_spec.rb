@@ -6,12 +6,9 @@ require File.dirname(__FILE__) + '/nokogiri_test_helper.rb'
 
 describe NoraMark::Extensions do
   describe "register generator in the path" do
-    before(:all) do
+    before(:each) do
       if NoraMark.const_defined? :Tester
-        if NoraMark::Tester.const_defined? :Generator
-          NoraMark::Tester.send(:remove_const, :Generator)
-        end
-        Noramark.send(:remove_const, :Tester)
+        NoraMark::Extensions.unregister_generator(:tester)
       end
       @test_plugin_dir = File.dirname(__FILE__) + '/fixtures/test-plugins'
       $:.unshift @test_plugin_dir
@@ -21,7 +18,11 @@ describe NoraMark::Extensions do
       nora = NoraMark::Document.parse('text')
       expect(nora.tester).to eq 'it is just a test.'
     end
-    after(:all) do
+    it 'load generator from path using frontmatter' do
+      nora = NoraMark::Document.parse("---\ngenerator: tester\n---\ntext")
+      expect(nora.tester).to eq 'it is just a test.'
+    end
+    after(:each) do
       $:.delete @test_plugin_dir
     end
     
