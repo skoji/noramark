@@ -30,7 +30,7 @@ module NoraMark
       elsif File.exist? home_dir_path
         require home_dir_path
       else
-        require "noramark_#{generator.to_s.downcase}"
+        require "nora_mark_#{generator.to_s.downcase}"
       end
       const_get_if_available(module_name)
     end
