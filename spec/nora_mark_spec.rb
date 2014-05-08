@@ -149,6 +149,18 @@ describe NoraMark::Document do
                  )
       end
     end
+    describe 'attribute handling' do
+      it 'accept data- named parameter as attributes' do
+        noramark = NoraMark::Document.parse('[span[data-type:foobar]{lorem ipsum}]')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                  ['p',
+                   ["span[data-type='foobar']", 'lorem ipsum']]
+                 )
+      end
+    end
     describe 'divs and hN headers' do
       it 'parse paragraph with header' do
         text = "h1: タイトルです。\r\nここから、パラグラフがはじまります。\n\nh2.column:ふたつめの見出しです。\n ここから、次のパラグラフです。\nh3.third.foo: クラスが複数ある見出しです"

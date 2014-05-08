@@ -57,6 +57,11 @@ module NoraMark
         ids = node.ids || []
         classes = node.classes || []
         attr = node.attrs || {}
+        node.n.each { |k,v|
+          if k.to_s.start_with? 'data-'
+            attr.merge!({ k => [ v ] })
+          end
+        }
         tag_name = @tag_name || node.name
         @context << "<#{tag_name}#{ids_string(ids)}#{class_string(classes)}#{attr_string(attr)}"
         if node.body_empty

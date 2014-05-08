@@ -108,7 +108,8 @@ module NoraMark
         replace ({type: :PreformattedBlock}) do
           new_node = block('pre')
           if @node.codelanguage
-            new_node.attrs = {'data-code-language' => [@node.codelanguage]}
+            new_node.attrs = @node.attrs
+            new_node.add_attr 'data-code-language' => [@node.codelanguage]
             new_node.classes =  (@node.classes ||[]) << "code-#{@node.codelanguage}"
           end
           if @node.name == 'code'
