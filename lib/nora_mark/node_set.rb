@@ -31,7 +31,7 @@ module NoraMark
     end
 
     def text
-      @list.inject('') {|r,n| r << n.get_text }
+      @list.inject('') {|r,n| r << n.text }
     end
   end
 end

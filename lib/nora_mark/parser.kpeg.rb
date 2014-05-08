@@ -91,14 +91,18 @@ class NoraMark::Parser < KPeg::CompiledParser
       attr_reader :line_no
     end
     class HeadedSection < Node
-      def initialize(level, heading, raw_content, line_no)
+      def initialize(level, heading, params, named_params, raw_content, line_no)
         @level = level
         @heading = heading
+        @params = params
+        @named_params = named_params
         @raw_content = raw_content
         @line_no = line_no
       end
       attr_reader :level
       attr_reader :heading
+      attr_reader :params
+      attr_reader :named_params
       attr_reader :raw_content
       attr_reader :line_no
     end
@@ -294,8 +298,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     def frontmatter(content, line_no)
       ::NoraMark::Frontmatter.new(content, line_no)
     end
-    def h_section(level, heading, raw_content, line_no)
-      ::NoraMark::HeadedSection.new(level, heading, raw_content, line_no)
+    def h_section(level, heading, params, named_params, raw_content, line_no)
+      ::NoraMark::HeadedSection.new(level, heading, params, named_params, raw_content, line_no)
     end
     def inline(name, ids, classes, params, named_params, raw_content, line_no)
       ::NoraMark::Inline.new(name, ids, classes, params, named_params, raw_content, line_no)
@@ -3944,8 +3948,8 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HStart = - HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }
-  def _HStart(n)
+  # HStartCommand = - HStartMark(n) ("(" - Parameters:args - ")")? ("[" - NamedParameters:named_args - "]")? { { args: args || [] , named_args: named_args || {}} }
+  def _HStartCommand(n)
 
     _save = self.pos
     while true # sequence
@@ -3955,6 +3959,114 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _tmp = apply_with_args(:_HStartMark, n)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+
+      _save2 = self.pos
+      while true # sequence
+        _tmp = match_string("(")
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = apply(:_Parameters)
+        args = @result
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save2
+          break
+        end
+        _tmp = match_string(")")
+        unless _tmp
+          self.pos = _save2
+        end
+        break
+      end # end sequence
+
+      unless _tmp
+        _tmp = true
+        self.pos = _save1
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save3 = self.pos
+
+      _save4 = self.pos
+      while true # sequence
+        _tmp = match_string("[")
+        unless _tmp
+          self.pos = _save4
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save4
+          break
+        end
+        _tmp = apply(:_NamedParameters)
+        named_args = @result
+        unless _tmp
+          self.pos = _save4
+          break
+        end
+        _tmp = apply(:__hyphen_)
+        unless _tmp
+          self.pos = _save4
+          break
+        end
+        _tmp = match_string("]")
+        unless _tmp
+          self.pos = _save4
+        end
+        break
+      end # end sequence
+
+      unless _tmp
+        _tmp = true
+        self.pos = _save3
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      @result = begin;  { args: args || [] , named_args: named_args || {}} ; end
+      _tmp = true
+      unless _tmp
+        self.pos = _save
+      end
+      break
+    end # end sequence
+
+    set_failed_rule :_HStartCommand unless _tmp
+    return _tmp
+  end
+
+  # HStart = - HStartCommand(n):hsc ln:ln - DocumentContent:s Le { hsc.merge({ level: n, heading: s, ln: ln}) }
+  def _HStart(n)
+
+    _save = self.pos
+    while true # sequence
+      _tmp = apply(:__hyphen_)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _tmp = apply_with_args(:_HStartCommand, n)
+      hsc = @result
       unless _tmp
         self.pos = _save
         break
@@ -3981,7 +4093,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  { level: n, heading: s, ln: ln} ; end
+      @result = begin;  hsc.merge({ level: n, heading: s, ln: ln}) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -3993,7 +4105,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # HSection = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* {h_section(h[:level], h[:heading], content, h[:ln])}
+  # HSection = HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* {h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln])}
   def _HSection(n)
 
     _save = self.pos
@@ -4052,7 +4164,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; h_section(h[:level], h[:heading], content, h[:ln]); end
+      @result = begin; h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -4064,7 +4176,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # BlockHStart = - HStartMark(n) ln:ln - DocumentContentExcept('{'):s - "{" - Nl { { level: n, heading: s, ln: ln} }
+  # BlockHStart = - HStartCommand(n):hsc ln:ln - DocumentContentExcept('{'):s - "{" - Nl { hsc.merge({ level: n, heading: s, ln: ln}) }
   def _BlockHStart(n)
 
     _save = self.pos
@@ -4074,7 +4186,8 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      _tmp = apply_with_args(:_HStartMark, n)
+      _tmp = apply_with_args(:_HStartCommand, n)
+      hsc = @result
       unless _tmp
         self.pos = _save
         break
@@ -4116,7 +4229,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin;  { level: n, heading: s, ln: ln} ; end
+      @result = begin;  hsc.merge({ level: n, heading: s, ln: ln}) ; end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -4128,7 +4241,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     return _tmp
   end
 
-  # ExplicitHSection = BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd {h_section(h[:level], h[:heading], content, h[:ln])}
+  # ExplicitHSection = BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd {h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln])}
   def _ExplicitHSection(n)
 
     _save = self.pos
@@ -4169,7 +4282,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         self.pos = _save
         break
       end
-      @result = begin; h_section(h[:level], h[:heading], content, h[:ln]); end
+      @result = begin; h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln]); end
       _tmp = true
       unless _tmp
         self.pos = _save
@@ -5101,10 +5214,11 @@ class NoraMark::Parser < KPeg::CompiledParser
   Rules[:_ParagraphDelimiter] = rule_info("ParagraphDelimiter", "(BlockDelimiter | PreformattedCommandHead | LineBlock | Newpage | HeadedStart)")
   Rules[:_HStartMark] = rule_info("HStartMark", "- < \"\#\"+ > &{ text.length == n }")
   Rules[:_HMarkupTerminator] = rule_info("HMarkupTerminator", "(- < \"\#\"+ > - CharString:cs Le &{ text.length <= n && !cs.strip.end_with?('{') } | - Eof)")
-  Rules[:_HStart] = rule_info("HStart", "- HStartMark(n) ln:ln - DocumentContent:s Le { { level: n, heading: s, ln: ln} }")
-  Rules[:_HSection] = rule_info("HSection", "HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* {h_section(h[:level], h[:heading], content, h[:ln])}")
-  Rules[:_BlockHStart] = rule_info("BlockHStart", "- HStartMark(n) ln:ln - DocumentContentExcept('{'):s - \"{\" - Nl { { level: n, heading: s, ln: ln} }")
-  Rules[:_ExplicitHSection] = rule_info("ExplicitHSection", "BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd {h_section(h[:level], h[:heading], content, h[:ln])}")
+  Rules[:_HStartCommand] = rule_info("HStartCommand", "- HStartMark(n) (\"(\" - Parameters:args - \")\")? (\"[\" - NamedParameters:named_args - \"]\")? { { args: args || [] , named_args: named_args || {}} }")
+  Rules[:_HStart] = rule_info("HStart", "- HStartCommand(n):hsc ln:ln - DocumentContent:s Le { hsc.merge({ level: n, heading: s, ln: ln}) }")
+  Rules[:_HSection] = rule_info("HSection", "HStart(n):h EmptyLine* (!HMarkupTerminator(n) Block)*:content EmptyLine* {h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln])}")
+  Rules[:_BlockHStart] = rule_info("BlockHStart", "- HStartCommand(n):hsc ln:ln - DocumentContentExcept('{'):s - \"{\" - Nl { hsc.merge({ level: n, heading: s, ln: ln}) }")
+  Rules[:_ExplicitHSection] = rule_info("ExplicitHSection", "BlockHStart(n):h EmptyLine* - BlockBody:content - BlockEnd {h_section(h[:level], h[:heading], h[:args], h[:named_args], content, h[:ln])}")
   Rules[:_HeadedStart] = rule_info("HeadedStart", "(HStart(6) | HStart(5) | HStart(4) | HStart(3) | HStart(2) | HStart(1) | BlockHStart(6) | BlockHStart(5) | BlockHStart(4) | BlockHStart(3) | BlockHStart(2) | BlockHStart(1))")
   Rules[:_HeadedSection] = rule_info("HeadedSection", "(ExplicitHSection(6) | ExplicitHSection(5) | ExplicitHSection(4) | ExplicitHSection(3) | ExplicitHSection(2) | ExplicitHSection(1) | HSection(6) | HSection(5) | HSection(4) | HSection(3) | HSection(2) | HSection(1))")
   Rules[:_FrontmatterSeparator] = rule_info("FrontmatterSeparator", "- \"---\" - Nl")

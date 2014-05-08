@@ -29,6 +29,10 @@ module NoraMark
     alias p params
     alias n named_params
 
+    def add_attr attr
+      (@attrs ||= {}).merge! attr
+    end
+    
     def each
       node = self
       while !node.nil?
@@ -291,14 +295,14 @@ module NoraMark
     
     def clone
       @raw_content = nil
-      all_nodes.each { |node| @raw_content = nil }
+      all_nodes.each { |node| node.instance_eval { @raw_content = nil } }
       Marshal.restore Marshal.dump self
     end
 
-    def get_text
+    def text
       children.inject("") do
         |result, node|
-        result << node.get_text
+        result << node.text
       end
     end
 
@@ -313,10 +317,10 @@ module NoraMark
   end
 
   class DLItem < Node
-    def get_text
+    def text
       @params[0].inject('') do
         |result, node|
-        result << node.get_text
+        result << node.text
       end << super
     end
   end
@@ -325,11 +329,13 @@ module NoraMark
     def heading_info
       @name =~ /h([1-6])/
       return {} if $1.nil?
-      {level:  $1.to_i, id: @ids[0], text: get_text }
+      {level:  $1.to_i, id: @ids[0], text: text }
     end
   end
 
   class HeadedSection < Node
+    attr_accessor :level
+
     def reparent
       super
       @heading.inject(nil) do
@@ -342,10 +348,10 @@ module NoraMark
       end
     end
 
-    def get_text
+    def text
       @heading[0].inject('') do
         |result, node|
-        result << node.get_text
+        result << node.text
       end << super
     end
 
@@ -355,7 +361,7 @@ module NoraMark
       # do nothing
     end
 
-    def get_text
+    def text
       @content
     end
   end
@@ -369,7 +375,7 @@ module NoraMark
       true
     end
 
-    def get_text
+    def text
       @content
     end
   end
@@ -383,7 +389,7 @@ module NoraMark
       true
     end
 
-    def get_text
+    def text
       @content.join "\n"
     end
   end
@@ -393,7 +399,7 @@ module NoraMark
       # do nothing
     end
 
-    def get_text
+    def text
       @content.join "\n"
     end
 

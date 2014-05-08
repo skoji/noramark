@@ -5,6 +5,24 @@ module NoraMark
     attr_accessor :document_name, :root
     private_class_method :new 
 
+    def self.generators
+      @generators ||= {}
+    end
+    
+    def self.register_generator(generator)
+      @generators ||= {}
+      generator_name = generator.name
+      @generators[generator_name] = generator
+      generator.activate self if generator.respond_to? :activate
+      class_eval do
+        define_method(generator_name) do
+          generate(generator_name)
+        end
+      end
+    end
+
+    register_generator(::NoraMark::Html::Generator)
+
     def self.parse(string_or_io, param = {})
       instance = new param
       src = (string_or_io.respond_to?(:read) ? string_or_io.read : string_or_io).encode 'utf-8'
@@ -36,12 +54,16 @@ module NoraMark
       @preprocessors << block
     end
 
-    def html
-      if @html.nil?
-        @transformers[:html].each { |t| t.transform @root }
-        @html = Html::Generator.new(@param).convert(@root.clone, @render_parameter)
+    def transformers(generator_name)
+      @transformers[generator_name] ||= []
+    end
+    
+    def generate(generator_name)
+      if @result[generator_name].nil?
+        transformers(generator_name).each { |t| t.transform @root }
+        @result[generator_name] = Document.generators[generator_name].new(@param).convert(@root.clone, @render_parameter)
       end
-      @html
+      @result[generator_name]
     end
 
     def render_parameter(param = {})
@@ -55,12 +77,13 @@ module NoraMark
     
     def initialize(param = {})
       @param = param
+      @result = {}
       @preprocessors = [
                         Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
                        ]
       @document_name = param[:document_name] || "noramark_#{SecureRandom.uuid}"
       @render_parameter = {}
-      @transformers = { html: []}
+      @transformers = { }
     end 
   end
 end
