@@ -78,8 +78,9 @@ module NoraMark
       end
 
       def convert(parsed_result, render_parameter = {})
-        DEFAULT_TRANSFORMER.options[:render_parameter] = render_parameter
-        @parsed_result = DEFAULT_TRANSFORMER.transform parsed_result
+        transformer = Html.default_transformer
+        transformer.options[:render_parameter] = render_parameter
+        @parsed_result = transformer.transform parsed_result
         assign_id_to_headings 
 
         children = parsed_result.children
