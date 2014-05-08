@@ -14,11 +14,22 @@ module NoraMark
       generator_name = generator.name
       @generators[generator_name] = generator
       generator.activate self if generator.respond_to? :activate
-      class_eval do
-        define_method(generator_name) do
-          generate(generator_name)
-        end
+      define_method(generator_name) do
+        generate(generator_name)
       end
+    end
+
+    def self.unregister_generator(generator)
+      @generators ||= {}
+      if generator.is_a? Symbol or generator.is_a? String
+        generator_name = generator.to_sym
+      else
+        generator_name = generator.name        
+      end
+
+      @generators.delete generator_name
+      generator.deactivate self if generator.respond_to? :deactivate
+      remove_method generator_name
     end
 
     register_generator(::NoraMark::Html::Generator)
@@ -46,6 +57,10 @@ module NoraMark
           end
           page_no
         end
+      end
+      frontmatter = instance.root.find_node :type => :Frontmatter
+      if (frontmatter&& frontmatter.yaml['generator'])
+        NoraMark::Extensions.register_generator(frontmatter.yaml['generator'].to_sym)
       end
       instance
     end
