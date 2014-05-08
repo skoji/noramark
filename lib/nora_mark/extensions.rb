@@ -7,10 +7,17 @@ module NoraMark
       NoraMark::Document.register_generator(generator)
     end
     
-    def load_generator(generator)
-      module_name = '::NoraMark::#{generator.to_s.capitalize}::Generator'
-      return const_get(module_name) if const_defined? module_name.to_sym
-      path = "#{generator.to_s.lowercase}.rb"
+    def self.const_get_if_available(name)
+      name.split(/::/).inject(Object){|o,c|
+        o.const_get(c) if !o.nil? and o.const_defined? c
+      }       
+    end
+    
+    def self.load_generator(generator)
+      module_name = "NoraMark::#{generator.to_s.capitalize}::Generator"
+      generator_module = const_get_if_available(module_name)
+      return generator_module unless generator_module.nil?
+      path = "#{generator.to_s.downcase}.rb"
       current_dir_path = File.expand_path(File.join('.', '.noramark-plugins', path))
       home_dir_path = File.expand_path(File.join(ENV['HOME'], '.noramark-plugins', path))
       if File.exist? current_dir_path
@@ -18,9 +25,9 @@ module NoraMark
       elsif File.exist? home_dir_path
         require home_dir_path
       else
-        require "noramark/#{generator.to_s.lowercase}"
+        require "noramark_#{generator.to_s.downcase}"
       end
-      const_defined?(module_name.to_sym) ? const_get(module_name) : nil
+      return const_get_if_available(module_name)      
     end
   end
 end
