@@ -362,3 +362,16 @@ https://github.com/skoji/noramark/blob/master/emacs-mode/noramark-mode.el
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Related Project
+
+### NoraMark HTMLBook
+
+https://github.com/skoji/nora_mark_htmlbook
+HTMLBook generator plugin
+
+### NoraMark.js
+
+https://github.com/skoji/noramark.js
+JavaScript port of NoraMark.
+
