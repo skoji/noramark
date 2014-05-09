@@ -335,9 +335,11 @@ Result.
 </body>
 </html>
 ```
-### HTML generator default transformer
+### Transformer examples
 
 [HTML generator default transformer](https://github.com/skoji/noramark/blob/master/lib/nora_mark/html/default_transformer.rb) is a good example of transformer.
+
+HTMLBook also implements its own [transformer](https://github.com/skoji/nora_mark_htmlbook/blob/master/lib/nora_mark_htmlbook/transformer.rb).
 
 ## noramark-mode.el
 
