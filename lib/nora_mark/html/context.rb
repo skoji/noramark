@@ -1,7 +1,7 @@
 module NoraMark
   module Html
     class Context
-      attr_accessor :title, :head_inserters, :lang, :stylesheets, :enable_pgroup, :render_parameter
+      attr_accessor :title, :head_inserters, :lang, :stylesheets, :enable_pgroup, :render_parameter, :namespaces
       def initialize(param = {})
         @head_inserters = []
         @lang = param[:lang] || 'en'
@@ -10,7 +10,7 @@ module NoraMark
         @enable_pgroup = param[:enable_pgroup] || true
         self.paragraph_style= param[:paragraph_style]
         @pages = Pages.new(param[:sequence_format])
-        @block_delimiter_stack = []
+        @namespaces = {}
         @render_parameter = {}
         head_inserter do
           ret = ""
@@ -60,7 +60,11 @@ module NoraMark
           end_html
         end
         page = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        page << "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"#{@lang}\" xml:lang=\"#{@lang}\">\n"
+        page << "<html xmlns=\"http://www.w3.org/1999/xhtml\""
+        page << @namespaces.map do |k,v|
+          "xmlns:#{k}=\"#{v}\""
+        end.join(' ')
+        page << " lang=\"#{@lang}\" xml:lang=\"#{@lang}\">\n"
         page << "<head>\n"
         page << "<title>#{@title}</title>\n"
         @head_inserters.each {

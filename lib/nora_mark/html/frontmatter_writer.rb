@@ -18,6 +18,9 @@ module NoraMark
           end,
           paragraph_style: proc do |value|
             @context.paragraph_style = value.strip.to_sym
+          end,
+          namespace: proc do |value|
+            @context.namespaces.merge! value
           end
         }
       end

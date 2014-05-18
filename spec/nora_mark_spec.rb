@@ -1436,5 +1436,19 @@ EOF
                )
     end
   end
+  describe 'Frontmatter MetaData' do
+    it 'handle namespace' do
+      text = <<EOF
+---
+namespace: { epub: "http://www.idpf.org/2007/ops" }
+---
+text
+EOF
+      converted = NoraMark::Document.parse(text)
+      xhtml = Nokogiri::XML::Document.parse(converted.html[0])  
+      expect(xhtml.root.namespaces['xmlns:epub'])
+        .to eq 'http://www.idpf.org/2007/ops'
+    end
+  end
 end
 
