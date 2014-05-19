@@ -21,6 +21,9 @@ module NoraMark
           end,
           namespace: proc do |value|
             @context.namespaces.merge! value
+          end,
+          meta: proc do |value|
+            @context.metas << value
           end
         }
       end

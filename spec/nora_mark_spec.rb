@@ -1449,6 +1449,21 @@ EOF
       expect(xhtml.root.namespaces['xmlns:epub'])
         .to eq 'http://www.idpf.org/2007/ops'
     end
+
+    it 'handle meta tag' do
+      text = <<EOF
+---
+meta: { name: mymeta, content: mycontent }
+namespace: { epub: "http://www.idpf.org/2007/ops" }
+---
+text
+EOF
+      converted = NoraMark::Document.parse(text)
+      xhtml = Nokogiri::XML::Document.parse(converted.html[0])
+      expect(xhtml.root.at_xpath('xmlns:head/xmlns:body')).to be_nil
+      expect(xhtml.root.at_xpath('xmlns:head/xmlns:meta').selector_and_children)
+        .to eq ["meta[name='mymeta'][content='mycontent']"]
+    end
   end
 end
 

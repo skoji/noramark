@@ -1,7 +1,7 @@
 module NoraMark
   module Html
     class Context
-      attr_accessor :title, :head_inserters, :lang, :stylesheets, :enable_pgroup, :render_parameter, :namespaces
+      attr_accessor :title, :head_inserters, :lang, :stylesheets, :enable_pgroup, :render_parameter, :namespaces, :metas
       def initialize(param = {})
         @head_inserters = []
         @lang = param[:lang] || 'en'
@@ -11,10 +11,11 @@ module NoraMark
         self.paragraph_style= param[:paragraph_style]
         @pages = Pages.new(param[:sequence_format])
         @namespaces = {}
+        @metas = []
         @render_parameter = {}
         head_inserter do
           ret = ""
-          @stylesheets.each { |s|
+          @stylesheets.each do |s|
             if s.is_a? String
               ret << "<link rel=\"stylesheet\" type=\"text/css\" href=\"#{s}\" />\n"
             elsif s.is_a? Array
@@ -22,7 +23,12 @@ module NoraMark
             else
               raise "Can't use #{s} as a stylesheet"
             end
-          }
+          end
+          ret << @metas.map do |meta|
+            "<meta " + meta.map do |k,v|
+              "#{k}=\"#{v}\""
+            end.join(" ") + " />"
+          end.join("\n")
           ret
         end
       end
