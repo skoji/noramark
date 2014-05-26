@@ -1,0 +1,18 @@
+---
+lang: ja
+title: test title
+stylesheets: [css/normalize.css, css/main.css]
+---
+
+art {
+    h1: header 1
+    article comes here.
+    linebreak will produce paragraph.
+
+    blank line will procude div.pgroup.
+
+    d.column {
+        This block will produce div.column.
+        Inline commands like [link(http://github.com/skoji/nora_mark/){this}] and [sp.strong{this}] is available.
+    }
+}
