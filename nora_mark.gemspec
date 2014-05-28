@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.0.0'
   gem.add_dependency "kpeg"
-  gem.add_dependency "tilt"
+  gem.add_development_dependency "tilt", ">= 2.0"
   gem.add_development_dependency "rspec", "~> 2.14"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "byebug"

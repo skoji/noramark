@@ -1,3 +1,3 @@
 module NoraMark
-  VERSION = "0.2beta11"
+  VERSION = "0.2beta12"
 end

@@ -1,3 +1,11 @@
+# version 0.2beta8 to 0.2beta12
+
+* Plugin API for generator
+* Support video and audio tag
+* Support nested unordered list
+* Support GFM style inline code block 
+* Tilt Adapter (@KitaitiMakoto)
+
 # version 0.2beta7 (NoraMark beta)
 
 * new table of contents feature. assign table of contents heading to every heading element (h1-h2 and Markdown style header)
