@@ -129,7 +129,6 @@ module NoraMark
 
     def rebuild_children
       @children = @first_child.nil? ? [] : NodeSet.new(@first_child.collect { |node| node })
-      @children
     end
 
     def children
