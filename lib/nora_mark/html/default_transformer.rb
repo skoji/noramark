@@ -44,8 +44,9 @@ module NoraMark
 
         modify 'img' do
           @node.body_empty = true
-          (@node.attrs ||= {}).merge!({src: [@node.params[0].text ]})        
-          @node.attrs.merge!({alt: [ escape_html(@node.params[1].text.strip)]}) if (@node.p.size > 1 && @node.params[1].text.size > 0)
+          @node.attrs ||= {}
+          @node.attrs.merge!({src: [@node.params[0].text ]}) if @node.attrs[:src].nil?
+          @node.attrs.merge!({alt: [ escape_html(@node.params[1].text.strip)]}) if (@node.attrs[:alt].nil? && @node.p.size > 1 && @node.params[1].text.size > 0)
         end
 
         replace 'image' do
