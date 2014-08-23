@@ -248,7 +248,7 @@ Group 6 matches the named parameter.")
 
 (defun noramark-match-line-command (last)
   (let (cmd id class param nparam comma)
-    (cond ((search-forward-regexp (concat "^[[:space:]]*\\([A-Za-z0-9-_]+\\)" noramark-regex-command-param "[[:space:]]*\\([:{]\\)") last t)
+    (cond ((search-forward-regexp (concat "^[[:space:]]*\\([A-Za-z0-9-_]+\\)" noramark-regex-command-param "\\([:{]\\)") last t)
            (beginning-of-line)
 
            (setq cmd (list (match-beginning 1) (match-end 1))
