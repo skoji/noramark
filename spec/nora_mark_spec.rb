@@ -709,6 +709,17 @@ describe NoraMark::Document do
                   ['p', ['code.the-class', 'this is inside code and `backquote will not be parsed`'], '. you see?']
                  ])
       end
+      it 'handle non-escaped inline' do
+        text = "the text following will not be escaped: [noescape{&#169;}]"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html        
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['div.pgroup', 
+                  ['p', 'the text following will not be escaped: ©']
+                 ])
+      end
     end
     describe 'list' do
       it 'handle ordered list ' do

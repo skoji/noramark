@@ -103,7 +103,11 @@ module NoraMark
 
       def to_html(node)
         if node.kind_of? Text
-          @context << escape_html(node.content)
+          if node.noescape
+            @context << node.content
+          else
+            @context << escape_html(node.content)
+          end
         else
           writer = @writers[node.class]
           if writer.nil?

@@ -31,6 +31,12 @@ module NoraMark
           (@node.attrs ||= {}).merge!({href: [@node.params[0].text]})
         end
 
+        replace 'noescape' do
+          node = text(@node.text)
+          node.noescape = true
+          node
+        end
+
         modify 'ruby' do
           @node.append_child inline 'rp', '('
           @node.append_child inline 'rt', escape_html(@node.params[0].text.strip)

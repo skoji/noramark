@@ -356,6 +356,7 @@ module NoraMark
 
   end
   class Text < Node
+    attr_accessor :noescape
     def reparent
       # do nothing
     end
