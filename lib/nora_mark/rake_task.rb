@@ -34,9 +34,9 @@ module NoraMark
         nora =
           NoraMark::Document.parse(
                                    File.open(t.source),
-                                   :lang => @lang,
+                                   :lang => @lang.to_s,
                                    :sequence_format => "%0#{page_number_digits}d",
-                                   :document_name=>t.name.sub(/_[0-9]{3}\.xhtml/, '')) do
+                                   :document_name=>t.name.sub(/_[0-9]{#{page_number_digits}}\.xhtml/, '')) do
           |doc|
           @preprocessors.each do
             |prepro|
