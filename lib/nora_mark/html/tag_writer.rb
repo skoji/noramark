@@ -31,11 +31,11 @@ module NoraMark
           if vals.nil?
             ''
           elsif !vals.is_a? Array
-            " #{name}='#{name}'"
+            " #{name}='#{escape_html(name)}'"
           elsif vals.size == 0
             ''
           else
-            " #{name}='#{vals.join(' ')}'"            
+            " #{name}='#{escape_html(vals.join(' '))}'"            
           end
         end.join('')
       end

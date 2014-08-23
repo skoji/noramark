@@ -24,7 +24,7 @@
 <section><h3 id='heading_index_4'>Gemfile</h3>
 <div class='pgroup'><p>Gemfileに次のように書きます</p>
 </div>
-<pre><code>gem 'nora_mark' </code>
+<pre><code>gem &#39;nora_mark&#39; </code>
 </pre>
 <div class='pgroup'><p>そして、</p>
 </div>
@@ -48,9 +48,9 @@
 </div>
 </section>
 <section><h3 id='heading_index_8'>コードから</h3>
-<pre class='code-ruby' data-code-language='ruby'><code>require 'nora_mark'
+<pre class='code-ruby' data-code-language='ruby'><code>require &#39;nora_mark&#39;
 
-document = NoraMark::Document.parse(string_or_io, lang: 'ja')
+document = NoraMark::Document.parse(string_or_io, lang: &#39;ja&#39;)
 document.html.write_as_files</code>
 </pre>
 </section>
@@ -60,9 +60,9 @@ document.html.write_as_files</code>
 <ol><li>normark-mode.elをEmacsのload-pathが通った場所に配置してください。</li>
 <li><code>~/.emacs.d/init.el</code>に次の記述をしてください。</li>
 </ol>
-<pre class='code-emacs-lisp' data-code-language='emacs-lisp'><code>(require 'noramark-mode)
-(setq auto-mode-alist (cons '(&quot;\\.nora$&quot; . noramark-mode) auto-mode-alist))
-(setq auto-mode-alist (cons '(&quot;-nora\\.txt$&quot; . noramark-mode) auto-mode-alist))</code>
+<pre class='code-emacs-lisp' data-code-language='emacs-lisp'><code>(require &#39;noramark-mode)
+(setq auto-mode-alist (cons &#39;(&quot;\\.nora$&quot; . noramark-mode) auto-mode-alist))
+(setq auto-mode-alist (cons &#39;(&quot;-nora\\.txt$&quot; . noramark-mode) auto-mode-alist))</code>
 </pre>
 </section>
 </section>
@@ -79,18 +79,18 @@ document.html.write_as_files</code>
 ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。</pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;div class='pgroup'&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;div class=&#39;pgroup&#39;&gt;
 &lt;p&gt;吾輩は猫である。名前はまだ無い。&lt;/p&gt;
 &lt;p&gt;どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。&lt;/p&gt;
 &lt;p&gt;＜中略＞&lt;/p&gt;
 &lt;p&gt;この書生の掌の裏うちでしばらくはよい心持に坐っておったが、しばらくすると非常な速力で運転し始めた。&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class='pgroup'&gt;
+&lt;div class=&#39;pgroup&#39;&gt;
 &lt;p&gt;ふと気が付いて見ると書生はいない。たくさんおった兄弟が一疋ぴきも見えぬ。&lt;/p&gt;
 &lt;/div&gt;</code>
 </pre>
 </div>
-<div class='pgroup'><p>改行ごとに<code>&lt;p&gt;</code>要素がつくられます。空行で区切られると<code>&lt;div class='pgroup'&gt;</code>がつくられます。</p>
+<div class='pgroup'><p>改行ごとに<code>&lt;p&gt;</code>要素がつくられます。空行で区切られると<code>&lt;div class=&#39;pgroup&#39;&gt;</code>がつくられます。</p>
 </div>
 <div class='pgroup'><p>言語が日本語(ja)以外の場合は、次のようになります。</p>
 </div>
@@ -163,7 +163,7 @@ Ut enim ad minim veniam, quis nostrud exercitation </pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;blockquote&gt;
-&lt;div class='pgroup'&gt;
+&lt;div class=&#39;pgroup&#39;&gt;
 &lt;p&gt;山路を登りながら、こう考えた。&lt;/p&gt;
 &lt;p&gt;智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい&lt;/p&gt;
 &lt;/div&gt;
@@ -236,7 +236,7 @@ puts &quot;Hello, World.&quot;
 </pre>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;pre class='code-ruby' data-code-language='ruby'&gt;&lt;code&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;pre class=&#39;code-ruby&#39; data-code-language=&#39;ruby&#39;&gt;&lt;code&gt;
 puts &quot;Hello, World.&quot;
 &lt;/code&gt;&lt;/pre&gt;</code>
 </pre>
@@ -245,23 +245,23 @@ puts &quot;Hello, World.&quot;
 <section><h5 id='heading_index_15'>キャプションの指定</h5>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>code(ソースコードはこちら) {
-puts 'Hello, World'
+puts &#39;Hello, World&#39;
 }</pre>
 </div>
 <div class='pgroup'><p>または、こんな書き方もできます。</p>
 </div>
 <div class='pre'><p class='caption'>原稿</p>
 <pre>```(ソースコードはこちら)
-puts 'Hello, World'
+puts &#39;Hello, World&#39;
 ```</pre>
 </div>
 <div class='pgroup'><p>こんな風になります。</p>
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;div class='pre'&gt;
-&lt;p class='caption'&gt;原稿はこちら&lt;/p&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;div class=&#39;pre&#39;&gt;
+&lt;p class=&#39;caption&#39;&gt;原稿はこちら&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;
-puts 'Hello, World'
+puts &#39;Hello, World&#39;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;</code>
 </pre>
@@ -280,7 +280,7 @@ puts 'Hello, World'
 </div>
 <pre>[l(http://github.com/skoji/noramark){NoraMarkのレポジトリ}]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;a href='http://github.com/skoji/noramark'&gt;NoraMarkのレポジトリ&lt;/a&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;a href=&#39;http://github.com/skoji/noramark&#39;&gt;NoraMarkのレポジトリ&lt;/a&gt;</code>
 </pre>
 </div>
 </dd>
@@ -289,7 +289,7 @@ puts 'Hello, World'
 </div>
 <pre>[sp.note{spanの中にはいる}]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;span class='note&quot;&gt;spanの中に入る&lt;/span&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;span class=&#39;note&quot;&gt;spanの中に入る&lt;/span&gt;</code>
 </pre>
 </div>
 </dd>
@@ -298,7 +298,7 @@ puts 'Hello, World'
 </div>
 <pre>[img(img/some_image.jpg,alternate text)]</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;img src='img/some_image.jpg' alt='alternate text' /&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;img src=&#39;img/some_image.jpg&#39; alt=&#39;alternate text&#39; /&gt;</code>
 </pre>
 </div>
 </dd>
@@ -307,7 +307,7 @@ puts 'Hello, World'
 </div>
 <pre>FM TOWNSが登場してからすでに[tcy{25}]年がたった。</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;p&gt;FM TOWNSが登場してからすでに&lt;span class='tcy'&gt;25&lt;/span&gt;年がたった。&lt;/p&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;p&gt;FM TOWNSが登場してからすでに&lt;span class=&#39;tcy&#39;&gt;25&lt;/span&gt;年がたった。&lt;/p&gt;</code>
 </pre>
 </div>
 </dd>
@@ -350,7 +350,7 @@ puts 'Hello, World'
 </div>
 <pre>p.caution: 用量に注意してご利用ください。</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;p class='caution'&gt;用量に注意してご利用ください。&lt;/p&gt;</code>
+<pre class='code-html' data-code-language='html'><code>&lt;p class=&#39;caution&#39;&gt;用量に注意してご利用ください。&lt;/p&gt;</code>
 </pre>
 </div>
 <dl><dt>image</dt>
@@ -358,8 +358,8 @@ puts 'Hello, World'
 </div>
 <pre>image(path-to-image/img.jpg, 代替テキスト): イメージのキャプション</pre>
 <div class='pre'><p class='caption'>変換結果</p>
-<pre class='code-html' data-code-language='html'><code>&lt;figure class='img-wrap'&gt;
-&lt;img src='path-to-image/img.jpg' alt='代替テキスト' /&gt;
+<pre class='code-html' data-code-language='html'><code>&lt;figure class=&#39;img-wrap&#39;&gt;
+&lt;img src=&#39;path-to-image/img.jpg&#39; alt=&#39;代替テキスト&#39; /&gt;
 &lt;figcaption&gt;イメージのキャプション&lt;/figcaption&gt;
 &lt;/figure&gt;</code>
 </pre>
@@ -478,7 +478,7 @@ li: 第三の要素
 </div>
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;h1&gt;単独の見出し&lt;/h1&gt;
-&lt;div class='pgroup'&gt;
+&lt;div class=&#39;pgroup&#39;&gt;
 &lt;p&gt;ここに本文&lt;/p&gt;
 &lt;/div&gt;</code>
 </pre>
@@ -494,7 +494,7 @@ li: 第三の要素
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;section&gt;
   &lt;h1&gt;見出し&lt;/h1&gt;
-  &lt;div class='pgroup'&gt;
+  &lt;div class=&#39;pgroup&#39;&gt;
     &lt;p&gt;本文&lt;/p&gt;
   &lt;/div&gt;
 &lt;/section&gt;</code>
@@ -513,19 +513,19 @@ li: 第三の要素
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;section&gt;
   &lt;h1&gt;見出し&lt;/h1&gt;
-  &lt;div class='pgroup'&gt;
+  &lt;div class=&#39;pgroup&#39;&gt;
     &lt;p&gt;本文&lt;/p&gt;
   &lt;/div&gt;
   &lt;section&gt;
     &lt;h2&gt;小見出し&lt;/h2&gt;
-      &lt;div class='pgroup'&gt;
+      &lt;div class=&#39;pgroup&#39;&gt;
         &lt;p&gt;次の本文&lt;/p&gt;
       &lt;/div&gt;
   &lt;/section&gt;
 &lt;/section&gt;
 &lt;section&gt;
   &lt;h1&gt;新しい章&lt;/h1&gt;
-  &lt;div class='pgroup'&gt;
+  &lt;div class=&#39;pgroup&#39;&gt;
     &lt;p&gt;新しい章の本文&lt;/p&gt;
   &lt;/div&gt;
 &lt;/section&gt;</code>
@@ -544,15 +544,15 @@ li: 第三の要素
 <div class='pre'><p class='caption'>変換結果</p>
 <pre class='code-html' data-code-language='html'><code>&lt;section&gt;
   &lt;h1&gt;第一のセクション&lt;/h1&gt;
-  &lt;div class='pgroup'&gt;
+  &lt;div class=&#39;pgroup&#39;&gt;
   &lt;p&gt;ここは第一のセクション&lt;/p&gt;
   &lt;/div&gt;
   &lt;section&gt;第二のセクション&lt;/h1&gt;
-    &lt;div class='pgroup'&gt;
+    &lt;div class=&#39;pgroup&#39;&gt;
     &lt;p&gt;ここは第二のセクション&lt;/p&gt;
     &lt;/div&gt;
   &lt;/section&gt;
-  &lt;div class='pgroup'&gt;
+  &lt;div class=&#39;pgroup&#39;&gt;
   &lt;p&gt;ここは再び第一のセクション&lt;/p&gt;
   &lt;/div&gt;
 &lt;/section&gt;</code>
