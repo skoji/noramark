@@ -10,10 +10,12 @@ opt.on('--kconv') {
 
 opt.parse(ARGV)
 
-if !ARGV[0].nil? and File.exist? File.join(File.dirname(ARGV[0]), 'transformer.rb')
-  transformer = File.open(File.join(
+transformer_name = File.join(
                           File.dirname(ARGV[0]),
-                          File.basename(ARGV[0], '.txt') + '-transform.rb')).read
+                          File.basename(ARGV[0], '.txt') + '-transform.rb') if !ARGV[0].nil?
+
+if !transformer_name.nil? and File.exist? transformer_name
+  transformer = File.open(transformer_name).read
 end
 
 input = ARGF.read
