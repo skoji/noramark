@@ -59,9 +59,12 @@ module NoraMark
         end
       end
       frontmatter = instance.root.find_node :type => :Frontmatter
-      if (frontmatter&& frontmatter.yaml['generator'])
-        NoraMark::Extensions.register_generator(frontmatter.yaml['generator'].to_sym)
+      if (frontmatter)
+        if (frontmatter.yaml['generator'])
+          NoraMark::Extensions.register_generator(frontmatter.yaml['generator'].to_sym)
+        end
       end
+      
       instance
     end
 
