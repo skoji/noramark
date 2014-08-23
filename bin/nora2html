@@ -8,8 +8,19 @@ opt.on('--kconv') {
   auto_convert_encode = true
 }
 
-args = opt.parse(ARGV)
+opt.parse(ARGV)
+
+if !ARGV[0].nil? and File.exist? File.join(File.dirname(ARGV[0]), 'transformer.rb')
+  transformer = File.open(File.join(
+                          File.dirname(ARGV[0]),
+                          File.basename(ARGV[0], '.txt') + '-transform.rb')).read
+end
+
 input = ARGF.read
 input = Kconv.toutf8(input) if auto_convert_encode
 
-puts NoraMark::Document::parse(input).render_parameter(nonpaged: true).html[0]
+doc =  NoraMark::Document::parse(input)
+
+doc.add_transformer(text: transformer) unless transformer.nil?
+
+puts doc.render_parameter(nonpaged: true).html[0]
