@@ -56,10 +56,13 @@ module NoraMark
         end
 
         replace 'image' do
+          imagenode = inline('img', nil,
+                             body_empty: true,
+                             attrs: {src: [ @node.params[0].text.strip],  alt: [ (@node.params[1].text ||'').strip ] })
           newnode = block('figure',
                           class_if_empty:'img-wrap',
                           ids: @node.ids,
-                          children: [ inline('img', nil, attrs: {src: [ @node.params[0].text.strip],  alt: [ (@node.params[1].text ||'').strip ] }) ],
+                          children: [ imagenode],
                           template: @node) 
           if !@node.children_empty?
             if @node.n[:caption_before] 
