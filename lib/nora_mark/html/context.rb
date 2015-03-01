@@ -68,7 +68,7 @@ module NoraMark
         page = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         page << "<html xmlns=\"http://www.w3.org/1999/xhtml\""
         page << @namespaces.map do |k,v|
-          "xmlns:#{k}=\"#{v}\""
+          " xmlns:#{k}=\"#{v}\""
         end.join(' ')
         page << " lang=\"#{@lang}\" xml:lang=\"#{@lang}\">\n"
         page << "<head>\n"
