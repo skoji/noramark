@@ -28,6 +28,9 @@ module NoraMark
         }
       end
       def write(node)
+        if node.yaml.keys.map(&:to_sym).include? :stylesheets
+          @context.stylesheets = []
+        end
         node.yaml.each {
           |k,v|
           writer = @writers[k.to_sym]

@@ -88,7 +88,26 @@ module NoraMark
           page << "</html>\n"
           page.freeze 
         end
+        restore_metas
       end
+
+      # save metadata written with Frontmatter Writer
+      def save_metas
+        @saved_metas = {
+          stylesheets: @stylesheets,
+          title: @title,
+          lang: @lang,
+          paragraph_style: @paragraph_style,
+          namespaces: @namespaces,
+          metas: @metas
+        }
+      end
+      def restore_metas
+        return if @saved_metas.nil?
+        @stylesheets,@title,@lang,@paragraph_style,@namespaces,@metas = @saved_metas.values
+        @saved_metas = nil
+      end
+
 
       def <<(text)
         if @pages.size == 0 || @pages.last.frozen?
@@ -100,6 +119,7 @@ module NoraMark
       def set_toc toc
         @pages.set_toc toc
       end
+
       def result
         if !@pages.last.frozen?
           end_html
