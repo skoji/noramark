@@ -3,6 +3,7 @@ module NoraMark
     class Context
       attr_accessor :title, :head_inserters, :lang, :stylesheets, :enable_pgroup, :render_parameter, :namespaces, :metas
       def initialize(param = {})
+        @default_param = param
         @head_inserters = []
         @lang = param[:lang] || 'en'
         @title = param[:title] || 'NoraMark generated document'
@@ -10,8 +11,8 @@ module NoraMark
         @enable_pgroup = param[:enable_pgroup] || true
         self.paragraph_style= param[:paragraph_style]
         @pages = Pages.new(param[:sequence_format])
+        @metas = param[:metas] || []
         @namespaces = {}
-        @metas = []
         @render_parameter = {}
         head_inserter do
           ret = ""
@@ -93,21 +94,22 @@ module NoraMark
 
       # save metadata written with Frontmatter Writer
       def save_metas
-        @saved_metas = {
-          stylesheets: @stylesheets,
-          title: @title,
-          lang: @lang,
-          paragraph_style: @paragraph_style,
-          namespaces: @namespaces,
-          metas: @metas
-        }
-      end
-      def restore_metas
-        return if @saved_metas.nil?
-        @stylesheets,@title,@lang,@paragraph_style,@namespaces,@metas = @saved_metas.values
-        @saved_metas = nil
+        @default_param[:styleheets] ||= @stylesheets if !@stylesheets.nil? && @stylesheets.size > 0
+        @default_param[:title] ||= @title
+        @default_param[:lang] ||= @lang
+        @default_param[:paragraph_style] ||= @paragraph_style
+        @default_param[:namespaces] ||=  @namespaces if !@namespaces.nil? && @namespaces.size > 0
+        @default_param[:metas] ||= @metas if !@metas.nil? && @metas.size > 0
       end
 
+      def restore_metas
+        @stylesheets = @default_param[:styleheets] || @stylesheets
+        @title = @default_param[:title] || @title
+        @lang = @default_param[:lang]  || @lang
+        @paragraph_style = @default_param[:paragraph_style] || @paragraph_style
+        @namespaces = @default_param[:namespaces]  || @namespaces
+        @metas = @default_param[:metas]  || @metas
+      end
 
       def <<(text)
         if @pages.size == 0 || @pages.last.frozen?

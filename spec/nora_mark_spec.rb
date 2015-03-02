@@ -951,8 +951,39 @@ EOF
         expect(head.element_children[0].a).to eq ['title', 'page 2']
         expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='alternative.css']", '']
         # 3rd page
+        head = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'the title']
+        expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='default.css']", '']
+      end
+
+            it 'specify stylesheet on each page, with default supplied' do
+        text = <<EOF
+---
+title: document title 1st
+---
+1st page.
+newpage:
+---
+title: page 2
+stylesheets: alternative.css
+---
+2nd page with alternative stylesheet.
+newpage:
+3rd page with default css.
+EOF
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title', paragraph_style: :use_paragraph_group, stylesheets: ['default.css'])
+        converted = noramark.html
+        # 1st page
         head = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:head')
-        expect(head.element_children[0].a).to eq ['title', 'the document title']
+        expect(head.element_children[0].a).to eq ['title', 'document title 1st']
+        expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='default.css']", '']
+        # 2nd page
+        head = Nokogiri::XML::Document.parse(converted[1]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'page 2']
+        expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='alternative.css']", '']
+        # 3rd page
+        head = Nokogiri::XML::Document.parse(converted[2]).root.at_xpath('xmlns:head')
+        expect(head.element_children[0].a).to eq ['title', 'the title']
         expect(head.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='default.css']", '']
       end
 
