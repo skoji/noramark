@@ -129,6 +129,39 @@ EOF
                ['div.the_class', ['p', '3rd line.']])
     end
 
+    it 'removes node' do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      second_div = page.children[1]
+      second_div.remove
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.selector_and_children(remove_id: false))
+        .to eq(["body", ["p", "1st line."], ["p", "5th line."]])
+    end
+
+    it 'removes all nodes after specified node' do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      second_div = page.children[1]
+      second_div.remove_following
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.selector_and_children(remove_id: false))
+        .to eq(["body", ["p", "1st line."]])
+    end
+
+    it 'replace with removed nodes' do
+      noramark = NoraMark::Document.parse(@text)
+      page = noramark.root.children[0]
+      first_p = page.children[0]
+      second_div = page.children[1]
+      removed = second_div.remove_following
+      first_p.replace(removed)
+      body = Nokogiri::XML::Document.parse(noramark.html[0]).root.at_xpath('xmlns:body')
+      expect(body.selector_and_children(remove_id: false))
+        .to eq(["body", ["div.the_class", ["p", "3rd line."]], ["p", "5th line."]])
+    end
+
+    
     it 'modify existing node by DSL' do
       text = "1st line.\nfoobar(title)[level: 3] {\n in the section.\n}\n# section 2."
       noramark = NoraMark::Document.parse(text, lang: 'ja')

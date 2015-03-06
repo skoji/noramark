@@ -36,8 +36,8 @@ module NoraMark
     def each
       node = self
       while !node.nil?
-        yield node
-        node = node.next
+        node, node_old = node.next, node
+        yield node_old
       end
     end
 
@@ -151,14 +151,29 @@ module NoraMark
       @next = nil
     end
 
-    def remove
+    def _remove_internal
       @parent.first_child = @next  if !@parent.nil? && @parent.first_child == self
       @parent.last_child = @prev  if !@parent.nil? && @parent.last_child == self
       @next.prev = @prev unless @next.nil?
       @prev.next = @next unless @prev.nil?
+    end
+    
+    def remove
+      _remove_internal
       @parent.children_replaced unless @parent.nil?
       unlink
       self
+    end
+
+    def remove_following
+      parent = @parent
+      r = self.map do |node|
+        node._remove_internal
+        node.unlink
+        node
+      end
+      parent.children_replaced
+      r
     end
 
     def after(node)
@@ -309,6 +324,16 @@ module NoraMark
 
   class Root < Node
     attr_accessor :document_name
+
+    def assign_pageno
+      @first_child.inject(1) do |page_no, node|
+        if node.kind_of? Page
+          node.page_no = page_no
+          page_no = page_no + 1
+        end
+        page_no
+      end
+    end
   end
 
   class Page < Node
