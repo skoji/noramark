@@ -57,6 +57,16 @@ module NoraMark
           end
         end
       end 
+      def write_toc_as_file(directory: nil)
+        return if @toc.nil?
+        dir = directory || Dir.pwd
+        Dir.chdir(dir) do
+          File.open("#{@file_basename}.yaml", 'w+') do
+            |file|
+            file << YAML.dump(@toc)
+          end
+        end
+      end
     end
   end
 end

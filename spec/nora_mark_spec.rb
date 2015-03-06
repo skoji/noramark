@@ -1388,6 +1388,7 @@ EOF
         expect(files).to include 'nora-test-file_001.xhtml'
         expect(files).to include 'nora-test-file_002.xhtml'
       end
+
     end
     describe 'parse and create manual' do
       before {
@@ -1421,6 +1422,7 @@ EOF
     end
     describe 'table of contents' do
       before do
+        @basedir = File.join(File.dirname(__FILE__), 'created_files')        
         @text = <<EOF
 ---
 lang: ja
@@ -1436,8 +1438,9 @@ h6: [strong{some column}]
 text
 }
 EOF
-        @noramark = NoraMark::Document.parse(@text, document_name: 'nora')
+        @noramark = NoraMark::Document.parse(@text, document_name: 'nora-with-toc')
       end
+      after { Dir.glob(File.join(@basedir, '*.yaml')) { |file| File.delete file } }
       it 'should assign ids to headers' do
         body = Nokogiri::XML::Document.parse(@noramark.html[0]).root.at_xpath('xmlns:body')
         h1 = body.at_xpath('//xmlns:h1')
@@ -1452,12 +1455,27 @@ EOF
         toc = @noramark.html.toc
         expect(toc.size).to eq 3
         expect(toc[0])
-          .to eq({link: "nora_00001.xhtml#heading_index_1", level: 1, text: "chapter 1"})
+          .to eq({link: "nora-with-toc_00001.xhtml#heading_index_1", level: 1, text: "chapter 1"})
         expect(toc[1])
-          .to eq({link: "nora_00001.xhtml#heading_index_2", level: 2, text: "section 1-1"})
+          .to eq({link: "nora-with-toc_00001.xhtml#heading_index_2", level: 2, text: "section 1-1"})
         expect(toc[2])
-          .to eq({link: "nora_00002.xhtml#heading_index_3", level: 6, text: "some column"})
+          .to eq({link: "nora-with-toc_00002.xhtml#heading_index_3", level: 6, text: "some column"})
       end
+      it 'should generate and write tocs' do
+        @noramark.html.write_toc_as_file(directory: @basedir)
+        expect(File.exist?(File.join(@basedir, 'nora-with-toc.yaml')))
+        File.open(File.join(@basedir, 'nora-with-toc.yaml')) do
+          |file|
+          toc = YAML.load(file.read)
+          expect(toc[0])
+            .to eq({link: "nora-with-toc_00001.xhtml#heading_index_1", level: 1, text: "chapter 1"})
+          expect(toc[1])
+            .to eq({link: "nora-with-toc_00001.xhtml#heading_index_2", level: 2, text: "section 1-1"})
+          expect(toc[2])
+            .to eq({link: "nora-with-toc_00002.xhtml#heading_index_3", level: 6, text: "some column"})
+        end
+      end
+
     end
     it 'should raise error' do
       text = "d {\n block is\nd {\n nested but\nd {\n not terminated }"

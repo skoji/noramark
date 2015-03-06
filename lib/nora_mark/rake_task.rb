@@ -3,7 +3,7 @@ require 'rake/tasklib'
 
 module NoraMark
   class RakeTask < ::Rake::TaskLib
-    attr_accessor :lang, :page_number_digits
+    attr_accessor :lang, :page_number_digits, :write_toc_file
     def initialize(lang: 'en')
       @preprocessors = []
       @transformers = []
@@ -21,6 +21,14 @@ module NoraMark
       @transformers << block;
     end
 
+    def html
+      return @nora.html if !@nora.nil?
+    end
+
+    def toc
+      return @nora.html.toc if !@nora.nil? && !@nora.html.nil?
+    end
+
     def define
       desc "rule for *-nora.txt to *-nora_xxx.html. Use *-nora-transform.rb on same directory as transformer"
       rule( /-((nora)|(arti))_[0-9]{#{page_number_digits}}\.xhtml/ =>
@@ -30,8 +38,9 @@ module NoraMark
         |t|
 
         dir =  File.dirname File.expand_path(t.source)
-        transformer_name = File.join dir, File.basename(t.source, '.txt') + '-transform.rb'
-        nora =
+        basename = File.basename(t.source, '.txt')
+        transformer_name = File.join dir, basename + '-transform.rb'
+        @nora =
           NoraMark::Document.parse(
                                    File.open(t.source),
                                    :lang => @lang.to_s,
@@ -50,7 +59,10 @@ module NoraMark
             doc.add_transformer(text: File.open(transformer_name).read)
           end
         end
-        nora.html.write_as_files
+        @nora.html.write_as_files
+        if (@write_toc_file)
+          @nora.html.write_toc_as_file
+        end
       end
       
     end
