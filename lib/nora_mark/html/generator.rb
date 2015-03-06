@@ -26,10 +26,10 @@ module NoraMark
                                        node_preprocessor: proc do |node|
                                          @context.end_html
                                          if node.first_child.class == Frontmatter
-                                           @context.save_metas
                                            frontmatter = node.first_child
                                            frontmatter_writer.write frontmatter
                                            frontmatter.remove
+                                           @context.save_default_metas
                                          end
                                          node
                                        end);
