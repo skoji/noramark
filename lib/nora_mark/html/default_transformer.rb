@@ -108,7 +108,12 @@ module NoraMark
         end
 
         replace({type: :HeadedSection}) do
-          block('section', [ block("h#{@node.level}", @node.heading, ids: @node.n[:heading_id], n: {chop_last_space: true}) ] + @node.children, template: @node)
+          if @node.named_params[:without_header]
+            content = @node.children
+          else
+            content = [ block("h#{@node.level}", @node.heading, ids: @node.n[:heading_id], n: {chop_last_space: true}) ] + @node.children
+          end
+          block('section', content, template: @node)
         end
 
         replace ({type: :CodeInline}) do

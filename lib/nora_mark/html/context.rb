@@ -94,7 +94,7 @@ module NoraMark
 
       # save metadata written with Frontmatter Writer
       def save_default_metas
-        @default_param[:styleheets] ||= @stylesheets if !@stylesheets.nil? && @stylesheets.size > 0
+        @default_param[:stylesheets] ||= @stylesheets if !@stylesheets.nil? && @stylesheets.size > 0
         @default_param[:title] ||= @title
         @default_param[:lang] ||= @lang
         @default_param[:paragraph_style] ||= @paragraph_style
@@ -103,7 +103,7 @@ module NoraMark
       end
 
       def restore_metas
-        @stylesheets = @default_param[:styleheets] || @stylesheets
+        @stylesheets = @default_param[:stylesheets] || @stylesheets
         @title = @default_param[:title] || @title
         @lang = @default_param[:lang]  || @lang
         @paragraph_style = @default_param[:paragraph_style] || @paragraph_style

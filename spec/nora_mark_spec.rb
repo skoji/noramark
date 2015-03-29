@@ -1221,6 +1221,21 @@ EOF
                    ['p', 'これは、セクションの中です。']]]
                  )
       end
+
+      it 'should convert markdown style heading : without header' do
+        text = "#[without_header: true]: タイトル です。\r\n\r\nこれは、セクションの中です。"
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children.size).to eq 1
+        expect(body.element_children[0].selector_and_children)
+          .to eq(
+                 ['section',
+                  ['div.pgroup', 
+                   ['p', 'これは、セクションの中です。']]]
+                 )
+      end
+      
       it 'should convert markdown style heading with empty body' do
         text = "# タイトルです。\n* 中身です。\n\n## 次のタイトルです。これから書きます。\n\n## ここもこれから。"
         noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')

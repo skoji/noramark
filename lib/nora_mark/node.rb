@@ -172,7 +172,7 @@ module NoraMark
         node.unlink
         node
       end
-      parent.children_replaced
+      parent.children_replaced if parent
       r
     end
 

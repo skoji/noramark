@@ -3,7 +3,7 @@ require 'rake/tasklib'
 
 module NoraMark
   class RakeTask < ::Rake::TaskLib
-    attr_accessor :lang, :page_number_digits, :write_toc_file
+    attr_accessor :lang, :page_number_digits, :title, :stylesheets, :write_toc_file
     def initialize(lang: 'en')
       @preprocessors = []
       @transformers = []
@@ -40,12 +40,16 @@ module NoraMark
         dir =  File.dirname File.expand_path(t.source)
         basename = File.basename(t.source, '.txt')
         transformer_name = File.join dir, basename + '-transform.rb'
+        parameters = {
+          :lang => @lang.to_s,
+          :sequence_format => "%0#{page_number_digits}d",
+          :document_name=>t.name.sub(/_[0-9]{#{page_number_digits}}\.xhtml/, '')
+        }
+        parameters[:stylesheets] = @stylesheets unless @stylesheets.nil?
+        parameters[:title] = @title unless @title.nil?
         @nora =
           NoraMark::Document.parse(
-                                   File.open(t.source),
-                                   :lang => @lang.to_s,
-                                   :sequence_format => "%0#{page_number_digits}d",
-                                   :document_name=>t.name.sub(/_[0-9]{#{page_number_digits}}\.xhtml/, '')) do
+                                   File.open(t.source), parameters) do
           |doc|
           @preprocessors.each do
             |prepro|
