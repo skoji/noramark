@@ -1203,7 +1203,29 @@ EOF
         expect(body.element_children[2].selector_and_children)
           .to eq(["div.pgroup", ["p", "normal line again."]])
       end
-
+      it 'convert noescape block' do
+        text = <<EOF
+normal line.
+noescape {
+<table>
+<tr><td>you can write anything here.</td></tr>
+</table>
+}
+normal line again.
+EOF
+        noramark = NoraMark::Document.parse(text, lang: 'ja', title: 'the title')
+        converted = noramark.html
+        body = Nokogiri::XML::Document.parse(converted[0]).root.at_xpath('xmlns:body')
+        expect(body.element_children[0].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line."]])
+        expect(body.element_children[1].selector_and_children)
+          .to eq(
+                ["table",
+                 ["tr",
+                  ["td", 'you can write anything here.']]])
+        expect(body.element_children[2].selector_and_children)
+          .to eq(["div.pgroup", ["p", "normal line again."]])
+      end
     end
 
     describe 'markdown style' do

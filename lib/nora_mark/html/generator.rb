@@ -6,6 +6,7 @@ require 'nora_mark/html/tag_writer'
 require 'nora_mark/html/frontmatter_writer'
 require 'nora_mark/html/paragraph_writer'
 require 'nora_mark/html/abstract_node_writer'
+require 'nora_mark/html/raw_text_block_writer'
 require 'nora_mark/html/default_transformer'
 
 module NoraMark
@@ -22,6 +23,7 @@ module NoraMark
         frontmatter_writer = FrontmatterWriter.new self
         paragraph_writer = ParagraphWriter.new self
         abstract_node_writer = AbstractNodeWriter.new self
+        raw_writer = RawTextBlockWriter.new self
         page_writer = TagWriter.create('body', self,
                                        node_preprocessor: proc do |node|
                                          @context.end_html
@@ -35,6 +37,7 @@ module NoraMark
                                        end);
         
         @writers = {
+          Text => raw_writer,
           Paragraph => paragraph_writer,
           ParagraphGroup => paragraph_writer,
           Inline =>TagWriter.create(nil, self, trailer: ''),
