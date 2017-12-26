@@ -21,5 +21,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec", ">= 2.14"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "byebug"
-  gem.add_development_dependency "nokogiri", "~> 1.7.0"
+  gem.add_development_dependency "nokogiri", "~> 1.8.1"
 end
