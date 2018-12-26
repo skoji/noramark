@@ -4,9 +4,10 @@ module NoraMark
       def initialize(generator)
         @generator = generator
       end
+
       def write(node)
         @generator.to_html node.text
       end
     end
   end
-end  
+end

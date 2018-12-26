@@ -9,7 +9,7 @@ module Tilt
       @document = NoraMark::Document.parse(data).render_parameter(nonpaged: true)
     end
 
-    def evaluate(scope, locals, &block)
+    def evaluate(_scope, _locals)
       @html ||= @document.html[0]
     end
   end

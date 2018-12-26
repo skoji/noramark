@@ -10,13 +10,12 @@ module NoraMark
     def transform(node)
       frontmatter_node = node.find_node :type => :Frontmatter
       @frontmatter = frontmatter_node.yaml if frontmatter_node
-      node.all_nodes.unshift(node).each do 
-        |n|
+      node.all_nodes.unshift(node).each do |n|
         if match_rule = @rules.find { |rule| n.match?(rule[0]) }
-          action, p = match_rule[1,2]
+          action, p = match_rule[1, 2]
           @node = n
           send(action, &p)
-        end 
+        end
       end
       node
     end
@@ -29,12 +28,11 @@ module NoraMark
       new_node = instance_eval(&block)
       @node.replace new_node if new_node
     end
-
   end
-  
+
   class TransformerFactory
     attr_accessor :rules, :options
-    
+
     def self.create(text: nil, &block)
       instance = new
       instance.instance_eval do
@@ -47,22 +45,22 @@ module NoraMark
         end
         Transformer.new(@rules, @options)
       end
-    end 
-    
-    def transform_options options
-      (@options ||= {}).merge options 
     end
-    
+
+    def transform_options options
+      (@options ||= {}).merge options
+    end
+
     def modify(selector, &block)
-      @rules << [ selector, :modify, block ]
+      @rules << [selector, :modify, block]
     end
 
     def replace(selector, &block)
-      @rules << [ selector, :replace, block ]
+      @rules << [selector, :replace, block]
     end
 
     def rename(selector, name)
-      @rules << [ selector, :modify, proc { @node.name = name } ]
+      @rules << [selector, :modify, proc { @node.name = name }]
     end
   end
 end

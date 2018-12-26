@@ -4,6 +4,7 @@ module NoraMark
       def initialize(generator)
         @generator = generator
       end
+
       def write(node)
         node.children.each do |child|
           @generator.to_html child
@@ -11,4 +12,4 @@ module NoraMark
       end
     end
   end
-end  
+end

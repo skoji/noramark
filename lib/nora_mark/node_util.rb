@@ -4,14 +4,14 @@ module NoraMark
       children_arg = children || children_
       if !children_arg.nil?
         children_arg = children_arg.to_ary if children_arg.kind_of? NodeSet
-        children_arg = [ children_arg ] if !children_arg.kind_of? Array
+        children_arg = [children_arg] if !children_arg.kind_of? Array
         children_arg = children_arg.map { |node| (node.is_a? String) ? Text.new(node, 0) : node }
       end
       if !template.nil?
         node = klass.new(name, template.ids, template.classes, template.params, template.n, template.children, template.line_no)
-        node.ids = (node.ids ||[] + ids) if ids.size > 0
+        node.ids = (node.ids || [] + ids) if ids.size > 0
         node.classes = (node.classes || [])
-        node.classes = node.classes +  classes
+        node.classes = node.classes + classes
         if node.classes.size == 0 && class_if_empty
           node.classes << class_if_empty
         end
@@ -46,6 +46,5 @@ module NoraMark
       text.raw_text = raw_text
       text
     end
-
   end
 end

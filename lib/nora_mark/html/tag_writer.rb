@@ -9,7 +9,7 @@ module NoraMark
         instance = TagWriter.new(tag_name, generator, chop_last_space: chop_last_space)
         instance.node_preprocessors << node_preprocessor unless node_preprocessor.nil?
         instance.write_body_preprocessors << write_body_preprocessor unless write_body_preprocessor.nil?
-        instance.trailer = trailer 
+        instance.trailer = trailer
         yield instance if block_given?
         instance
       end
@@ -26,8 +26,8 @@ module NoraMark
 
       def attr_string(attrs)
         return '' if attrs.nil?
-        attrs.map do
-          |name, vals|
+
+        attrs.map do |name, vals|
           if vals.nil?
             ''
           elsif !vals.is_a? Array
@@ -35,17 +35,17 @@ module NoraMark
           elsif vals.size == 0
             ''
           else
-            " #{name}='#{escape_html(vals.join(' '))}'"            
+            " #{name}='#{escape_html(vals.join(' '))}'"
           end
         end.join('')
       end
 
       def class_string(cls_array)
-        attr_string({class: cls_array})
+        attr_string({ class: cls_array })
       end
 
       def ids_string(ids_array)
-        attr_string({id: ids_array})
+        attr_string({ id: ids_array })
       end
 
       def add_class(node, cls)
@@ -54,12 +54,13 @@ module NoraMark
 
       def tag_start(node)
         return if node.no_tag
+
         ids = node.ids || []
         classes = node.classes || []
         attr = node.attrs || {}
-        node.n.each { |k,v|
+        node.n.each { |k, v|
           if k.to_s.start_with? 'data-'
-            attr.merge!({ k => [ v ] })
+            attr.merge!({ k => [v] })
           end
         }
         tag_name = @tag_name || node.name
@@ -74,9 +75,10 @@ module NoraMark
       def output(string)
         @context << string
       end
-      
+
       def tag_end(node)
         return if node.no_tag
+
         tag_name = @tag_name || node.name
         @context << "</#{tag_name}>#{@trailer}"
       end
@@ -91,8 +93,7 @@ module NoraMark
       end
 
       def write_body(node)
-        @write_body_preprocessors.each {
-          |x|
+        @write_body_preprocessors.each { |x|
           return if instance_exec(node, &x) == :done
         }
         write_children node
@@ -109,10 +110,10 @@ module NoraMark
 
       def write_nodeset(nodeset)
         return if nodeset.nil? || nodeset.size == 0
+
         nodeset.each { |x| @generator.to_html x }
-        @generator.context.chop_last_space if (@param[:chop_last_space]) 
+        @generator.context.chop_last_space if (@param[:chop_last_space])
       end
-      
     end
   end
 end

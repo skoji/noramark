@@ -6,7 +6,3 @@ require 'nora_mark/node_set'
 require 'nora_mark/html/generator'
 require 'nora_mark/document'
 require 'nora_mark/extensions'
-
-
-
-

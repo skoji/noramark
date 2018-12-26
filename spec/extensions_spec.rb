@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 require File.dirname(__FILE__) + '/spec_helper.rb'
 require File.dirname(__FILE__) + '/../lib/nora_mark'
 require 'nokogiri'
@@ -25,7 +26,5 @@ describe NoraMark::Extensions do
     after(:each) do
       $:.delete @test_plugin_dir
     end
-    
   end
 end
-

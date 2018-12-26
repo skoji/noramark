@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 require File.dirname(__FILE__) + '/spec_helper.rb'
 require File.dirname(__FILE__) + '/../lib/nora_mark'
 require 'nokogiri'
@@ -36,9 +37,9 @@ EOF
     body = Nokogiri::XML::Document.parse(@parsed.html[0]).root.at_xpath('xmlns:body')
     expect(body.element_children[0].selector_and_children())
       .to eq(
-             ['section', ['h1', 'section 1'], 
-              ['div.custom1', ['div.pgroup', ['p', 'text is here']]]]
-             )
+        ['section', ['h1', 'section 1'],
+         ['div.custom1', ['div.pgroup', ['p', 'text is here']]]]
+      )
   end
   it 'can split page' do
     @parsed.add_transformer(generator: :html) do
@@ -73,16 +74,16 @@ EOF
     body = Nokogiri::XML::Document.parse(@parsed.html[0]).root.at_xpath('xmlns:body')
     expect(body.element_children[0].selector_and_children())
       .to eq(
-            ['section', ['h1', 'section 1'], 
-             ['div.class-1', ['div.pgroup', ['p', 'text is here']]]]
-          )
+        ['section', ['h1', 'section 1'],
+         ['div.class-1', ['div.pgroup', ['p', 'text is here']]]]
+      )
 
     body = Nokogiri::XML::Document.parse(@parsed.html[1]).root.at_xpath('xmlns:body')
     expect(body.element_children[0].selector_and_children())
       .to eq(
-            ["section", ["h1", "section 2"], 
-             ["div.pgroup", ["p", "next text."]]]
-          )
+        ["section", ["h1", "section 2"],
+         ["div.pgroup", ["p", "next text."]]]
+      )
   end
 
   it 'can add frontmatter' do
@@ -114,26 +115,23 @@ EOF
             @node.assign_pageno
           end
         end
-        
       end
     end
     html = @parsed.html
     body1 = Nokogiri::XML::Document.parse(html[0]).root.at_xpath('xmlns:body')
     expect(body1.element_children[0].selector_and_children())
       .to eq(
-            ['section', ['h1', 'section 1'], 
-             ['div.class-1', ['div.pgroup', ['p', 'text is here']]]]
-          )
+        ['section', ['h1', 'section 1'],
+         ['div.class-1', ['div.pgroup', ['p', 'text is here']]]]
+      )
     head2 = Nokogiri::XML::Document.parse(html[1]).root.at_xpath('xmlns:head')
     expect(head2.element_children[1].a).to eq ["link[rel='stylesheet'][type='text/css'][href='new_stylesheet.css']", '']
 
     body2 = Nokogiri::XML::Document.parse(@parsed.html[1]).root.at_xpath('xmlns:body')
     expect(body2.element_children[0].selector_and_children())
       .to eq(
-            ["section", ["h1", "section 2"], 
-             ["div.pgroup", ["p", "next text."]]]
-          )
-    
-    
+        ["section", ["h1", "section 2"],
+         ["div.pgroup", ["p", "next text."]]]
+      )
   end
 end

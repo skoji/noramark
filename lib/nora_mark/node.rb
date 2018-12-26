@@ -9,7 +9,7 @@ module NoraMark
     def raw_text?
       @raw_text
     end
-    
+
     def named_params=(named_params)
       @named_params = named_params
     end
@@ -21,7 +21,7 @@ module NoraMark
     def params=(params)
       @params = params.map { |param| NodeSet.new param }
     end
-    
+
     def params
       @params
     end
@@ -32,7 +32,7 @@ module NoraMark
     def add_attr attr
       (@attrs ||= {}).merge! attr
     end
-    
+
     def each
       node = self
       while !node.nil?
@@ -46,22 +46,21 @@ module NoraMark
     end
 
     def _match?(raw_selector)
-      raw_selector.inject(true) {
-        |result, s|
+      raw_selector.inject(true) { |result, s|
         result && s.call(self)
       }
     end
 
-    def modify_selector(k,v)
+    def modify_selector(k, v)
       case k
       when :type
-        proc { | node | node.kind_of? NoraMark.const_get(v) }
+        proc { |node| node.kind_of? NoraMark.const_get(v) }
       when :name
-        proc { | node | node.name ==  v }
+        proc { |node| node.name ==  v }
       when :id
-        proc { | node | (node.ids || []).contain? v }
+        proc { |node| (node.ids || []).contain? v }
       when :class
-        proc { | node | (node.class || []).contain? v }
+        proc { |node| (node.class || []).contain? v }
       when :proc
         v
       else
@@ -75,9 +74,9 @@ module NoraMark
       when String
         selector = { name: original_selector }
       when Regexp
-        selector = { proc: proc { |node| original_selector =~ node.name }}
+        selector = { proc: proc { |node| original_selector =~ node.name } }
       end
-      selector.map { |k,v| modify_selector(k,v) }
+      selector.map { |k, v| modify_selector(k, v) }
     end
 
     def ancestors(selector = {})
@@ -97,14 +96,12 @@ module NoraMark
 
     def reparent
       @params ||= []
-      @params = @params.map do
-        |node_array|
-        node_array.inject(nil) do
-          |prev, child_node|
+      @params = @params.map do |node_array|
+        node_array.inject(nil) do |prev, child_node|
           child_node.prev = prev
           prev.next = child_node if !prev.nil?
           child_node.parent = self
-          child_node.reparent 
+          child_node.reparent
           child_node
         end
         NodeSet.new node_array
@@ -119,7 +116,7 @@ module NoraMark
         child_node.prev = prev
         prev.next = child_node if !prev.nil?
         child_node.parent = self
-        child_node.reparent 
+        child_node.reparent
         child_node
       end
       @raw_content = nil
@@ -133,6 +130,7 @@ module NoraMark
 
     def children
       return [] if @first_child.nil?
+
       @children ||= rebuild_children
     end
 
@@ -152,12 +150,12 @@ module NoraMark
     end
 
     def _remove_internal
-      @parent.first_child = @next  if !@parent.nil? && @parent.first_child == self
-      @parent.last_child = @prev  if !@parent.nil? && @parent.last_child == self
+      @parent.first_child = @next if !@parent.nil? && @parent.first_child == self
+      @parent.last_child = @prev if !@parent.nil? && @parent.last_child == self
       @next.prev = @prev unless @next.nil?
       @prev.next = @next unless @prev.nil?
     end
-    
+
     def remove
       _remove_internal
       @parent.children_replaced unless @parent.nil?
@@ -203,15 +201,15 @@ module NoraMark
       node.reparent
       @parent.children_replaced unless @parent.nil?
     end
-    
+
     def replace(node)
       node = [node] if !node.is_a? Array
-      
+
       first_node = node.shift
       rest_nodes = node
 
       first_node.parent = @parent
-      if !@parent.nil? 
+      if !@parent.nil?
         @parent.first_child = first_node if (@parent.first_child == self)
         @parent.last_child = first_node if (@parent.last_child == self)
       end
@@ -225,8 +223,7 @@ module NoraMark
       first_node.reparent
       first_node.parent.children_replaced unless first_node.parent.nil?
       unlink
-      rest_nodes.inject(first_node) do
-        |prev, rest_node|
+      rest_nodes.inject(first_node) do |prev, rest_node|
         prev.after rest_node
         rest_node
       end
@@ -246,7 +243,7 @@ module NoraMark
       node.remove
       node.reparent
       if self.children.size == 0
-        @raw_content = [ node ]
+        @raw_content = [node]
         reparent
       else
         @first_child.prev = node
@@ -256,15 +253,15 @@ module NoraMark
         children_replaced
       end
     end
-    
+
     def append_child(node)
       node.remove
       node.reparent
       if self.children.size == 0
-        @raw_content = [ node ]
+        @raw_content = [node]
         reparent
       else
-        @last_child.next = node 
+        @last_child.next = node
         node.prev = @last_child
         node.parent = self
         @last_child = node
@@ -275,18 +272,15 @@ module NoraMark
     def all_nodes
       r = []
       if !@params.nil?
-        @params.each do
-          |node_array|
-          r = node_array[0].inject([]) do
-            |result, node|
+        @params.each do |node_array|
+          r = node_array[0].inject([]) do |result, node|
             result << node
             result + node.all_nodes
           end
         end
       end
       if !@first_child.nil?
-        r = @first_child.inject(r) do
-          |result, node|
+        r = @first_child.inject(r) do |result, node|
           result << node
           result + node.all_nodes
         end
@@ -301,12 +295,13 @@ module NoraMark
     def _find_node raw_selector
       return self if _match? raw_selector
       return nil unless @first_child
+
       return (@first_child.find { |n| n._match? raw_selector } ||
-              @first_child.inject(nil) do
-                |r, n| r or n._find_node raw_selector
+              @first_child.inject(nil) do |r, n|
+                r or n._find_node raw_selector
               end)
     end
-    
+
     def clone
       @raw_content = nil
       all_nodes.each { |node| node.instance_eval { @raw_content = nil } }
@@ -314,12 +309,10 @@ module NoraMark
     end
 
     def text
-      children.inject("") do
-        |result, node|
+      children.inject("") do |result, node|
         result << node.text
       end
     end
-
   end
 
   class Root < Node
@@ -342,8 +335,7 @@ module NoraMark
 
   class DLItem < Node
     def text
-      @params[0].inject('') do
-        |result, node|
+      @params[0].inject('') do |result, node|
         result << node.text
       end << super
     end
@@ -353,7 +345,8 @@ module NoraMark
     def heading_info
       @name =~ /h([1-6])/
       return {} if $1.nil?
-      {level:  $1.to_i, id: @ids[0], text: text }
+
+      { level: $1.to_i, id: @ids[0], text: text }
     end
   end
 
@@ -362,23 +355,20 @@ module NoraMark
 
     def reparent
       super
-      @heading.inject(nil) do
-        |prev, child_node|
+      @heading.inject(nil) do |prev, child_node|
         child_node.prev = prev
         prev.next = child_node if !prev.nil?
         child_node.parent = self
-        child_node.reparent 
+        child_node.reparent
         child_node
       end
     end
 
     def text
-      @heading[0].inject('') do
-        |result, node|
+      @heading[0].inject('') do |result, node|
         result << node.text
       end << super
     end
-
   end
   class Text < Node
     attr_accessor :noescape
@@ -395,7 +385,7 @@ module NoraMark
     def raw_text
       true
     end
-    
+
     def raw_text?
       true
     end
@@ -409,7 +399,7 @@ module NoraMark
     def raw_text
       true
     end
-    
+
     def raw_text?
       true
     end
@@ -418,7 +408,7 @@ module NoraMark
       @content.join "\n"
     end
   end
-  
+
   class Frontmatter < Node
     def reparent
       # do nothing
@@ -433,4 +423,4 @@ module NoraMark
       @yaml
     end
   end
-end  
+end

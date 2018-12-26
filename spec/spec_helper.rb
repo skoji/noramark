@@ -30,7 +30,6 @@ RSpec.configure do |config|
     end
     result
   end
-
 end
 
 require 'rspec/core/formatters/base_text_formatter'

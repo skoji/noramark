@@ -1,14 +1,14 @@
 require 'securerandom'
 
 module NoraMark
-  class Document 
+  class Document
     attr_accessor :document_name, :root
-    private_class_method :new 
+    private_class_method :new
 
     def self.generators
       @generators ||= {}
     end
-    
+
     def self.register_generator(generator)
       @generators ||= {}
       generator_name = generator.name
@@ -24,7 +24,7 @@ module NoraMark
       if generator.is_a? Symbol or generator.is_a? String
         generator_name = generator.to_sym
       else
-        generator_name = generator.name        
+        generator_name = generator.name
       end
 
       @generators.delete generator_name
@@ -38,15 +38,15 @@ module NoraMark
       instance = new param
       src = (string_or_io.respond_to?(:read) ? string_or_io.read : string_or_io).encode 'utf-8'
       yield instance if block_given?
-      instance.instance_eval do 
-        @preprocessors.each do
-          |pr|
+      instance.instance_eval do
+        @preprocessors.each do |pr|
           src = pr.call(src)
         end
         parser = Parser.new(src)
         if (!parser.parse)
           raise parser.raise_error
         end
+
         @root = parser.result
         @root.document_name ||= @document_name
         @root.reparent
@@ -58,7 +58,7 @@ module NoraMark
           NoraMark::Extensions.register_generator(frontmatter.yaml['generator'].to_sym)
         end
       end
-      
+
       instance
     end
 
@@ -69,7 +69,7 @@ module NoraMark
     def transformers(generator_name)
       @transformers[generator_name] ||= []
     end
-    
+
     def generate(generator_name)
       if @result[generator_name].nil?
         transformers(generator_name).each { |t| t.transform @root }
@@ -86,16 +86,16 @@ module NoraMark
     def add_transformer(generator: :html, text: nil, &block)
       (@transformers[generator] ||= []) << TransformerFactory.create(text: text, &block)
     end
-    
+
     def initialize(param = {})
       @param = param
       @result = {}
       @preprocessors = [
-                        Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
-                       ]
+        Proc.new { |text| text.gsub(/\r?\n(\r?\n)+/, "\n\n") },
+      ]
       @document_name = param[:document_name] || "noramark_#{SecureRandom.uuid}"
       @render_parameter = {}
-      @transformers = { }
-    end 
+      @transformers = {}
+    end
   end
 end

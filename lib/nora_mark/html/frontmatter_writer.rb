@@ -27,6 +27,7 @@ module NoraMark
           end
         }
       end
+
       def write(node)
         if node.yaml.keys.map(&:to_sym).include? :stylesheets
           @context.stylesheets = []
@@ -34,8 +35,7 @@ module NoraMark
         if node.yaml.keys.map(&:to_sym).include? :meta
           @context.metas = []
         end
-        node.yaml.each {
-          |k,v|
+        node.yaml.each { |k, v|
           writer = @writers[k.to_sym]
           writer.call(v) unless writer.nil?
         }

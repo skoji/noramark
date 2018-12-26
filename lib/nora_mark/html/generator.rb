@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 require 'nora_mark/html/util'
 require 'nora_mark/html/pages'
 require 'nora_mark/html/context'
@@ -35,44 +36,42 @@ module NoraMark
                                          end
                                          node
                                        end);
-        
+
         @writers = {
           Text => raw_writer,
           Paragraph => paragraph_writer,
           ParagraphGroup => paragraph_writer,
-          Inline =>TagWriter.create(nil, self, trailer: ''),
+          Inline => TagWriter.create(nil, self, trailer: ''),
           Block => TagWriter.create(nil, self),
-          Document =>  abstract_node_writer,
-          Page =>  page_writer,
-          Frontmatter =>  frontmatter_writer,
-          }
+          Document => abstract_node_writer,
+          Page => page_writer,
+          Frontmatter => frontmatter_writer,
+        }
       end
 
-      def collect_id_and_headings 
+      def collect_id_and_headings
         @id_pool = {}
         @headings = []
 
         all_nodes = @parsed_result.all_nodes
-        all_nodes.each do
-          |x|
+        all_nodes.each do |x|
           x.ids ||= []
-          x.ids.each do
-            |id|
+          x.ids.each do |id|
             if !@id_pool[id].nil?
               warn "duplicate id #{id}"
             end
             @id_pool[id] = x
           end
-          @headings << x if (x.kind_of?(Block) && x.name =~ /h[1-6]/) 
+          @headings << x if (x.kind_of?(Block) && x.name =~ /h[1-6]/)
         end
       end
-      def assign_id_to_headings 
+
+      def assign_id_to_headings
         collect_id_and_headings
         count = 1
-        @headings.each do
-          |heading|
-          if heading.ids.size == 0 
-            begin 
+        @headings.each do |heading|
+          if heading.ids.size == 0
+            begin
               id = "heading_index_#{count}"
               count = count + 1
             end while @id_pool[id]
@@ -85,13 +84,12 @@ module NoraMark
         transformer = Html.default_transformer
         transformer.options[:render_parameter] = render_parameter
         @parsed_result = transformer.transform parsed_result
-        assign_id_to_headings 
+        assign_id_to_headings
 
         children = parsed_result.children
         @context.file_basename = parsed_result.document_name
         @context.render_parameter = render_parameter
-        children.each {
-          |node|
+        children.each { |node|
           to_html(node)
         }
         @context.set_toc generate_toc
@@ -99,8 +97,7 @@ module NoraMark
       end
 
       def generate_toc
-        @headings.map do
-          |heading|
+        @headings.map do |heading|
           { page: heading.ancestors(type: :Page)[0].page_no }.merge heading.heading_info
         end
       end
