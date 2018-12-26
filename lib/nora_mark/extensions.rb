@@ -17,8 +17,6 @@ module NoraMark
       }
     end
 
-    private
-
     def self.load_generator(generator)
       module_name = "NoraMark::#{generator.to_s.capitalize}::Generator"
       generator_module = const_get_if_available(module_name)

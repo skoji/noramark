@@ -11,6 +11,6 @@ describe Tilt::NoraMarkTemplate do
   end
 
   it "should convert '.nora' files to HTML" do
-    expect(subject.render).to eq (fixtures_dir + 'html/sample.html').read
+    expect(subject.render).to eq((fixtures_dir + 'html/sample.html').read)
   end
 end

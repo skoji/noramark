@@ -116,11 +116,11 @@ module NoraMark
           block('section', content, template: @node)
         end
 
-        replace ({ type: :CodeInline }) do
+        replace({ type: :CodeInline }) do
           inline('code', @node.content, line_no: @node.line_no, template: @node)
         end
 
-        replace ({ type: :PreformattedBlock }) do
+        replace({ type: :PreformattedBlock }) do
           new_node = block('pre')
           if @node.codelanguage
             new_node.attrs = @node.attrs
