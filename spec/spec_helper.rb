@@ -1,7 +1,7 @@
 require 'coveralls'
 Coveralls.wear!
 
-require 'byebug'
+require 'debug'
 
 begin
   require 'rspec'

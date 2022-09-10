@@ -350,7 +350,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
   # BOM = /\uFEFF/
   def _BOM
-    _tmp = scan(/\A(?-mix:\uFEFF)/)
+    _tmp = scan(/\G(?-mix:\uFEFF)/)
     set_failed_rule :_BOM unless _tmp
     return _tmp
   end
@@ -507,7 +507,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
     _save = self.pos
     while true # sequence
-      _tmp = scan(/\A(?-mix:^)/)
+      _tmp = scan(/\G(?-mix:^)/)
       unless _tmp
         self.pos = _save
         break
@@ -544,7 +544,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
   # Nl = /\r?\n/
   def _Nl
-    _tmp = scan(/\A(?-mix:\r?\n)/)
+    _tmp = scan(/\G(?-mix:\r?\n)/)
     set_failed_rule :_Nl unless _tmp
     return _tmp
   end
@@ -576,7 +576,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
       _save1 = self.pos
       while true # sequence
-        _tmp = scan(/\A(?-mix:[\w])/)
+        _tmp = scan(/\G(?-mix:[\w])/)
         unless _tmp
           self.pos = _save1
           break
@@ -588,7 +588,7 @@ class NoraMark::Parser < KPeg::CompiledParser
             _tmp = match_string("-")
             break if _tmp
             self.pos = _save3
-            _tmp = scan(/\A(?-mix:[\w])/)
+            _tmp = scan(/\G(?-mix:[\w])/)
             break if _tmp
             self.pos = _save3
             break
@@ -891,7 +891,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save1 = self.pos
-      _tmp = scan(/\A(?-mix:[,)])/)
+      _tmp = scan(/\G(?-mix:[,)])/)
       self.pos = _save1
       unless _tmp
         self.pos = _save
@@ -936,7 +936,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save1 = self.pos
-      _tmp = scan(/\A(?-mix:[,)])/)
+      _tmp = scan(/\G(?-mix:[,)])/)
       self.pos = _save1
       unless _tmp
         self.pos = _save
@@ -998,7 +998,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     while true # sequence
       _text_start = self.pos
       while true
-        _tmp = scan(/\A(?-mix:[^,\]])/)
+        _tmp = scan(/\G(?-mix:[^,\]])/)
         break unless _tmp
       end
       _tmp = true
@@ -1033,7 +1033,7 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       _text_start = self.pos
       while true
-        _tmp = scan(/\A(?-mix:[^"])/)
+        _tmp = scan(/\G(?-mix:[^"])/)
         break unless _tmp
       end
       _tmp = true
@@ -1055,7 +1055,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save2 = self.pos
-      _tmp = scan(/\A(?-mix:[,\]])/)
+      _tmp = scan(/\G(?-mix:[,\]])/)
       self.pos = _save2
       unless _tmp
         self.pos = _save
@@ -1085,7 +1085,7 @@ class NoraMark::Parser < KPeg::CompiledParser
       end
       _text_start = self.pos
       while true
-        _tmp = scan(/\A(?-mix:[^'])/)
+        _tmp = scan(/\G(?-mix:[^'])/)
         break unless _tmp
       end
       _tmp = true
@@ -1107,7 +1107,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _save2 = self.pos
-      _tmp = scan(/\A(?-mix:[,\]])/)
+      _tmp = scan(/\G(?-mix:[,\]])/)
       self.pos = _save2
       unless _tmp
         self.pos = _save
@@ -2943,7 +2943,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _text_start = self.pos
-      _tmp = scan(/\A(?-mix:[`])/)
+      _tmp = scan(/\G(?-mix:[`])/)
       if _tmp
         text = get_text(_text_start)
       end
@@ -3076,7 +3076,7 @@ class NoraMark::Parser < KPeg::CompiledParser
 
     _save = self.pos
     while true # sequence
-      _tmp = scan(/\A(?-mix:^)/)
+      _tmp = scan(/\G(?-mix:^)/)
       unless _tmp
         self.pos = _save
         break
@@ -3087,7 +3087,7 @@ class NoraMark::Parser < KPeg::CompiledParser
         break
       end
       _text_start = self.pos
-      _tmp = scan(/\A(?-mix:\*+)/)
+      _tmp = scan(/\G(?-mix:\*+)/)
       if _tmp
         text = get_text(_text_start)
       end
@@ -4533,7 +4533,7 @@ class NoraMark::Parser < KPeg::CompiledParser
     _save = self.pos
     while true # sequence
       _text_start = self.pos
-      _tmp = scan(/\A(?-mix:[[:print:]])/)
+      _tmp = scan(/\G(?-mix:[[:print:]])/)
       if _tmp
         text = get_text(_text_start)
       end
