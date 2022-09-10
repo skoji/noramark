@@ -1,7 +1,7 @@
 module NoraMark
   class Extensions
     def self.register_generator(generator)
-      if !generator.respond_to? :name
+      if generator.is_a? Symbol  or generator.is_a? String
         generator = load_generator(generator)
       end
       NoraMark::Document.register_generator(generator)

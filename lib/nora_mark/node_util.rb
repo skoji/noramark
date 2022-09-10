@@ -33,12 +33,12 @@ module NoraMark
       node
     end
 
-    def block(*args)
-      _node(Block, *args)
+    def block(*args, **kwargs)
+      _node(Block, *args, **kwargs)
     end
 
-    def inline(*args)
-      _node(Inline, *args)
+    def inline(*args, **kwargs)
+      _node(Inline, *args, **kwargs)
     end
 
     def text value, raw_text: nil
