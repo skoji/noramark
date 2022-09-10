@@ -12,7 +12,7 @@ In non-beta release version, the syntax will be more stable.
 
 ## Requirements
 
-* Ruby 2.0.0 or greater
+* Ruby 3.0.0 or greater
 
 ## Installation
 

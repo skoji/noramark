@@ -1,3 +1,8 @@
+# version 0.3 
+
+* Update dependencies
+* Only support Ruby 3.0
+
 # version 0.2beta8 to 0.2beta12
 
 * Plugin API for generator
