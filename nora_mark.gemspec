@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.version       = NoraMark::VERSION
 
   gem.required_ruby_version = '>= 3.0.0'
-  gem.add_dependency "kpeg", "1.3.1"
+  gem.add_dependency "kpeg", "1.3.2"
   gem.add_development_dependency "debug"
   gem.add_development_dependency "tilt", ">= 2.0"
   gem.add_development_dependency "rspec", ">= 2.14"
